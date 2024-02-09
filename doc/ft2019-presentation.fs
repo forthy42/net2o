@@ -36,42 +36,14 @@ tex: net2o-logo
 tex: 35c3-logo
 ' net2o-logo "net2o-200.png" 0.666e }}image-file 2Constant net2o-img
 
-: logo-img ( o1 -- o o-img ) { rightimg }
-    baseline# 0e to baseline#
-    {{  {{ glue*ll }}glue rightimg }}h
-    glue*l }}glue
-    }}v >o font-size# f2/ to border o o>
-    to baseline# ;
-
-: logo-img2 ( o1 o2 -- o o-img ) { leftimg rightimg }
-    baseline# 0e to baseline#
-    {{  {{ leftimg glue*ll }}glue rightimg }}h
-    glue*l }}glue
-    }}v >o font-size# f2/ to border o o>
-    to baseline# ;
-
-$FFFFBBFF text-color: redish
-$00CCCCFF dup text-emoji-color: blue-emoji#
-m2c:shadow-color# @ color, FValue shadow-col#
-dark-mode
-m2c:shadow-color# @ re-color shadow-col#
-$FFFFBBFF re-text-color redish
-$00CCCCFF dup re-emoji-color blue-emoji#
-light-mode
-
-$10 stack: vp-tops
-
 ' }}i18n-text is }}text'
 
 {{
-    {{ glue-left }}glue
+    {{ glue-left @ }}glue
 	
 	\ page 0
-	' blackish >body f@  ' dark-blue >body f@
 	{{
 	    $FFFFFF00 dup pres-frame
-	    ' redish >body f@ ' dark-blue >body f!
-	    ' blue-emoji# >body f@ ' blackish >body f!
 
 	    tex: cloudcalypse
 	    \ 1 ms
@@ -119,7 +91,6 @@ $10 stack: vp-tops
 		>o 3 vp-shadow>># lshift to box-flags o o>
 	    }}v box[] >o font-size# to border o Value title-page o o>
 	}}z box[] dup >slides
-	' dark-blue >body f!  ' blackish >body f!
 
 \ page 1
 {{
@@ -344,9 +315,9 @@ $10 stack: vp-tops
         "}" \\
 	tex: vp-google+ glue*lll ' vp-google+ }}vp vp[] dup vp-tops >stack
 	!i18n \sans \normal
-	light-mode $DDDDDDFF color, dark-mode
+	light-gui $DDDDDDFF color, dark-gui
 	$202020FF color, fdup to slider-color to slider-fgcolor
-	light-mode
+	light-gui
 	dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
@@ -475,11 +446,11 @@ $10 stack: vp-tops
         "    }," \\
 	    tex: vp-facebook glue*lll ' vp-facebook }}vp vp[] dup vp-tops >stack
 	    !i18n \sans \normal
-	    light-mode
+	    light-gui
 	    $CCCCFFFF color, fdrop
-	    dark-mode
+	    dark-gui
 	    $000040FF color, fdup to slider-color to slider-fgcolor
-	    light-mode
+	    light-gui
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
@@ -533,7 +504,7 @@ $10 stack: vp-tops
         "}, {" \\
 	tex: vp-twitter glue*lll ' vp-twitter }}vp vp[] dup vp-tops >stack
 	!i18n \sans \normal
-	light-mode $DDDDDDFF color, dark-mode
+	light-gui $DDDDDDFF color, dark-gui
 	$202020FF color, fdup to slider-color to slider-fgcolor
 	dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
@@ -677,19 +648,18 @@ $10 stack: vp-tops
 ' }}text is }}text'
 
 \ end
-glue-right }}glue
+glue-right @ }}glue
 }}h box[]
-net2o-img drop  logo-img
+    baseline# 0e to baseline#
+    {{
+	{{ glue*ll }}glue net2o-img drop }}h
+	glue*l }}glue
+    }}v >o font-size# f2/ to border o o>
+    to baseline#
 }}z slide[]
 to top-widget
 
 also opengl
-
-: !widgets ( -- )
-    set-fullscreen-hint 1 set-compose-hint
-    top-widget .htop-resize
-    vp-tops get-stack 0 ?DO  .vp-top  LOOP
-    1e ambient% sf! set-uniforms ;
 
 [IFDEF] writeout-en
     lsids ' .lsids s" ef2018/en" r/w create-file throw
@@ -698,14 +668,7 @@ also opengl
 
 previous
 
-also [IFDEF] android android [THEN]
-
-: presentation ( -- )
-    1config
-    [IFDEF] hidestatus hidekb hidestatus [THEN]
-    !widgets widgets-loop ;
-
-previous
+dark-gui
 
 script? [IF]
     next-arg s" time" str= [IF]  +db time( \ ) [THEN]

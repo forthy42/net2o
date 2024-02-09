@@ -31,9 +31,14 @@ require minos2/font-style.fs
 44e update-size#
 
 require minos2/text-style.fs
+require minos2/presentation-support.fs
 
-Variable slides[]
-Variable slide#
+tex: net2o-logo
+tex: minos2
+tex: $quid
+' net2o-logo "net2o-200.png" 0.666e }}image-file Constant net2o-glue
+' minos2 "net2o-minos2.png" 0.666e }}image-file Constant minos2-glue
+' $quid  "squid-logo-200.png" 0.5e }}image-file Constant $quid-glue
 
 0 Value n2-img
 0 Value m2-img
@@ -42,155 +47,12 @@ Variable slide#
 3 Constant n/m-switch
 8 Constant m/$-switch
 
-: >slides ( o -- ) slides[] >stack ;
-
-glue ' new static-a with-allocater Constant glue-left
-glue ' new static-a with-allocater Constant glue-right
-
-: glue0 ( -- ) 0e fdup
-    [ glue-left  .hglue-c ]L df!
-    [ glue-right .hglue-c ]L df! ;
-: trans-frame ( o -- )
-    >o transp# to frame-color o> ;
-: solid-frame ( o -- )
-    >o white# to frame-color o> ;
-: !slides ( nprev n -- )
-    over >r
+: ft2018-slides-updated ( -- )
     n2-img m2-img $q-img
     r@ m/$-switch u>= IF swap THEN
     r> n/m-switch u>= IF rot  THEN
-    rot dup .parent-w .parent-w /flop drop
-    rot dup .parent-w .parent-w /flop drop
-    rot dup .parent-w .parent-w /flip drop
-    trans-frame trans-frame solid-frame
-    44e update-size# update-glue
-    over slide# !
-    slides[] $[] @ /flip drop
-    slides[] $[] @ /flop drop glue0 ;
-: fade-img ( r0..1 img1 img2 -- ) >r >r
-    [ whitish x-color 1e f+ ] Fliteral fover f-
-    r> >o to frame-color parent-w .parent-w /flop drop o>
-    [ whitish x-color ] Fliteral f+
-    r> >o to frame-color parent-w .parent-w /flop drop o> ;
-: fade!slides ( r0..1 n -- )
-    dup m/$-switch = IF
-	fdup $q-img m2-img fade-img
-    THEN
-    dup n/m-switch = IF
-	fdup m2-img n2-img fade-img
-    THEN ;
-: anim!slides ( r0..1 n -- )
-    slides[] $[] @ /flop drop
-    fdup fnegate dpy-w @ fm* glue-left  .hglue-c df!
-    -1e f+       dpy-w @ fm* glue-right .hglue-c df! ;
-
-: prev-anim ( n r0..1 -- )
-    dup 0<= IF  drop fdrop  EXIT  THEN
-    fdup 1e f>= IF  fdrop
-	dup 1- swap !slides +sync +config  EXIT
-    THEN
-    1e fswap f-
-    fade!slides 1- sin-t anim!slides +sync +config ;
-
-: next-anim ( n r0..1 -- )
-    dup slides[] $[]# 1- u>= IF  drop fdrop  EXIT  THEN
-    fdup 1e f>= IF  fdrop
-	dup 1+ swap !slides +sync +config  EXIT
-    THEN
-    1+ fade!slides sin-t anim!slides +sync +config ;
-
-1e FValue slide-time%
-
-: prev-slide ( -- )
-    slide-time% anims[] $@len IF  anim-end .2e f*  THEN
-    slide# @ ['] prev-anim >animate ;
-: next-slide ( -- )
-    slide-time% anims[] $@len IF  anim-end .2e f*  THEN
-    slide# @ ['] next-anim >animate ;
-
-: slide-frame ( glue color -- o )
-    font-size# 70% f* }}frame ;
-
-box-actor class
-    \ sfvalue: s-x
-    \ sfvalue: s-y
-    \ sfvalue: last-x
-    \ sfvalue: last-t
-    \ sfvalue: speed
-end-class slide-actor
-
-:noname ( axis dir -- ) nip
-    0< IF  prev-slide  ELSE  next-slide  THEN ; slide-actor is scrolled
-:noname ( rx ry b n -- )  dup 1 and 0= IF
-	over $8  and IF  prev-slide  2drop fdrop fdrop  EXIT  THEN
-	over $10 and IF  next-slide  2drop fdrop fdrop  EXIT  THEN
-	over -$2 and 0= IF
-	    fover caller-w >o x f- w f/ o>
-	    fdup 0.1e f< IF  fdrop  2drop fdrop fdrop  prev-slide  EXIT
-	    ELSE  0.9e f> IF  2drop fdrop fdrop  next-slide  EXIT  THEN  THEN
-	THEN  THEN
-    [ box-actor :: clicked ] ; slide-actor to clicked
-:noname ( ekey -- )
-    case
-	k-up      of  prev-slide  endof
-	k-down    of  next-slide  endof
-	k-prior   of  prev-slide  endof
-	k-next    of  next-slide  endof
-	k-volup   of  prev-slide  endof
-	k-voldown of  next-slide  endof
-	s-k3      of  1e ambient% sf!
-	    Ambient 1 ambient% opengl:glUniform1fv  +sync endof
-	k-f3      of  ambient% sf@ 0.1e f+ 1e fmin  ambient% sf!
-	    Ambient 1 ambient% opengl:glUniform1fv  +sync endof
-	k-f4      of  ambient% sf@ 0.1e f- 0e fmax  ambient% sf!
-	    Ambient 1 ambient% opengl:glUniform1fv  +sync endof
-	s-k5      of  1e saturate% sf!
-	    Saturate 1 saturate% opengl:glUniform1fv  +sync endof
-	k-f5      of  saturate% sf@ 0.1e f+ 3e fmin saturate% sf!
-	    Saturate 1 saturate% opengl:glUniform1fv  +sync endof
-	k-f6      of  saturate% sf@ 0.1e f- 0e fmax saturate% sf!
-	    Saturate 1 saturate% opengl:glUniform1fv  +sync endof
-	[ box-actor :: ekeyed ]  EXIT
-    endcase ; slide-actor to ekeyed
-\ :noname ( $xy b -- )  dup 1 > IF
-\ 	[ box-actor :: touchdown ] EXIT
-\     THEN  drop
-\     xy@ to s-y to s-x ftime to last-t
-\     true to grab-move? ; slide-actor is touchdown
-\ :noname ( $xy b -- ) dup 1 > IF
-\ 	[ box-actor :: touchmove ] EXIT
-\     THEN  drop xy@ fdrop
-\     ftime last-t fover to last-t f- \ delta-t
-\     last-x fover to last-x f-       \ delta-x
-\     fswap f/ caller-w .w f/ to speed
-\     last-x s-x f- caller-w .w f/ fdup f0< IF \ to the right
-\ 	1e f+ slide# @ prev-anim
-\     ELSE \ to the left
-\ 	slide# @ next-anim
-\     THEN ; slide-actor is touchmove
-:noname ( $xy b -- ) 2dup [ box-actor :: touchmove ] drop
-    xy@ dpy-h @ s>f fswap f- dpy-h @ 2/ fm/ lightpos-xyz sfloat+ sf!
-    dpy-w @ s>f f- dpy-w @ 2/ fm/ lightpos-xyz sf!
-    3.0e lightpos-xyz 2 sfloats + sf!
-    LightPos 1 lightpos-xyz opengl:glUniform3fv  +sync ; slide-actor is touchmove
-\ :noname ( $xy b -- )  dup 1 > IF
-\ 	[ box-actor :: touchup ] EXIT
-\     THEN  2drop
-\     slide# @ 1e next-anim
-\     false to grab-move? ; slide-actor is touchup
-
-: slide[] ( o -- o )
-    >o slide-actor new to act o act >o to caller-w o> o o> ;
-
-glue-left  >o 1glue vglue-c glue! 1glue dglue-c glue! o>
-glue-right >o 1glue vglue-c glue! 1glue dglue-c glue! o>
-
-tex: net2o-logo
-tex: minos2
-tex: $quid
-' net2o-logo "net2o-200.png" 0.666e }}image-file Constant net2o-glue
-' minos2 "net2o-minos2.png" 0.666e }}image-file Constant minos2-glue
-' $quid  "squid-logo-200.png" 0.5e }}image-file Constant $quid-glue
+    /flip drop /flop drop /flop drop ;
+' ft2018-slides-updated is slides-updated
 
 : logo-img ( xt xt -- o o-img ) 2>r
     baseline# 0e to baseline#
@@ -200,11 +62,11 @@ tex: $quid
     to baseline# r> ;
 
 : pres-frame ( color -- o1 o2 ) \ drop $FFFFFFFF
-    day-mode new-color, night-mode -1 +to color,# new-color, fdrop day-mode
+    light-gui new-color, dark-gui -1 +to color,# new-color, fdrop light-gui
     glue*wh slide-frame dup .button1 simple[] ;
 
 {{
-{{ glue-left }}glue
+{{ glue-left @ }}glue
 
 \ page 0
 {{
@@ -213,10 +75,7 @@ $FFFFFFFF dup pres-frame
 glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 "net2o: ΜΙΝΩΣ2 GUI, $quid “crypto”" /title
 "($quid = Ethisches Micropayment mit effizienter BlockChain)" /subtitle
-{{ {{ glue*l }}glue
-{{ $0000007F color, to x-color \tiny l"  Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. " }}i18n-text \bold "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit," }}text \regular " sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui " }}text \italic "dolorem ipsum quia dolor sit amet," }}text \regular " consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum " }}text \bold-italic "qui dolorem eum fugiat" }}text \regular " quo voluptas nulla pariatur?" }}text glue*l }}glue }}p cbl dpy-w @ 44.5% fm* dup .par-split /center
-glue*l }}glue }}v
-glue*2 }}glue }}z  \ ) $CCDDDD3F 4e }}frame dup .button1
+    glue*2 }}glue	
 "Bernd Paysan" /author
 "Forth–Tagung 2018, Essen" /location
 glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
@@ -613,7 +472,7 @@ glue*l }}glue
 }}z box[] /flip dup >slides
 
 \ end
-glue-right }}glue
+glue-right @ }}glue
 }}h box[]
 {{
 ' net2o-logo net2o-glue  logo-img to n2-img
@@ -622,22 +481,6 @@ glue-right }}glue
 }}z
 }}z slide[]
 to top-widget
-
-also opengl
-
-: !widgets ( -- ) top-widget .htop-resize
-    1e ambient% sf! set-uniforms ;
-
-previous
-
-also [IFDEF] android android [THEN]
-
-: presentation ( -- )
-    1config
-    [IFDEF] hidestatus hidekb hidestatus [THEN]
-    !widgets widgets-loop ;
-
-previous
 
 script? [IF]
     next-arg s" time" str= [IF]  +db time( \ ) [THEN]

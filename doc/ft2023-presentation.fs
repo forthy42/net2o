@@ -49,20 +49,6 @@ tex: minos2-logo
     /flip drop /flop drop ;
 ' ft2021-slides-updated is slides-updated
 
-: logo-img ( o1 -- o o-img ) { rightimg }
-    baseline# 0e to baseline#
-    {{  {{ glue*ll }}glue rightimg }}h
-    glue*l }}glue
-    }}v >o font-size# f2/ to border o o>
-    to baseline# ;
-
-: logo-img2 ( o1 o2 -- o o-img ) { leftimg rightimg }
-    baseline# 0e to baseline#
-    {{  {{ leftimg glue*ll }}glue rightimg }}h
-    glue*l }}glue
-    }}v >o font-size# f2/ to border o o>
-    to baseline# ;
-
 ' }}i18n-text is }}text'
 
 light-gui
