@@ -45,11 +45,11 @@ tex: net2o-logo
 $FFFFBBFF text-color: redish
 $00CCCCFF dup text-emoji-color: blue-emoji#
 m2c:shadow-color# @ color, FValue shadow-col#
-night-mode
+dark-gui
 m2c:shadow-color# @ re-color shadow-col#
 $FFFFBBFF re-text-color redish
 $00CCCCFF dup re-emoji-color blue-emoji#
-day-mode
+light-gui
 
 glue new Constant glue*20l
 glue*20l >o 1glue hglue-c glue! 0glue dglue-c glue! 1glue 20e f* vglue-c glue! o>
@@ -57,7 +57,7 @@ glue*20l >o 1glue hglue-c glue! 0glue dglue-c glue! 1glue 20e f* vglue-c glue! o
 ' }}i18n-text is }}text'
 
 {{
-    {{ glue-left }}glue
+    {{ glue-left @ }}glue
 	
 	\ page 0
 	' blackish >body f@  ' dark-blue >body f@
@@ -363,8 +363,8 @@ glue*20l >o 1glue hglue-c glue! 0glue dglue-c glue! 1glue 20e f* vglue-c glue! o
         "}" \\
 	tex: vp-google+ glue*lll ' vp-google+ }}vp vp[] dup vp-tops >stack
 	    !i18n \sans \normal
-	    night-mode $202020FF color, fdrop
-	    day-mode $DDDDDDFF color,
+	    dark-gui $202020FF color, fdrop
+	    light-gui $DDDDDDFF color,
 	    fdup to slider-color to slider-fgcolor
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
@@ -494,7 +494,7 @@ glue*20l >o 1glue hglue-c glue! 0glue dglue-c glue! 1glue 20e f* vglue-c glue! o
         "    }," \\
 	        tex: vp-facebook glue*lll ' vp-facebook }}vp vp[] dup vp-tops >stack
 		!i18n \sans \normal
-		night-mode $000040FF color, fdrop day-mode $CCCCFFFF color,
+		dark-gui $000040FF color, fdrop light-gui $CCCCFFFF color,
 		fdup to slider-color to slider-fgcolor
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
@@ -549,8 +549,8 @@ glue*20l >o 1glue hglue-c glue! 0glue dglue-c glue! 1glue 20e f* vglue-c glue! o
         "}, {" \\
 	        tex: vp-twitter glue*lll ' vp-twitter }}vp vp[] dup vp-tops >stack
 		!i18n \sans \normal
-		night-mode $202020FF color, fdrop
-		day-mode $DDDDDDFF color,
+		dark-gui $202020FF color, fdrop
+		light-gui $DDDDDDFF color,
 		fdup to slider-color to slider-fgcolor
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
@@ -595,8 +595,8 @@ glue*20l >o 1glue hglue-c glue! 0glue dglue-c glue! 1glue 20e f* vglue-c glue! o
         "  </entry>" \\
 		tex: vp-blogger glue*lll ' vp-blogger }}vp vp[] dup vp-tops >stack
 		!i18n \sans \normal
-		night-mode $202020FF color, fdrop
-		day-mode $DDDDDDFF color,
+		dark-gui $202020FF color, fdrop
+		light-gui $DDDDDDFF color,
 		fdup to slider-color to slider-fgcolor
 		dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
@@ -716,7 +716,7 @@ glue*20l >o 1glue hglue-c glue! 0glue dglue-c glue! 1glue 20e f* vglue-c glue! o
 ' }}text is }}text'
 
 \ end
-glue-right }}glue
+glue-right @ }}glue
 }}h box[]
 net2o-img drop  logo-img
 }}z slide[]
