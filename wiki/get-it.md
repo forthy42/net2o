@@ -196,11 +196,17 @@ it to your keyring and check:
 Get it for Windows
 ------------------
 
-You need: A 32/64 bit x86/amd64 Windows. You need to install
-[Gforth](http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/current/gforth.exe)
-from the latest Snapshot first.
+Up to 2020, I did compile Gforth and net2o for Windows using Cygwin.
+Nowadays, all supported versions of Windows come with WSL(G), and the much
+better way to use net2o on Windows is via WSLG, install a Debian derived
+distribution to run inside WSL, and install net2o via the Debian repository.
+This is the historical, now obsolete way to use that:
 
-Then you install the current [net2o](https://net2o.de/windows/net2o.exe)
+You need: A 32/64 bit x86/amd64 Windows. You need to install
+[Gforth](https://www.complang.tuwien.ac.at/forth/gforth/Snapshots/current/gforth.exe)
+from the last Snapshot first.
+
+Then you install the last [net2o](https://net2o.de/windows/net2o.exe)
 snapshot.
 
 ### Key information (new key for September 22th 2019)
