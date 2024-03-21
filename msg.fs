@@ -1009,6 +1009,9 @@ Variable group-list[]
 \g ### messaging commands ###
 \g 
 
+forward joined,
+forward left,
+
 scope{ net2o-base
 
 $34 net2o: message ( -- o:msg ) \g push a message object
@@ -1025,9 +1028,11 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     $> >load-group parent >o
     +unique-con +chat-control
     wait-task @ ?dup-IF  <hide>  THEN
+    pubkey $@ joined,
     o> ;
 +net2o: msg-leave ( $:group -- ) \g leave a chat group
-    $> >group parent msg-group-o .msg:peers[] del$cell ;
+    $> >group parent msg-group-o .msg:peers[] del$cell
+    parent >o pubkey $@ left, o> ;
 +net2o: msg-reconnect ( $:pubkey+addr -- ) \g rewire distribution tree
     $> $make
     [{: $chat d: last-msg xo group-o :}h1
@@ -1317,22 +1322,21 @@ also net2o-base
     last-signdate@ 64#1 64+ lit, 64#-1 lit, ask-last# ulit, msg-last? ;
 
 : join, ( -- )
-    [: msg-join sync-ahead?,
-      <msg msg-start "joined" $, msg-action msg-otr> ;] [msg,] ;
+    [: msg-join sync-ahead?, ;] [msg,] ;
 
 : silent-join, ( -- )
     msg-group$ $@ dup IF  message $, msg-join  end-with
     ELSE  2drop  THEN ;
 
 : leave, ( -- )
-    [: msg-leave
-      <msg msg-start "left" $, msg-action msg-otr> ;] [msg,] ;
+    ['] msg-leave [msg,] ;
 
 : silent-leave, ( -- )
     ['] msg-leave [msg,] ;
 
-: left, ( addr u -- )
+: left,timeout ( addr u -- )
     key| $, msg-signal "left (timeout)" $, msg-action ;
+
 previous
 
 : send-join ( -- )
@@ -1617,6 +1621,25 @@ previous
     msg-group-o .msg:?otr IF  now>otr  ELSE  now>never  THEN
     (send-avalanche)
     >r .chat r> 0= IF  msg-group-o .msg:.nobody  THEN ;
+
+: send-otr-avalanche ( args xt group -- )
+    msg-group-o >r to msg-group-o
+    msg-group-o .msg:mode dup @ msg:otr# or swap
+    ['] send-avalanche !wrapper
+    r> to msg-group-o ;
+
+also net2o-base
+: joined, ( addr u -- )
+    key| o msg-group-o [{: d: key object group :}h1 object >o
+	key [: $, msg-signal " joined" $, msg-action ;] group send-otr-avalanche
+	o> ;]
+    wait-task @ send-event ;
+: left, ( addr u -- )
+    key| o msg-group-o [{: d: key object group :}h1 object >o
+	key [: $, msg-signal " left" $, msg-action ;] group send-otr-avalanche
+	o> ;]
+    wait-task @ send-event ;
+previous
 
 \ chat helper words
 
@@ -2355,8 +2378,9 @@ previous
 	    ack@ .timeouts @ . <default> cr )
 	    ungroup-ctx \ ungroup before sending avalanches!
 	    msg-group$ $@len IF
-		msg-group-o ?dup-IF  .msg:mode dup @ msg:otr# or swap
-		    [: pubkey $@ ['] left, send-avalanche ;] !wrapper
+		msg-group-o ?dup-IF
+		    .msg:mode dup @ msg:otr# or swap
+		    [: pubkey $@ ['] left,timeout send-avalanche ;] !wrapper
 		THEN
 	    THEN
 	    net2o:dispose-context

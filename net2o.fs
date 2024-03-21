@@ -2045,15 +2045,9 @@ forth-local-words:
       "[ \t\n]" t name (font-lock-variable-name-face . 3))
      (("hash:") non-immediate (font-lock-type-face . 2)
       "[ \t\n]" t name (font-lock-variable-name-face . 3))
-     (("with") compile-only (font-lock-type-face . 2)
-      "[ \t\n]" t name (font-lock-variable-name-face . 3))
-     (("endwith") compile-only (font-lock-type-face . 2))
     )
 forth-local-indent-words:
     (
-    (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
-    (("with") (0 . 2) (0 . 2) compile-only)
-    (("endwith") (-2 . 0) (0 . -2) compile-only)
+     (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
     )
 End:
-[THEN]

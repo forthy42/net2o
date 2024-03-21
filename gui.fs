@@ -2041,14 +2041,10 @@ forth-local-words:
     (
      (("net2o:" "+net2o:") definition-starter (font-lock-keyword-face . 1)
       "[ \t\n]" t name (font-lock-function-name-face . 3))
-     ("[a-z0-9]+(" immediate (font-lock-comment-face . 1)
-      ")" nil comment (font-lock-comment-face . 1))
     )
 forth-local-indent-words:
     (
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
-     (("{{") (0 . 2) (0 . 2) immediate)
-     (("}}h" "}}closerh" "}}v" "}}z" "}}vp" "}}p") (-2 . 0) (-2 . 0) immediate)
     )
 End:
 [THEN]
