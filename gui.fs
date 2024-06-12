@@ -46,7 +46,8 @@ gl-init
 require minos2/md-viewer.fs
 require i18n-date.fs
 
-update-gsize#
+' update-gsize# is rescaler
+rescaler
 
 \ check if dispose damages things
 
