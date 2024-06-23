@@ -10,10 +10,11 @@
 \ ----===< prefix >===-----
 cell 8 = [IF] "64" [ELSE] "32" [THEN]
 machine "amd64" str= [IF]
-    cpu? avx512dq [IF]
+    cpu? avx512dq cpu? svm 0= and [IF] \ avx512dq on Intel only if available
 	2drop "AVX512"
     [ELSE]
-	cpu? avx2 cpu? svm 0= and [IF] \ AVX2 only on Intel
+	cpu? avx2 cpu? svm 0= cpu? avx512dq or and [IF]
+	    \ AVX2 only on Intel, except if avx512dq is available, then on AMD, too
 	    2drop "AVX2"
 	[ELSE]
 	    2drop "x86_64"

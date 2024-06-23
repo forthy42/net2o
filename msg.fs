@@ -1027,7 +1027,7 @@ $21 net2o: msg-group ( $:group -- ) \g set group
 +net2o: msg-join ( $:group -- ) \g join a chat group
     $> >load-group parent >o
     +unique-con +chat-control
-    wait-task @ ?dup-IF  <hide>  THEN
+\    wait-task @ ?dup-IF  <hide>  THEN
     pubkey $@ joined,
     o> ;
 +net2o: msg-leave ( $:group -- ) \g leave a chat group
@@ -1257,7 +1257,7 @@ Variable ask-msg-files[]
 :noname ( -- )
     parent 0 fs-inbuf !@ 0 fs-path !@
     [{: px $pack $addr :}h1 px $pack $addr ev-msg-eval ;]
-    parent .wait-task @ send-event
+    parent .wait-task-event
     fs:fs-clear
 ; msgfs-class is fs-flush
 :noname ( -- )
@@ -1623,6 +1623,7 @@ previous
     >r .chat r> 0= IF  msg-group-o .msg:.nobody  THEN ;
 
 : send-otr-avalanche ( args xt group -- )
+    msg( ." Sending OTR avalanche msg" forth:cr )
     msg-group-o >r to msg-group-o
     msg-group-o .msg:mode dup @ msg:otr# or swap
     ['] send-avalanche !wrapper
@@ -1630,15 +1631,17 @@ previous
 
 also net2o-base
 : joined, ( addr u -- )
-    key| o msg-group-o [{: d: key object group :}h1 object >o
+    key| msg( 2dup .simple-id ." : joined" forth:cr )
+    o msg-group-o [{: d: key object group :}h1 object >o
 	key [: $, msg-signal " joined" $, msg-action ;] group send-otr-avalanche
 	o> ;]
-    wait-task @ send-event ;
+    wait-task-event ;
 : left, ( addr u -- )
-    key| o msg-group-o [{: d: key object group :}h1 object >o
+    key| msg( 2dup .simple-id ." : left" forth:cr )
+    o msg-group-o [{: d: key object group :}h1 object >o
 	key [: $, msg-signal " left" $, msg-action ;] group send-otr-avalanche
 	o> ;]
-    wait-task @ send-event ;
+    wait-task-event ;
 previous
 
 \ chat helper words

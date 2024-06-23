@@ -519,10 +519,12 @@ Variable mapstart $1 mapstart !
 
 : ret0 ( -- ) return-addr $10 erase ;
 : setup! ( -- )   setup-table @ token-table !  ret0 ;
+: wait-task-event ( xt -- )
+    wait-task @ main-up@ over select send-event ;
 : context! ( -- )
     context-table @ token-table !
     o [{: connection :}h1 connection .do-connect ;]
-    wait-task @ main-up@ over select send-event ;
+    wait-task-event ;
 
 : new-code@ ( -- addrs addrd u -- )
     new-code-s 64@ new-code-d 64@ new-code-size @ ;
@@ -1442,11 +1444,6 @@ User try-reads
     [THEN]
     try-read# try-reads !  0 0 ;
 
-: read-event ( -- )
-    pollfds revents w@ POLLIN and IF
-	?events  \ 0 pollfds revents w!
-    THEN ;
-
 : try-read-packet-wait ( -- addr u / 0 0 )
     [defined] no-hybrid ( [defined] darwin ) [ ( or ) 0= ] [IF]
 	try-read# try-reads @ ?DO
@@ -1454,7 +1451,7 @@ User try-reads
 	    dup IF  unloop  +rec  EXIT  THEN  2drop
 	LOOP
     [THEN]
-    poll-sock IF read-a-packet4/6 read-event ELSE 0 0 THEN ;
+    poll-sock IF read-a-packet4/6 ELSE 0 0 THEN ?events ;
 
 4 Value sends#
 4 Value sendbs#
@@ -1481,7 +1478,7 @@ Variable recvflag  recvflag off
 
 : send-loop ( -- )
     send-anything?
-    BEGIN  0= IF   wait-send drop read-event  THEN
+    BEGIN  0= IF   wait-send drop ?events  THEN
 	!!0depth!! send-another-chunk  AGAIN ;
 
 : create-sender-task ( -- )

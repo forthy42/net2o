@@ -62,7 +62,7 @@ Variable fs-table
     o [{: xo :}h1
 	xo >o action-of file-xt IF  file-xt  ELSE  file:err  THEN
 	0 is file-xt o> ;]
-    parent .wait-task @ send-event ;
+    parent .wait-task-event ;
 \ id handling
 
 : id>addr ( id -- addr remainder )

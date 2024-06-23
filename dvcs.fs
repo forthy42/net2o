@@ -927,7 +927,7 @@ $20 /sync-files * Constant /sync-reqs
     msg( ." dvcs-sync-done" forth:cr )
     net2o:close-all
     msg( ." dvcs-sync-done closed" forth:cr )
-    o [{: xo :}h1 xo .ev-dvcs-sync-done ;] wait-task @ send-event ;
+    o [{: xo :}h1 xo .ev-dvcs-sync-done ;] wait-task-event ;
 
 : +dvcs-sync-done ( -- )
     ['] dvcs-sync-done is sync-done-xt

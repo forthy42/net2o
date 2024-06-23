@@ -646,7 +646,7 @@ Variable thumb.png$
 
 : ev-chat-connects  gui-chat-connects
     connection dup [{: con :}h1 con to connection ;]
-    swap .wait-task @ send-event ;
+    swap .wait-task-event ;
 
 false Value in-group?
 

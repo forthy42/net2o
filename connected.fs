@@ -191,7 +191,7 @@ in net2o : gen-reset ( -- )
 	    nlit, ko  THEN
     ELSE
 	error-id>o ?dup-IF
-	    >o [{: tc :}h1 tc throw ;] wait-task @ send-event o>
+	    >o [{: tc :}h1 tc throw ;] wait-task-event o>
 	ELSE  throw  THEN
     THEN ; IS >throw
 

@@ -36,7 +36,7 @@ $0d8607f5  netlink-addr nl_groups l!
     prep-netlink ;
 
 : netlink? ( -- flag )
-    pollfds pollfd# >poll drop read-event
+    pollfds pollfd# >poll drop ?events
     pollfds [ pollfd revents ]L + w@ POLLIN and ;
 
 : wait-for-netlink ( -- )
