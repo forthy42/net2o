@@ -377,7 +377,7 @@ previous
 		avalanche( ." Avalanche to: " group-o h. cr )
 		group-o to msg-group-o xo .avalanche-msg ;]
 	    r> send-event
-	ELSE  2drop  THEN
+	THEN
     THEN ;
 : show-msg ( addr u -- )
     parent dup IF  .wait-task @ dup up@ <> and  THEN
