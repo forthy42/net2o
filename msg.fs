@@ -2583,8 +2583,6 @@ forth-local-words:
       "[ \t\n]" t name (font-lock-function-name-face . 3))
      (("\\U") immediate (font-lock-comment-face . 1)
       "[\n]" nil comment (font-lock-comment-face . 1))
-     ("[a-z\-0-9]+(" immediate (font-lock-comment-face . 1)
-      ")" nil comment (font-lock-comment-face . 1))
     )
 forth-local-indent-words:
     (
