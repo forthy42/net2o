@@ -121,7 +121,7 @@ There's some
 especially initiated by Moxie Marlinspike, whether a canary is
 effective, and whether a court can order you to silence (yes, they
 can), or to say something specific (sometimes, they can), but so far,
-a court has not forced anybody to give false speech on his own
+a court has not forced anybody to give false speech on their own
 (instead of just answering a question with a false ”No”, because
 saying “yes” would violate the gag order).  That's why this canary is
 a provable lie (i.e. even when the bugs were there, the text here is

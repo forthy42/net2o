@@ -174,7 +174,7 @@ suppose “do it yourself“ is a good option.
 
 A transaction can move within the currently active ledger group, since that's
 where the balance is computed.  You present the original payer a target that
-is in his currently active ledger group, doing the first step of the route
+is in their currently active ledger group, doing the first step of the route
 there.
 
 Having many accounts active can become a backup problem; remember, quite some
@@ -193,7 +193,7 @@ the shorter run remain active.
 
 I call it the SwapDragonChain, as the swap dragon is the mascott of
 Forth (the SWAP operation).  I'm sure the swap dragon can handle
-double booking quite well with his two heads.
+double booking quite well with their two heads.
 
 Note that unlike the lightning network, there is no need to worry about the
 transactions: they are all public.  Nothing can be lost or stolen.  The

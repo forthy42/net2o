@@ -57,8 +57,8 @@ can revoke and generate a new key, which is trusted, too.
 persons and sites you want to visit.  Encryption protect against
 keyword search, relays outside the control of the adversary allow to
 connect to persons and sites as you like.  The adversary still can cut
-you entirely off the net, or insulate the people under his control
-from the rest of the world, by dropping all packets at his borders, or
+you entirely off the net, or insulate the people under their control
+from the rest of the world, by dropping all packets at their borders, or
 identifying relays as such and drop connections to open relays/proxies
 only.  Trivial attempts to figure out if a host is an open relay can be
 blocked by stealth nodes; but the stealth PSK is likely public

@@ -27,9 +27,9 @@ secret" (i.e. the secret key that is proving my identity), and
 p=\[s]base, my pubkey.  I publish p and p1, which together are stored
 as identity.  The assumption is that p1 can't be reversed to get s1,
 and p won't reveal s.  An attacker who stole s can't guess s1, because
-he doesn't have p2, and so it's even more difficult to get s2.  An
+they doesn't have p2, and so it's even more difficult to get s2.  An
 attacker who stole s can generate a new pair of p1, p2, but that would
-give him a different identity (a suspicious identity, though).  After
+give them a different identity (a suspicious identity, though).  After
 generating the key, s1 is destroyed; it is no longer needed, though it
 can be recomputed using s and p2 and the extended euclidean algorithm.
 

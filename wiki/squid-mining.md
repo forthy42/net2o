@@ -59,7 +59,7 @@ self-stabilizing.
 
 A bidding system would work like this: _n_ $quids are offered.  When
 you buy _m,_ you also offer a factor _x>1._ The buyers are sorted by
-factor, and the highest bidder gets his _x*m_ $quids, paying _x*m_ the
+factor, and the highest bidder gets their _x*m_ $quids, paying _x*m_ the
 price of a nominal $quid, but that deduces just _m_ from the offered
 _n,_ so more $quids are generated from higher biddings.  High bidding
 thus makes other projects want to be funded through that channel, so

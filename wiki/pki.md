@@ -51,11 +51,11 @@ SSL's PKI attempt
 -----------------
 
 SSL uses Certificate Authorities (CAs) to sign public keys. The message of
-this signature is "someone gave us some money, told us he has this domain, and
-he gave us this public key." The "premium" signatures usually mean "he gave us
-more money". This is big business, so you can expect that the most trustworthy
-members drop out earliest—because someone paid them a lot of money (Mark
-Shuttleworth sold Thawte, the first CA, for $500M to VeriSign in
+this signature is "someone gave us some money, told us they has this domain,
+and they gave us this public key." The "premium" signatures usually mean "they
+gave us more money". This is big business, so you can expect that the most
+trustworthy members drop out earliest—because someone paid them a lot of money
+(Mark Shuttleworth sold Thawte, the first CA, for $500M to VeriSign in
 1999). However, the actual trustworthyness of the CAs itself is not the real
 problem. The real problem is that any CA can sign any combination of domain
 name and public key, as they like. And any intruder into one of the CAs, who
@@ -127,9 +127,9 @@ to change its presented public key frequently to avoid being tracked
 * When we allow one indirection in the server's identity, we can
 have temporary server keys, signed by a constant identity—this allows to
 reduce the risk that an intruder on the server can steal the keys—they are
-temporary, the permanent keys are only needed for off-line signatures, so an
-intruder can not get more than he can get anyways—the data while he's in,
-before he's discovered.
+temporary, the permanent keys are only needed for off-line signatures, so
+intruders can not get more than they can get anyways—the data while they're in,
+before they're discovered.
 * We can easily replicate public keys and store them before we even
 need them (e.g. based on popularity), reducing the costs when we
 actually need to create a connection.

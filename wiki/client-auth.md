@@ -18,14 +18,14 @@ communication verifies the identity of the partner, as a man in the middle
 attack has to replace both identities to actually intercept the communication
 (if there is an identity exchange).
 
-So what happens if we use the public key as sign-in to the server? The user
-presents its public key, which establishes a shared secret that allows to
-verify that this user is legitimate (i.e. knows his secret key), **and** at
+So what happens if we use the public key as sign-in to the server? The users
+present their public key, which establishes a shared secret that allows to
+verify that this user is legitimate (i.e. knows their secret key), **and** at
 the same time allows to establish a secure connection.
 
 The trust model is again "we know each other" model. This time, we have a
-much better position than in the "unknown server case": The first time an
-unknown new user accesses a server is when he creates his account. This is
+much better position than in the "unknown server case": The first time
+unknown new users accesses a server is when they creates their account. This is
 still critical, you don't want to create an account while a man-in-the-middle
 attack is ongoing (this is a "captive environment" problem; if you never leave
 that environment, the MitM can go on with that attack forever.  A captive
@@ -48,7 +48,7 @@ create the correct checksum even though the user correctly answers the captcha.
 
 This verifies that when creating the account, a secure, non-intercepted
 connection was present. The server now stores the user's public key as primary
-user ID. Each time the user logs in, his identity is verified. I don't talk
+user ID. Each time users log in, their identity is verified. I don't talk
 about name and address, what's verified is that the connection was initially
 not intercepted, and therefore, when presenting the same public key and using
 the same shared secret, it's now also not intercepted.

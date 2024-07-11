@@ -104,8 +104,8 @@ tree concept can be used for them.
 
 Timeshift streaming watchers who skip over parts have to change the position
 in the queue.  Since they then don’t have the entire video, they can‘t
-distribute all of it.  Everybody still can contribute as much as he consumes,
-it is still a fair share.
+distribute all of it.  Everybody still can contribute as much as they
+consumes, it is still a fair share.
 
 ### Collection tree and mixing ###
 
