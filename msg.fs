@@ -2261,7 +2261,8 @@ synonym jpeg jpg
 synonym png jpg
 
 : opus ( addr u -- )
-    2dup file-in save-mem 2>r
+    2dup
+    [: 5 - forth:type ." .aidx" ;] $tmp file-in save-mem 2>r
     [: 5 - forth:type ." .opus" ;] $tmp file-in save-mem 2r>
     [:  over >r $, msg:audio-idx# ulit, msg-object r> free throw
 	over >r $, msg:audio# ulit, msg-object r> free throw ;] ;
