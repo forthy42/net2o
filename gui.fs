@@ -1272,8 +1272,12 @@ Hash: audio#
 0 Value audio-playing
 
 [IFDEF] linux
-    also require minos2/pulse-audio.fs pulse-init
+    also
+    require minos2/pulse-audio.fs
     require minos2/opus-codec.fs
+    \ +db pulse( \ )
+    +db opus( \ )
+    pulse-init
     previous
 [ELSE]
     [IFDEF] android
@@ -1290,7 +1294,7 @@ Hash: audio#
 	end-structure
 	Variable idx-block
 	Variable play-block
-	1 Value channels
+	2 Value channels
 	
 	: start-play ;
 	: pause-play ;
@@ -1773,12 +1777,12 @@ wmsg-o >o msg-table @ token-table ! o>
 	    }}z box[] /flip dup to chat-record-button
 	    [:  chat-record-button /flip drop
 		chat-recording-button /flop drop +resize +sync +lang
+		[IFDEF] android 1 [ELSE] 2 [THEN] to channels
 		"recording" .net2o-cache/ open-rec+
-		1 to channels
 		[IFDEF] android
 		    opensles:sample-rate ['] write-record opensles:record-mono
 		[ELSE]
-		    pulse:sample-rate pulse:record-mono
+		    pulse:sample-rate pulse:record-stereo
 		[THEN]
 	    ;] 0 click[]
 	    {{
@@ -1787,9 +1791,13 @@ wmsg-o >o msg-table @ token-table ! o>
 	    }}z box[] /flip dup to chat-recording-button
 	    [:  chat-recording-button /flip drop
 		chat-record-button /flop drop +resize +sync +lang
-		close-rec-mono
+		[IFDEF] android
+		    close-rec-mono
+		[ELSE]
+		    close-rec-stereo
+		[THEN]
 		"recording" .net2o-cache/
-		[: ." audio:" type ;] $tmp avalanche-text
+		[: ." file://" type ." .aidx" ;] $tmp avalanche-text
 	    ;] 0 click[]
 	    {{ glue*lll edit-bg x-color font-size# 40% f* }}frame dup .button3
 		dup to chat-edit-bg
