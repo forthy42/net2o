@@ -1276,7 +1276,7 @@ Hash: audio#
     require minos2/pulse-audio.fs
     require minos2/opus-codec.fs
     \ +db pulse( \ )
-    +db opus( \ )
+    \ +db opus( \ )
     pulse-init
     previous
 [ELSE]
