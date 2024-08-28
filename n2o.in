@@ -3,8 +3,8 @@
 
 ${NET2O_DEBUGS} "warnings" search nip nip warnings ! \ in production mode, we don't want any warnings
 
-fpath+ @DATADIR@/net2o-@PACKAGE_VERSION@
-"@LIBDIR@/net2o/@PACKAGE_VERSION@/@GFARCH@/libcc-named" c-lib:libcc-path also-path
+fpath+ @DATADIR@/net2o/@PACKAGE_VERSION@
+c-lib:libcc-path path+ @LIBDIR@/net2o/@PACKAGE_VERSION@/@GFARCH@/libcc-named
 
 @HAS_GPSD@ [IF] \ gpsd
     s" unix/gps.fs" open-fpath-file

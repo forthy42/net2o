@@ -106,7 +106,7 @@ TESTS = tests/alice2-msg.fs tests/alice-msg.fs tests/bob-msg.fs		\
 	  tests/dvcs-test.s2o tests/dvcs-test2.s2o			\
 	  tests/termclient.fs tests/msg-test
 
-@VERDIR@SRCPATH = net2o-$(VERSION)
+@VERDIR@SRCPATH = net2o/$(VERSION)
 @NOVERDIR@SRCPATH = net2o
 SRCDIRS = $(SRCPATH)/tests $(SRCPATH)/doc $(SRCPATH)/android $(SRCPATH)/linux $(SRCPATH)/json $(SRCPATH)/html $(SRCPATH)/xml
 
@@ -160,7 +160,6 @@ install:	libcc-install
 		$(MKDIR) -p $(datadir)/$$i; \
 	done
 	-@VERDIR@rm $(datadir)/net2o
-	@VERDIR@ln -fs net2o-$(VERSION) $(datadir)/net2o
 	for i in $(SOURCES) $(LANGS); do \
 		$(INSTALL_DATA) $(srcdir)/$$i $(datadir)/$(SRCPATH)/$$i; \
 	done
