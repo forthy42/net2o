@@ -2023,7 +2023,7 @@ is /help
 
 :noname ( addr u -- )
     bl $split 2swap s>unumber? 0= abort" Line number needed!" drop >r
-    IF  xc@  ELSE  drop  '👍'  THEN  r>
+    IF  xc@  ELSE  drop   [ e? xchar-maxmem 1 = ] [IF] '+' [ELSE] '👍' [THEN]  THEN  r>
     msg-group-o .msg:log[] $[]# >r
     dup 0< IF   r@ +  THEN  r> dup 0<> - umin
     [: msg-group-o .msg:log[] $[]@ chain,

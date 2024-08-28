@@ -4,13 +4,7 @@
 ${NET2O_DEBUGS} "warnings" search nip nip warnings ! \ in production mode, we don't want any warnings
 
 fpath+ @DATADIR@/net2o-@PACKAGE_VERSION@
-also c-lib
-:noname libcc-path path>string
-    BEGIN  next-path 2swap dup  WHILE  2nip  REPEAT 2drop
-    2dup "gforth" search 2drop nip over - type
-    ." net2o/@PACKAGE_VERSION@/" machine type ." /libcc-named" ; $tmp
-libcc-path also-path
-previous
+"@LIBDIR@/net2o/@PACKAGE_VERSION@/@GFARCH@/libcc-named" c-lib:libcc-path also-path
 
 @HAS_GPSD@ [IF] \ gpsd
     s" unix/gps.fs" open-fpath-file
