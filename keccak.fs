@@ -18,24 +18,7 @@
 require rec-scope.fs
 require unix/cpu.fs
 
-[IFDEF] old-keccak
-    fast-lib [IF]
-	require keccakfast.fs false
-    [ELSE]
-	[IFDEF] android
-	    s" libkeccakp.so" c-lib:open-path-lib drop
-	[THEN] true
-    [THEN]
-    [IF]
-	c-library keccak
-	    s" keccakp" add-lib
-	    \	s" keccakp/.libs" add-libpath \ find library during build
-	    include keccaklib.fs
-	end-c-library
-    [THEN]
-[ELSE]
-    require keccaklow.fs
-[THEN]
+require keccaklow.fs
 
 [IFUNDEF] crypto bye [THEN] \ stop here if libcompile only
 
@@ -54,15 +37,6 @@ end-class keccak
 
 UValue @keccak
 
-[IFDEF] old-keccak
-: keccak0 ( -- ) @keccak KeccakInitializeState ;
-
-: keccak* ( -- ) @keccak keccak-rounds @ KeccakF ;
-: >keccak ( addr u -- )  @keccak -rot KeccakAbsorb ;
-: +keccak ( addr u -- )  @keccak -rot KeccakEncrypt ;
-: -keccak ( addr u -- )  @keccak -rot KeccakDecrypt ;
-: keccak> ( addr u -- )  @keccak -rot KeccakExtract ;
-[ELSE]
 : keccak0 ( -- ) @keccak KeccakP1600_Initialize ;
 : KeccakF ( state-addr rounds -- ) KeccakP1600_Permute_Nrounds ;
 : keccak* ( -- ) @keccak keccak-rounds @ KeccakP1600_Permute_Nrounds ;
@@ -109,7 +83,6 @@ UValue @keccak
 	dup rounds KeccakP1600_Permute_Nrounds
 	dup I delta-I $80 umin KeccakDecrypt
     $80 +LOOP drop r> ;
-[THEN]
 
 : move-rep ( srcaddr u1 destaddr u2 -- )
     bounds ?DO
