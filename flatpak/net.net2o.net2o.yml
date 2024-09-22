@@ -1,10 +1,10 @@
 app-id: net.net2o.net2o
 base: org.gforth.gforth
-base-version: "22.08"
+base-version: "24.08"
 runtime: org.freedesktop.Platform
 platform-extensions:
   - org.freedesktop.Platform.GL.default
-runtime-version: "22.08"
+runtime-version: "24.08"
 sdk: org.freedesktop.Sdk
 command: n2o
 

@@ -27,4 +27,5 @@ do
     echo "autogen.sh in ${i%autogen.sh}"
     (cd ${i%autogen.sh}; ./autogen.sh)
 done
+libtoolize --force --copy --install || glibtoolize --force --copy --install
 test -n "$NOCONFIGURE" || "$srcdir/configure" "$@"
