@@ -19,7 +19,7 @@ Create a debian sources.list file pointing to the net2o repository,
 and add my key to the trust db so that Debian can verify the packets,
 update the repository data and install net2o.
 
-### Debian >= Bullseye
+### Debian (>= Bullseye)
 
 Make yourself root
 

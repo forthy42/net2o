@@ -33,7 +33,7 @@ $10 stack: o-stack
 
 : scan-vals ( wid -- ) to config-wl
     BEGIN  '=' parse bl skip dup  WHILE  2>r
-	    parse-name config-recognize 2r> eval-config
+	    parse-name config-recognize 2r> rot >config
     REPEAT  2drop ;
 
 Variable list-class$

@@ -2175,7 +2175,7 @@ s" minos2/unicode/brackets.db" open-fpath-file
     dup r> = UNTIL ;
 
 : text-rec ( addr u -- )
-    2drop ['] noop rectype-nt ;
+    2drop ['] noop ['] translate-nt ;
 : tag-rec ( addr u -- )
     over c@ '#' = IF
 	-skip-punctation
@@ -2183,31 +2183,31 @@ s" minos2/unicode/brackets.db" open-fpath-file
 	[: 1 /string
 	    \ ." tag: '" forth:type ''' forth:emit forth:cr
 	    $, msg-tag
-	;] rectype-nt
-    ELSE  2drop rectype-null  THEN ;
+	;] ['] translate-nt
+    ELSE  2drop ['] notfound  THEN ;
 : vote-rec ( addr u -- )
     2dup "vote:" string-prefix? IF
 	over ?flush-text 2dup + to last->in
 	5 /string drop xc@
-	[: ulit, msg-vote ;] rectype-nt
-    ELSE  2drop rectype-null  THEN ;
+	[: ulit, msg-vote ;] ['] translate-nt
+    ELSE  2drop ['] notfound  THEN ;
 : pk-rec ( addr u -- rectype )
     over c@ '@' <> over 3 < or IF
-	2drop rectype-null  EXIT  THEN \ minimum nick: 2 characters
+	2drop ['] notfound  EXIT  THEN \ minimum nick: 2 characters
     -skip-punctation  2dup 1 /string  nick>pk
-    2dup d0= IF  2drop 2drop rectype-null
+    2dup d0= IF  2drop 2drop ['] notfound
     ELSE
 	2>r over ?flush-text + to last->in
 	last->in source drop - >in !  2r>
 	[:
 	    \ ." signal: '" 85type ''' forth:emit forth:cr
 	    $, msg-signal
-	;] rectype-nt
+	;] ['] translate-nt
     THEN ;
 : chain-rec ( addr u -- )
     over c@ '!' = IF
 	-skip-punctation  2dup 1 /string
-	dup 0= IF  2drop 2drop rectype-null  EXIT  THEN
+	dup 0= IF  2drop 2drop ['] notfound  EXIT  THEN
 	snumber?
 	case
 	    0 of  endof
@@ -2216,19 +2216,19 @@ s" minos2/unicode/brackets.db" open-fpath-file
 		over abs over u< IF  over 0< IF  +  ELSE  drop  THEN
 		    >r over ?flush-text + to last->in  r>
 		    [: msg-group-o .msg:log[] $[]@ chain, ;]
-		    rectype-nt  EXIT  THEN
+		    ['] translate-nt  EXIT  THEN
 	    endof
 	    2drop
 	endcase
-    THEN  2drop  rectype-null  ;
+    THEN  2drop  ['] notfound  ;
 
 : http-rec ( addr u -- )
     2dup "https://" string-prefix? >r
     2dup "http://" string-prefix? r> or IF
 	over ?flush-text
 	-skip-punctation 2dup + to last->in
-	[: rework-% $, msg-url ;] rectype-nt
-    ELSE  2drop rectype-null  THEN ;
+	[: rework-% $, msg-url ;] ['] translate-nt
+    ELSE  2drop ['] notfound  THEN ;
 
 forward hash-in
 
@@ -2290,10 +2290,10 @@ synonym aidx opus
 	    dup 0= IF  drop ['] genfile-file  THEN
 	    catch
 	    r> free throw  r> to last->in
-	    0= IF  rectype-nt  EXIT  THEN
+	    0= IF  ['] translate-nt  EXIT  THEN
 	THEN
     THEN
-    2drop rectype-null ;
+    2drop ['] notfound ;
 
 $100 buffer: format-chars
 
@@ -2331,7 +2331,7 @@ $100 buffer: format-chars
 	>r 2dup + ?flush-text end to last->in
 	r> ~current  true to success  THEN
     2drop
-    success IF  ['] noop rectype-nt  ELSE  rectype-null  THEN ;
+    success IF  ['] noop ['] translate-nt  ELSE  ['] notfound  THEN ;
 
 depth >r
 ' text-rec  ' format-text-rec  ' vote-rec  ' file-rec

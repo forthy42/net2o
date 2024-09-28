@@ -86,15 +86,15 @@ $10 stack: array-stack
 0 Value previous-type
 
 : set-val ( value -- )
-    key$ $@ find-name ?dup-IF  (to)  EXIT  THEN
+    key$ $@ find-name ?dup-IF  [ 0 ] (to)  EXIT  THEN
     json-err ;
 
 : set-int ( value -- )
-    key$ $@ find-name ?dup-IF  (to)  EXIT  THEN
+    key$ $@ find-name ?dup-IF  [ 0 ] (to)  EXIT  THEN
     '%' key$ $@ + 1- c!  key$ $@ find-name ?dup-IF
-	>r s>f r> (to) EXIT  THEN
+	>r s>f r> [ 0 ] (to) EXIT  THEN
     '!' key$ $@ + 1- c!  key$ $@ find-name ?dup-IF
-	>r #1000000000 um* d>64 r> (to) EXIT  THEN
+	>r #1000000000 um* d>64 r> [ 0 ] (to) EXIT  THEN
     json-err ;
 
 Defer next-element
@@ -105,9 +105,16 @@ Defer next-element
 	    ['] translate-nt     of                   endof
 	    ['] translate-num    of        r@ >stack  endof
 	    ['] translate-dnum   of  drop  r@ >stack  endof
+	    [IFDEF] translate-string
 	    ['] translate-string of  over >r s>number? r> free throw
 		0= IF json-err THEN
 		drop r@ >stack  endof
+	    [ELSE]
+	    ['] scan-translate-string of  scan-string
+		over >r s>number? r> free throw
+		0= IF json-err THEN
+		drop r@ >stack  endof
+	    [THEN]
 	    ['] translate-float  of  f>s   r@ >stack  endof
 	    ['] translate-bool   of        r@ >stack  endof
 	    ['] translate-nil    of        r@ >stack  endof
@@ -122,8 +129,13 @@ Defer next-element
 	case previous-type
 	    ['] translate-nt     of                    endof
 	    ['] translate-float  of        r@ f>stack  endof
+	    [IFDEF] translate-string
 	    ['] translate-string of  over >r >float r> free throw
 		0= IF json-err THEN  r@ f>stack  endof
+	    [ELSE]
+	    ['] scan-translate-string of  scan-string over >r >float r> free throw
+		0= IF json-err THEN  r@ f>stack  endof
+	    [THEN]
 	    ['] translate-num    of  s>f   r@ f>stack  endof
 	    ['] translate-dnum   of  d>f   r@ f>stack  endof
 	    ['] translate-bool   of  s>f   r@ f>stack  endof
@@ -135,7 +147,11 @@ Defer next-element
     array-item ?dup-IF  >r
 	case previous-type
 	    ['] translate-nt     of                    endof
+	    [IFDEF] translate-string
 	    ['] translate-string of  over >r $make r> free throw  r@ >stack  endof
+	    [ELSE]
+	    ['] scan-translate-string of  scan-string over >r $make r> free throw  r@ >stack  endof
+	    [THEN]
 	    ['] translate-num    of  [: 0 .r ;] $tmp $make r@ >stack  endof
 	    ['] translate-dnum   of  [: 0 d.r ;] $tmp $make r@ >stack  endof
 	    ['] translate-float  of  ['] f. $tmp -trailing $make  r@ >stack  endof
@@ -160,7 +176,7 @@ Defer next-element
 	    THEN
 	    >o r> element-stack >stack
 	    key$ @ key-stack >stack key$ off
-	    get-order r> swap 1+ set-order
+	    get-order r> >wordlist swap 1+ set-order
 	    array-item array-stack >stack 0 to array-item
 	ELSE
 	    cr key$ $. json-class-throw throw
@@ -192,15 +208,17 @@ Defer next-element
 
 : key-find? ( char -- nt )
     key$ $@ + 1- c! key$ $@ find-name ;
+: key-find-first? ( char -- nt )
+    key$ c$+! key$ $@ find-name ;
 
 : json-string! ( addr u -- )
     over >r
-    '$' key$ c$+! key$ $@ find-name ?dup-IF  (to) r> free throw  EXIT  THEN
+    '$' key-find-first? ?dup-IF  [ 0 ] (to) r> free throw  EXIT  THEN
     \ workaround if you mean number but wrote string
     '&' key-find? ?dup-IF
-	>r s>number?  IF  r> (to) r> free throw  EXIT  THEN  json-err  THEN
+	>r s>number?  IF  r> [ 0 ] (to) r> free throw  EXIT  THEN  json-err  THEN
     '#' key-find? ?dup-IF
-	>r s>number?  IF  drop r> (to) r> free throw  EXIT  THEN  json-err  THEN
+	>r s>number?  IF  drop r> [ 0 ] (to) r> free throw  EXIT  THEN  json-err  THEN
     '!' key-find? ?dup-IF  drop
 	?date IF  date>ticks set-val r> free throw  EXIT  THEN  json-err  THEN
     '%' key-find? ?dup-IF  drop
@@ -210,7 +228,11 @@ Defer next-element
 : eval-json ( .. tag -- )
     case
 	['] translate-nt     of  name?int execute       endof
+	[IFDEF] translate-string
 	['] translate-string of  json-string!           endof
+	[ELSE]
+	['] scan-translate-string of  scan-string json-string!           endof
+	[THEN]
 	['] translate-num    of  '#' key$ c$+! set-int  endof
 	['] translate-dnum   of  '&' key$ c$+! set-val  endof
 	['] translate-float  of  '%' key$ c$+! set-val  endof
@@ -257,7 +279,7 @@ true  ' translate-bool 2constant true
 }scope
 
 : rec-bool ( addr u -- ... )
-    ['] bools >body find-name-in ?dup-IF
+    ['] bools >wordlist find-name-in ?dup-IF
 	name>int execute
     ELSE  ['] notfound  THEN ;
 
@@ -274,11 +296,15 @@ true  ' translate-bool 2constant true
     outer-class new >o
     o element-stack >stack  0 key-stack >stack  0 array-stack >stack
     get-order n>r schema-wid 1 set-order
-    forth-recognizer >r  json-recognize is forth-recognize
+    action-of forth-recognize >r  ['] json-recognize is forth-recognize
     action-of parse-name >r ['] parse-json is parse-name
     ['] included catch
     r> is parse-name  r> is forth-recognize  nr> set-order
     throw process-element o o> ;
+
+[IFUNDEF] entries[]
+    $Variable entries[] \ list of google+ entries
+[THEN]
 
 : json-load-dir ( addr u -- )
     2dup open-dir throw { dd } fpath dup $@len >r also-path dd

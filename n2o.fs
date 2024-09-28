@@ -787,7 +787,7 @@ synonym #! \ ( -- )
 : import ( -- )
     \U import g+|... [directory]
     ?nextarg IF
-	['] importer >body find-name-in ?dup-IF
+	['] importer >wordlist find-name-in ?dup-IF
 	    name>interpret execute  EXIT  THEN  THEN
     ." unknown import" ;
 
