@@ -2274,15 +2274,15 @@ synonym aidx opus
     [:  over >r $, msg:files# ulit, msg-object r> free throw ;] ;
 
 : expand-to-file ( addr u -- addr u' flag )
-    drop source + over -
-    BEGIN  -trailing dup  WHILE
-	    2dup 7 /string rework-% file-status nip 0= IF
-		2dup + source drop - >in !  true EXIT  THEN
-	    bl -scan  REPEAT
-    false ;
+    2dup 7 /string rework-%
+    msgparse( [: forth:cr ." rework-%: '" 2dup forth:type ." '" ;] do-debug )
+    file-status nip
+    msgparse( [: forth:cr ." file-status: " dup forth:. ;] do-debug )
+    0= ;
 
 : file-rec ( addr u -- .. token )
     2dup "file://" string-prefix? IF
+	msgparse( [: forth:cr ." file recognized: '" 2dup forth:type ." '" ;] do-debug )
 	expand-to-file IF
 	    over ?flush-text 7 /string
 	    2dup + >r  rework-% save-mem over >r

@@ -838,7 +838,7 @@ scope{ /chat
 : start-n2o ( -- )
     extra-args ?dup-IF  argc !  THEN  0 to extra-args
     [IFDEF] cov+ load-cov [THEN]
-    cmd-args ++debug %droprate %droprate \ read in all debugging stuff
+    cmd-args ++debug +net2o-debugs %droprate %droprate \ read in all debugging stuff
     profile( init-timer )
     argc @ 1 > IF next-cmd ELSE n2o:help THEN
     [IFDEF] cov+ save-cov annotate-cov cov% [THEN]

@@ -93,6 +93,7 @@ debug: fetch( \ fetch hashed objects
 debug: silent( \ silent messages
 debug: otrify( \ otrify debug messages
 debug: restart( \ restart task on clean-request
+debug: msgparse( \ parse messages
 
 : search-debug ( addr u xt -- ) { xt }
     [: ." debug: " type ;] $tmp
