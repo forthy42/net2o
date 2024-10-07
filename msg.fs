@@ -2184,18 +2184,18 @@ s" minos2/unicode/brackets.db" open-fpath-file
 	    \ ." tag: '" forth:type ''' forth:emit forth:cr
 	    $, msg-tag
 	;] ['] translate-nt
-    ELSE  2drop ['] notfound  THEN ;
+    ELSE  2drop 0  THEN ;
 : vote-rec ( addr u -- )
     2dup "vote:" string-prefix? IF
 	over ?flush-text 2dup + to last->in
 	5 /string drop xc@
 	[: ulit, msg-vote ;] ['] translate-nt
-    ELSE  2drop ['] notfound  THEN ;
+    ELSE  2drop 0  THEN ;
 : pk-rec ( addr u -- rectype )
     over c@ '@' <> over 3 < or IF
-	2drop ['] notfound  EXIT  THEN \ minimum nick: 2 characters
+	2drop 0  EXIT  THEN \ minimum nick: 2 characters
     -skip-punctation  2dup 1 /string  nick>pk
-    2dup d0= IF  2drop 2drop ['] notfound
+    2dup d0= IF  2drop 2drop 0
     ELSE
 	2>r over ?flush-text + to last->in
 	last->in source drop - >in !  2r>
@@ -2207,7 +2207,7 @@ s" minos2/unicode/brackets.db" open-fpath-file
 : chain-rec ( addr u -- )
     over c@ '!' = IF
 	-skip-punctation  2dup 1 /string
-	dup 0= IF  2drop 2drop ['] notfound  EXIT  THEN
+	dup 0= IF  2drop 2drop 0  EXIT  THEN
 	snumber?
 	case
 	    0 of  endof
@@ -2220,7 +2220,7 @@ s" minos2/unicode/brackets.db" open-fpath-file
 	    endof
 	    2drop
 	endcase
-    THEN  2drop  ['] notfound  ;
+    THEN  2drop  0  ;
 
 : http-rec ( addr u -- )
     2dup "https://" string-prefix? >r
@@ -2228,7 +2228,7 @@ s" minos2/unicode/brackets.db" open-fpath-file
 	over ?flush-text
 	-skip-punctation 2dup + to last->in
 	[: rework-% $, msg-url ;] ['] translate-nt
-    ELSE  2drop ['] notfound  THEN ;
+    ELSE  2drop 0  THEN ;
 
 forward hash-in
 
@@ -2293,7 +2293,7 @@ synonym aidx opus
 	    0= IF  ['] translate-nt  EXIT  THEN
 	THEN
     THEN
-    2drop ['] notfound ;
+    2drop 0 ;
 
 $100 buffer: format-chars
 
@@ -2331,7 +2331,7 @@ $100 buffer: format-chars
 	>r 2dup + ?flush-text end to last->in
 	r> ~current  true to success  THEN
     2drop
-    success IF  ['] noop ['] translate-nt  ELSE  ['] notfound  THEN ;
+    success IF  ['] noop ['] translate-nt  ELSE  0  THEN ;
 
 depth >r
 ' text-rec  ' format-text-rec  ' vote-rec  ' file-rec

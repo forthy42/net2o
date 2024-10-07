@@ -258,7 +258,7 @@ Defer next-element
 	c@ cells json-tokens + @
 	dup IF  ['] translate-nt  EXIT  THEN
     THEN
-    drop ['] notfound ;
+    drop 0 ;
 
 256 buffer: stop-chars
 bl 1+ 0 [do] 1 stop-chars [i] + c! [loop]
@@ -281,7 +281,7 @@ true  ' translate-bool 2constant true
 : rec-bool ( addr u -- ... )
     ['] bools >wordlist find-name-in ?dup-IF
 	name>int execute
-    ELSE  ['] notfound  THEN ;
+    ELSE  0  THEN ;
 
 ' rec-bool ' rec-num ' rec-float ' rec-string ' rec-json 5
 ' jsons-recognize set-stack
