@@ -2232,10 +2232,6 @@ s" minos2/unicode/brackets.db" open-fpath-file
 
 forward hash-in
 
-: jpeg? ( addr u -- flag )
-    2dup dup 4 - 0 max safe/string ".jpg" capscompare 0= >r
-    dup 5 - 0 max safe/string ".jpeg" capscompare 0= r> or ;
-
 : >have+group ( addr u -- addr u )
     2dup key|  2dup >have-group  2dup >ihave  ihave$ $+! ;
 
@@ -2245,20 +2241,23 @@ forward hash-in
 : suffix ( addr u -- addr' u' )
     2dup '.' scan-back nip /string ;
 
-scope: file-suffixes
-: jpg ( addr u -- )
-    2dup jpeg? IF
-	2dup >thumbnail
-	dup IF  over >r hash-in
-	    [: forth:type img-orient @ 1- 0 max forth:emit ;] $tmp
-	    r> free throw  THEN
-    ELSE  #0.  THEN
+: image+thumbnail ( addr-image u-image addr-thumbnail u-thumbnail -- )
     2swap file-in
-    2swap dup IF   >have+group  THEN
-    [:  dup IF  $, msg:thumbnail# ulit, msg-object  ELSE  2drop  THEN
+    2swap >have+group
+    [:  $, msg:thumbnail# ulit, msg-object
 	$, msg:image# ulit, msg-object ;] ;
+
+scope: file-suffixes
+: png ( addr-image u-image -- )
+    file-in [: $, msg:image# ulit, msg-object ;] ;
+: jpg ( addr u -- )
+    2dup >thumbnail
+    dup IF  over >r hash-in
+	[: forth:type img-orient @ 1- 0 max forth:emit ;] $tmp
+	r> free throw image+thumbnail
+    ELSE  2drop png  THEN ;
 synonym jpeg jpg
-synonym png jpg
+synonym gif png
 
 : opus ( addr u -- )
     2dup
