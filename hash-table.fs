@@ -47,9 +47,10 @@ uvalue last#
 : #@? ( addrkey u bucket -- addrval u true / addrkey u false )
     dup >r @ 0= IF  rdrop false  EXIT  THEN
     2dup r@ $@ str=  IF  2drop r> dup to last# cell+ $@ true  EXIT  THEN
-    rdrop false ;    
+    rdrop false ;
 
-: bucket-off ( bucket -- ) dup $free cell+ $free ;
+: bucket-off ( bucket -- )
+    ?dup-IF  dup $free cell+ $free  THEN ;
 
 : #free? ( addrkey u bucket -- true / addrkey u false )
     dup >r @ 0= IF  rdrop false  EXIT  THEN

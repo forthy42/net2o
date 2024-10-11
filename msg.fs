@@ -676,16 +676,18 @@ end-class msg-?hash-class
     msg:hashs$ 2swap >ihave.id
 ; msg:class is msg:hash-id
 
+: >hash-finish { w^ xt d: hash -- }
+    xt cell hash key| fetch-finish# #+! ;
+
 : hash-finished { d: hash -- }
     fetch( ." finished " 2dup 85type forth:cr )
     hash fetch# #@ IF  cell+ .fetcher:got-it  ELSE  drop  THEN
-    hash fetch-finish# #@ dup IF
-	bounds U+DO
-	    hash I @ execute
-	cell +LOOP
-	last# bucket-off
-    ELSE  2drop  THEN
-    hash >ihave  hash drop free throw ;
+    hash >ihave
+    hash fetch-finish# #@ bounds U+DO
+	hash I @ execute
+    cell +LOOP
+    last# bucket-off
+    hash drop free throw ;
 
 : fetch-hash ( hashaddr u tsk -- )
     >r save-mem
@@ -789,12 +791,14 @@ forward need-hashed?
     2dup printable? IF  '[' emit type '@' emit
     ELSE  ." #["  85type ." /@"  THEN
     key| .key-id? ;
+: rotate@ ( addr u -- rotate )
+    keysize safe/string IF  c@ 7 umin  ELSE  0  THEN ;
 
 :noname ( addr u type -- )
     space <warn> case
 	msg:image#     of  ." img["      2dup 85type ?fetch  endof
 	msg:thumbnail# of  ." thumb["    2dup key| 85type
-	    space 2dup keysize safe/string IF  c@ '0' + emit  ELSE  drop  THEN
+	    space 2dup rotate@ '0' + forth:emit
 	    ?fetch  endof
 	msg:audio#     of  ." audio["    2dup 85type ?fetch  endof
 	msg:video#     of  ." video["    2dup 85type ?fetch  endof

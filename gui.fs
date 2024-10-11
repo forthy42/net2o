@@ -1242,9 +1242,9 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
     THEN ; wmsg-class is msg:otrify
 
 : >rotate ( addr u -- )
-    keysize safe/string IF  c@ to rotate#  ELSE  drop  THEN ;
+    rotate@ to rotate# ;
 : >swap ( w h addr u -- w h / h w )
-    keysize safe/string IF  c@ 4 and IF  swap  THEN  ELSE  drop  THEN ;
+    rotate@ 4 and IF  swap  THEN ;
 
 : update-thumb { d: hash object rotate -- }
     last# >r
@@ -1262,9 +1262,9 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 	glue*thumb r> }}thumb >r hash r@ .>rotate
     ELSE
 	128 128 glue*thumb dummy-thumb }}thumb dup
-	>r hash keysize safe/string IF  c@  ELSE  0  THEN
-	[{: d: x :}h1 x update-thumb ;]
-	{ w^ xt } xt cell hash key| fetch-finish# #+!
+	>r hash rotate@
+	[{: object rotate :}h1 object rotate update-thumb ;]
+	hash >hash-finish
 	hash key| ?fetch
     THEN  {{ glue*ll }}glue r> }}v 40%bv box[] ;
 
