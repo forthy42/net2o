@@ -2242,8 +2242,10 @@ forward hash-in
 : file-in ( addr u -- hash u )
     slurp-file over >r hash-in r> free throw >have+group ;
 
-: suffix ( addr u -- addr' u' )
-    2dup '.' scan-back nip /string ;
+[IFUNDEF] suffix
+    : suffix ( addr u -- addr' u' )
+	2dup '.' scan-back nip /string ;
+[THEN]
 
 : image+thumbnail ( addr-image u-image addr-thumbnail u-thumbnail -- )
     2swap file-in
@@ -2261,6 +2263,7 @@ scope: file-suffixes
 	r> free throw image+thumbnail
     ELSE  2drop png  THEN ;
 synonym jpeg jpg
+synonym webp jpg
 synonym gif png
 
 : opus ( addr u -- )
