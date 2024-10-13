@@ -1456,27 +1456,40 @@ Variable current-player
 	THEN  ;]
     2swap $make 64#1 +to msg:timestamp click[] ;
 
+: msg-stack= ( addr u -- o true | false )
+    2>r msg-box .childs[] $[]# dup IF
+	1- msg-box .childs[] $[] @ dup .name$ 2r@ str=
+	dup 0= IF  nip  THEN
+    THEN  2rdrop ;
+
 :noname ( addr u type -- )
     obj-red
     case
 	msg:image#     of
 	    2dup key| ?fetch
-	    msg-box .childs[] $[]# ?dup-IF
-		1- msg-box .childs[] $[] @ dup .name$ "thumbnail" str= IF
-		    album-view[] drop  EXIT  THEN  drop  THEN
+	    "thumbnail" msg-stack= IF  album-view[] drop  EXIT  THEN
+	    "filename"  msg-stack= IF  album-view[] drop  EXIT  THEN
 	    [: ." img[" 2dup 85type ']' emit ;] $tmp }}text  "image" name!
 	    ( 2rdrop ) album-view[]
 	endof
-	msg:thumbnail# of  ?thumb  "thumbnail" name!  endof
+	msg:thumbnail# of
+	    ?thumb
+	    "filename" msg-stack= IF
+		swap 2>r
+		{{
+		    0e to x-baseline  r> /center
+		    0e to x-baseline  r> /center
+		}}v box[]
+		msg-box .childs[] stack> drop
+	    THEN  "thumbnail" name!
+	endof
 	msg:audio#     of  key| 2dup ?fetch  idx-hash $+! idx-hash $@
-	    msg-box .childs[] $[]# ?dup-IF
-		1- msg-box .childs[] $[] @ dup .name$ "audio-idx" str= IF
-		    0 swap .childs[] $[] @ audio-play[] drop  EXIT  THEN  drop  THEN
+	    "audio-idx" msg-stack= IF  audio-play[] drop  EXIT  THEN
 	    [: ." audio[" 2dup 85type ']' emit ;] $tmp }}text  "audio" name!
 	    0 over .childs[] $[] @ audio-play[] drop
 	endof
 	msg:audio-idx# of  2dup key| ?fetch
-		?audio-idx "audio-idx" name!  endof
+	    ?audio-idx "audio-idx" name!  endof
 	msg:patch#     of  [: ." patch["    85type ']' emit
 	    ;] $tmp }}text  "patch" name!  endof
 	msg:snapshot#  of  [: ." snapshot[" 85type ']' emit
@@ -1487,6 +1500,7 @@ Variable current-player
 	    ( rdrop ) 2dup $make [: addr data $@ open-posting ;] swap 2>r
 	    [: ." posting" .posting ;] $tmp }}text 2r> click[]  "posting" name!
 	endof
+	msg:filename#  of  \script rework-% }}text \normal  "filename" name!  endof
 	nip nip [: ." ???(" h. ." )" ;] $tmp }}text 0
     endcase
     msg-box .child+

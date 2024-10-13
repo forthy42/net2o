@@ -792,13 +792,13 @@ forward need-hashed?
     ELSE  ." #["  85type ." /@"  THEN
     key| .key-id? ;
 : rotate@ ( addr u -- rotate )
-    keysize safe/string IF  c@ 7 umin  ELSE  0  THEN ;
+    keysize safe/string IF  c@  ELSE  0  THEN ;
 
 :noname ( addr u type -- )
     space <warn> case
 	msg:image#     of  ." img["      2dup 85type ?fetch  endof
 	msg:thumbnail# of  ." thumb["    2dup key| 85type
-	    space 2dup rotate@ '0' + forth:emit
+	    space 2dup rotate@ 0 ['] u.r $10 base-execute
 	    ?fetch  endof
 	msg:audio#     of  ." audio["    2dup 85type ?fetch  endof
 	msg:video#     of  ." video["    2dup 85type ?fetch  endof
@@ -808,6 +808,7 @@ forward need-hashed?
 	msg:snapshot#  of  ." snapshot[" 85type  endof
 	msg:message#   of  ." message["  85type  endof
 	msg:posting#   of  ." posting" .posting  endof
+	msg:filename#  of  ." filename[" encode-% type   endof
 	drop .posting
 	0
     endcase ." ]" <default> ;
@@ -2247,16 +2248,20 @@ forward hash-in
 	2dup '.' scan-back nip /string ;
 [THEN]
 
+: filename, ( addr u -- )
+    basename $, msg:filename# ulit, msg-object ;
+
 : image+thumbnail ( addr-image u-image addr-thumbnail u-thumbnail -- )
-    2swap file-in
-    2swap >have+group
-    [:  $, msg:thumbnail# ulit, msg-object
+    2swap 2dup 2>r file-in
+    2swap >have+group 2r>
+    [:  filename,
+	$, msg:thumbnail# ulit, msg-object
 	$, msg:image# ulit, msg-object ;] ;
 
 scope: file-suffixes
-: png ( addr-image u-image -- )
-    file-in [: $, msg:image# ulit, msg-object ;] ;
-: jpg ( addr u -- )
+: png ( addr-image u-image -- xt )
+    2dup 2>r file-in 2r> [: filename, $, msg:image# ulit, msg-object ;] ;
+: jpg ( addr u -- xt )
     2dup >thumbnail
     dup IF  over >r hash-in
 	[: forth:type img-orient @ 1- 0 max forth:emit ;] $tmp
@@ -2267,10 +2272,11 @@ synonym webp jpg
 synonym gif png
 
 : opus ( addr u -- )
-    2dup
+    2dup 2>r 2dup
     [: 5 - forth:type ." .aidx" ;] $tmp file-in save-mem 2>r
-    [: 5 - forth:type ." .opus" ;] $tmp file-in save-mem 2r>
-    [:  over >r $, msg:audio-idx# ulit, msg-object r> free throw
+    [: 5 - forth:type ." .opus" ;] $tmp file-in save-mem 2r> 2r>
+    [:  filename,
+	over >r $, msg:audio-idx# ulit, msg-object r> free throw
 	over >r $, msg:audio# ulit, msg-object r> free throw ;] ;
 synonym aidx opus
 }scope
