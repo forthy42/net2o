@@ -538,3 +538,6 @@ KeccakP1600_Permute_RoundLoop:
 KeccakP1600_Permute_Exit:
     StoreState
     ret
+#if defined(__ELF__)
+.section	.note.GNU-stack,"",%progbits
+#endif

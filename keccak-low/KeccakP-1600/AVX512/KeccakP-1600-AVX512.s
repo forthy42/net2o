@@ -1029,3 +1029,6 @@ iotas:
     .quad    0x8000000080008008
 iotas_end:
 .asciz    "Keccak-1600 for AVX-512F, CRYPTOGAMS by <appro@openssl.org>"
+#if defined(__ELF__)
+.section	.note.GNU-stack,"",%progbits
+#endif
