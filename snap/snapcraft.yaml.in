@@ -2,8 +2,8 @@
 N2OVER=$(n2o version)
 NET2O=${N2OVER% *}
 NET2O=${NET2O#n2o-}
-GFORTH=${N2OVER#* }
-GFORTH=${GFORTH%-*}
+GFORTHBIN=$(echo $N2OVER | cut -f2 -d' ')
+GFORTH=${GFORTHBIN%-*}
 GFORTH=${GFORTH##*-}
 cat <<EOF >snapcraft.yaml
 name: net2o # you probably want to 'snapcraft register <name>'
@@ -25,18 +25,31 @@ package-repositories:
     key-id: 60E71A159357533099A0AAF9CAF021DB3B7FA946
     url: https://net2o.de/debian
 
+layout:
+  /usr/lib/\$CRAFT_ARCH_TRIPLET_BUILD_FOR/pulseaudio:
+    bind: \$SNAP/usr/lib/\$CRAFT_ARCH_TRIPLET_BUILD_FOR/pulseaudio
+  /usr/lib/\$CRAFT_ARCH_TRIPLET_BUILD_FOR/dri:
+    bind: \$SNAP/usr/lib/\$CRAFT_ARCH_TRIPLET_BUILD_FOR/dri
+  /usr/lib/\$CRAFT_ARCH_TRIPLET_BUILD_FOR/gforth:
+    bind: \$SNAP/usr/lib/\$CRAFT_ARCH_TRIPLET_BUILD_FOR/gforth
+  /usr/lib/\$CRAFT_ARCH_TRIPLET_BUILD_FOR/net2o:
+    bind: \$SNAP/usr/lib/\$CRAFT_ARCH_TRIPLET_BUILD_FOR/net2o
+  /usr/share/gforth:
+    bind: \$SNAP/usr/share/gforth
+  /usr/share/net2o:
+    bind: \$SNAP/usr/share/net2o
+  /usr/share/X11/xkb:
+    bind: \$SNAP/usr/share/X11/xkb
+  /usr/share/glvnd:
+    bind: \$SNAP/usr/share/glvnd
+  /etc/glvnd:
+    bind: \$SNAP/etc/glvnd
+
 apps:
   gforth-fast:
-    command: usr/bin/gforth-fast
+    command: usr/bin/$GFORTHBIN
     environment:
-      __EGL_VENDOR_LIBRARY_DIRS: \$SNAP/usr/share/glvnd/egl_vendor.d:\$SNAP/etc/glvnd/egl_vendor.d
-      GFORTHPATH: .:\$SNAP/usr/share/net2o-$NET2O:\$SNAP/usr/lib/gforth/$GFORTH:\$SNAP/usr/share/gforth/$GFORTH:\$SNAP/usr/share/gforth/site-forth:~+
-      GFORTHCCPATH: \$SNAP/usr/lib/gforth/$GFORTH/\$SNAP_ARCH/libcc-named:\$SNAP/usr/lib/net2o/$NET2O/\$SNAP_ARCH/libcc-named
       GFORTHFONTS: \$SNAP/usr/share/fonts/
-      LIBGL_DRIVERS_PATH: \$SNAP/usr/lib/\$SNAP_LAUNCHER_ARCH_TRIPLET/dri
-      LD_LIBRARY_PATH: \$SNAP/usr/lib:\$SNAP/usr/lib/\$SNAP_LAUNCHER_ARCH_TRIPLET:\$SNAP/usr/lib/\$SNAP_LAUNCHER_ARCH_TRIPLET/pulseaudio
-      GFORTH_GL: glx
-      LOCPATH: \$SNAP/usr/lib/locale
       PULSE_SERVER: unix:\$XDG_RUNTIME_DIR/pulse/native
     plugs:
       - home
@@ -48,38 +61,11 @@ apps:
       - locale-control
       - audio-playback
       - audio-record
-  gforth:
-    command: usr/bin/gforth
-    environment:
-      GFORTHPATH: .:\$SNAP/usr/share/net2o-$NET2O:\$SNAP/usr/lib/gforth/$GFORTH:\$SNAP/usr/share/gforth/$GFORTH:\$SNAP/usr/share/gforth/site-forth:~+
-      GFORTHCCPATH: \$SNAP/usr/lib/gforth/$GFORTH/\$SNAP_ARCH/libcc-named:\$SNAP/usr/lib/net2o/$NET2O/\$SNAP_ARCH/libcc-named
-      GFORTHFONTS: \$SNAP/usr/share/fonts/
-      LIBGL_DRIVERS_PATH: \$SNAP/usr/lib/\$SNAP_LAUNCHER_ARCH_TRIPLET/dri
-      LD_LIBRARY_PATH: \$SNAP/usr/lib:\$SNAP/usr/lib/\$SNAP_LAUNCHER_ARCH_TRIPLET:\$SNAP/usr/lib/\$SNAP_LAUNCHER_ARCH_TRIPLET/pulseaudio
-      GFORTH_GL: glx
-      LOCPATH: \$SNAP/usr/lib/locale
-      PULSE_SERVER: unix:\$XDG_RUNTIME_DIR/../pulse/native
-    plugs:
-      - home
-      - network
-      - netlink-connector
-      - x11
-      - opengl
-      - unity7
-      - locale-control
-      - audio-playback
-      - audio-record
   n2o:
-    command: usr/bin/gforth-fast \$SNAP/usr/bin/n2o
+    command: usr/bin/$GFORTHBIN \$SNAP/usr/bin/n2o
     environment:
-      GFORTHPATH: .:\$SNAP/usr/share/net2o-$NET2O:\$SNAP/usr/lib/gforth/$GFORTH:\$SNAP/usr/share/gforth/$GFORTH:\$SNAP/usr/share/gforth/site-forth:~+
-      GFORTHCCPATH: \$SNAP/usr/lib/gforth/$GFORTH/\$SNAP_ARCH/libcc-named:\$SNAP/usr/lib/net2o/$NET2O/\$SNAP_ARCH/libcc-named
       GFORTHFONTS: \$SNAP/usr/share/fonts/
-      LIBGL_DRIVERS_PATH: \$SNAP/usr/lib/\$SNAP_LAUNCHER_ARCH_TRIPLET/dri
-      LD_LIBRARY_PATH: \$SNAP/usr/lib:\$SNAP/usr/lib/\$SNAP_LAUNCHER_ARCH_TRIPLET:\$SNAP/usr/lib/\$SNAP_LAUNCHER_ARCH_TRIPLET/pulseaudio
-      GFORTH_GL: glx
-      LOCPATH: \$SNAP/usr/lib/locale
-      PULSE_SERVER: unix:\$XDG_RUNTIME_DIR/../pulse/native
+      PULSE_SERVER: unix:\$XDG_RUNTIME_DIR/pulse/native
     plugs:
       - home
       - network
@@ -106,136 +92,53 @@ parts:
       - libglib2.0-dev
     stage-packages:
       - libglib2.0-bin
-  gforth:
-    after:
-       - prepare
-       - desktop-glib-only
-    source: https://www.complang.tuwien.ac.at/forth/gforth/Snapshots/$GFORTH/gforth-$GFORTH.tar.xz
-    plugin: autotools
-    autotools-configure-parameters:
-      - ac_cv_header_ffi_h=no
-      - --prefix=/usr
-      - --with-install=swig
-      - --disable-lib
-      - --with-siteinit=":noname defers 'cold s\" /\" s\" SNAP\" getenv s\" /\" S+ repl-included-files ; is 'cold"
-    build-packages:
-      - libtool-bin
-      - libltdl-dev
-      - libx11-dev
-      - libx11-xcb-dev
-      - libxrandr-dev
-      - libgles2-mesa-dev
-      - libgl1-mesa-dev
-      - libwayland-dev
-      - libvulkan-dev
-      - libpng-dev
-      - libfreetype6-dev
-      - libharfbuzz-dev
-      - libffi-dev
-      - libgps-dev
-      - libpulse-dev
-      - libopus-dev
-      - libva-dev
-      - libavcodec-dev
-      - libavutil-dev
-      - texinfo
-      - git
-      - g++
-      - yodl
-      - bison
-      - libpcre3-dev
-      - libboost-dev
-      - libstb-dev
-    stage-packages:
-      - locales-all
-      - locales
-      - libltdl7
-      - libfreetype6
-      - libglvnd0
-      - libglx0
-      - libpng16-16
-      - libvulkan1
-      - libpulse0
-      - libopus0
-      - libavcodec60
-      - libavutil58
-      - libwayland-client0
-      - libwayland-cursor0
-      - libwayland-egl1
-      - libegl1
-      - libgles2
-      - libgl1
-      - libx11-6
-      - libxau6
-      - libxcb1
-      - libxdmcp6
-      - libxext6
-      - libxrandr2
-      - libxrender1
-      - libva-glx2
-      - gforth-noto-fonts
-      - fonts-awesome
-      - libgps30t64
-      - libdrm-intel1
-      - libdrm-radeon1
-      - libdrm-nouveau2
-      - libharfbuzz0b
   net2o:
-    source: https://git.net2o.de/bernd/net2o.git
-    source-tag: $NET2O
-    plugin: autotools
-    build-environment:
-      - GFORTHPATH: .:/root/stage/usr/share/net2o-$NET2O:/root/stage/usr/lib/gforth/$GFORTH:/root/stage/usr/share/gforth/$GFORTH:/root/stage/usr/share/gforth/site-forth:~+
-      - GFORTHCCPATH: /root/stage/usr/lib/\$SNAP_LAUNCHER_ARCH_TRIPLET/gforth/$GFORTH/\$SNAP_ARCH/libcc-named:/root/stage/usr/lib/net2o/$NET2O/\$SNAP_ARCH/libcc-named
-    autotools-configure-parameters:
-      - --prefix=/usr
-    after:
-      - gforth
-    build-packages:
-      - g++
-      - libtool-bin
-      - libgps-dev
-      - libffi-dev
+    plugin: nil
     stage-packages:
-      - locales
+      - net2o-gui
+      - gforth
+      - gforth-libcc-wayland
+      - gforth-libcc-gles
+      - gforth-libcc-minos2
+      - gforth-libcc-x11
+      - gforth-libcc-gl
+      - gforth-libcc-audio
+      - gforth-libcc
       - locales-all
+      - locales
       - libltdl7
-      - libfreetype6
-      - libglvnd0
-      - libglx0
-      - libpng16-16
-      - libvulkan1
-      - libwayland-client0
-      - libwayland-cursor0
-      - libwayland-egl1
       - libegl1
-      - libgles2
-      - libgl1
-      - libx11-6
-      - libxau6
-      - libxcb1
-      - libxdmcp6
-      - libxext6
-      - libxrandr2
-      - libxrender1
-      - gforth-noto-fonts
-      - fonts-awesome
-      - libgps-dev
-      - libva-dev
-      - libgstreamer1.0-dev
-      - libgstreamer-plugins-base1.0-0
-      - libffi-dev
-      - libpulse0
-      - libopus0
-      - libavcodec60
-      - libavutil58
-      - libgps30t64
+      - libharfbuzz0b
+      - libxkbcommon0
+      - xkb-data
+      - breeze-cursor-theme
+      - libwebp7
+  gforth-fast:
+    plugin: nil
+    stage-packages:
+      - gforth
+      - gforth-libcc-wayland
+      - gforth-libcc-gles
+      - gforth-libcc-minos2
+      - gforth-libcc-x11
+      - gforth-libcc-gl
+      - gforth-libcc-audio
+      - gforth-libcc
+      - locales-all
+      - locales
+      - libltdl7
+      - libegl1
+      - libharfbuzz0b
+      - libxkbcommon0
+      - xkb-data
+      - breeze-cursor-theme
+      - libwebp7
   fixup:
     plugin: nil
     after:
+      - gforth-fast
       - net2o
-      - gforth
     override-build: |
       pwd
-      ln -fs libc_malloc_debug.so.0 /root/stage/usr/lib/x86_64-linux-gnu/libc_malloc_debug.so
+      ln -fs libc_malloc_debug.so.0 /root/stage/usr/lib/\$CRAFT_ARCH_TRIPLET_BUILD_FOR/libc_malloc_debug.so
 EOF
