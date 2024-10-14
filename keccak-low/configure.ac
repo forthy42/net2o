@@ -1,6 +1,6 @@
 ## keccac Autoconf
 
-AC_INIT([keccaklow], [1:0], [bernd@net2o.de], [keccak primitives],
+AC_INIT([keccaklow], [1:1], [bernd@net2o.de], [keccak primitives],
         [https://github.com/XKCP/XKCP])
 AC_PREREQ([2.59])
 AM_INIT_AUTOMAKE([1.10 -Wall no-define])
