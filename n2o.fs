@@ -570,7 +570,7 @@ warnings !
     \G cmd: Offer a net2o command line for client stuff
     get-me
     [: ." net2o interactive shell, type 'bye' to quit, 'help' for help" ;] do-debug
-    0 to script? n2o-cmds ;
+    false to script? n2o-cmds ;
 
 : script ( -- )
     \U script file
@@ -798,7 +798,7 @@ synonym #! \ ( -- )
     reset-net2o-cmds
     [ "gui.fs" ]path required
     save-net2o-cmds set-net2o-cmds
-    net2o-gui ;
+    false to script? net2o-gui ;
 
 : ... ( -- )
     ... ;
@@ -840,6 +840,7 @@ scope{ /chat
     [IFDEF] cov+ load-cov [THEN]
     cmd-args ++debug +net2o-debugs %droprate %droprate \ read in all debugging stuff
     profile( init-timer )
+    true to script?
     argc @ 1 > IF next-cmd ELSE n2o:help THEN
     [IFDEF] cov+ save-cov annotate-cov cov% [THEN]
     profile( .times )
