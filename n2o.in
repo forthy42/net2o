@@ -14,3 +14,5 @@ c-lib:libcc-path path+ @LIBDIR@/net2o/@PACKAGE_VERSION@/@GFARCH@/libcc-named
 1 arg "+cov" str= [IF]  shift-args require coverage.fs  [THEN]
 
 require n2o.fs
+' n2o-option is process-option
+:noname  true to script? net2o-bye ; is bootmessage

@@ -881,9 +881,6 @@ scope{ /chat
 	[: !!no-net2o-cmd!! DoError cr ;] do-debug
 	n2o:help n2o:bye
     THEN  true ;
-' n2o-option is process-option
-
-:noname  true to script? net2o-bye ; is bootmessage
 
 load-rc? off \ do not load ~/.config/gforthrc
 
