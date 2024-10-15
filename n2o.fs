@@ -77,17 +77,10 @@ Variable recs-backlog
     catch reset-net2o-cmds
     r> rp0 !  throw ;
 
-: (n2o-quit) ( -- )
-    \ exits only through THROW etc.
-    BEGIN
-	cr .status refill  WHILE
-	    interpret prompt
-    REPEAT  -56 throw ;
-
 : n2o-quit ( -- )
     clear-tibstack
     BEGIN
-	[compile] [  ['] (n2o-quit) catch dup #-56 <> and dup
+	[compile] [  ['] (quit1) catch dup #-56 <> and dup
     WHILE
 	    <# \ reset hold area, or we may get another error
 	    DoError
@@ -108,7 +101,7 @@ Variable recs-backlog
 
 scope{ n2o
 
-: help ( addr u -- )
+: help ( -- )
     \U help [cmd1 .. cmdn]
     \G help: print commands or details about specified command
     ?nextarg IF
@@ -138,9 +131,7 @@ scope{ n2o
 	s"     \O " ['] .usage search-help
 	." === Commands ===" cr
 	s"     \U " ['] .usage search-help
-    THEN
-    2drop ;
-
+    THEN ;
 }scope
 
 : next-cmd ( -- )
@@ -510,7 +501,15 @@ warnings !
     \G chat: group:      to start a group chat (peers may connect)
     \G chat: chat with an user, a group managed by an user, or start
     \G chat: your own group
-    announce nicks>chat handle-chat ;
+    ?get-me announce nicks>chat
+    script? IF
+	['] n2o-greeting is bootmessage
+	[: init-client word-args ['] handle-chat ['] do-net2o-cmds catch
+	    >r subme ['] net2o-bye is 'quit r> throw net2o-bye
+	;] is 'quit
+    ELSE
+	handle-chat
+    THEN ;
 
 : chatlog ( -- )
     \U chatlog @user1|group1 .. @usern|groupn 
@@ -568,9 +567,9 @@ warnings !
 : cmd ( -- )
     \U cmd
     \G cmd: Offer a net2o command line for client stuff
-    get-me
-    [: ." net2o interactive shell, type 'bye' to quit, 'help' for help" ;] do-debug
-    false to script? n2o-cmds ;
+    ?get-me
+    [: [: ." net2o interactive shell, type 'bye' to quit, 'help' for help" ;] do-debug ;] is bootmessage
+    ['] n2o-cmds is 'quit ;
 
 : script ( -- )
     \U script file
@@ -834,9 +833,7 @@ scope{ /chat
 ' n2o:nick is /nick
 }scope
 
-0 Value extra-args \ hide extra arguments until start-n2o is run
 : start-n2o ( -- )
-    extra-args ?dup-IF  argc !  THEN  0 to extra-args
     [IFDEF] cov+ load-cov [THEN]
     cmd-args ++debug +net2o-debugs %droprate %droprate \ read in all debugging stuff
     profile( init-timer )
@@ -846,12 +843,48 @@ scope{ /chat
     profile( .times )
     n2o:bye ;
 
-:noname ( -- )
-    n2o-greeting
-    is-color-terminal? IF  +status  ELSE  -status  THEN ;
-is bootmessage
-[: ['] start-n2o bt-rp0-catch
-    ?dup-IF  DoError forth:cr  THEN n2o:bye ;] is 'quit
+"n2o command not found" exception Constant !!no-net2o-cmd!!
+
+: debug-recognizer ( addr u -- debug translator | false )
+    dup 0= IF  2drop false  EXIT  THEN
+    over c@ >r 1 /string
+    r@ '+' = IF  find-debug ?dup-IF  ['] on   THEN  rdrop EXIT  THEN
+    r@ '-' = IF  find-debug ?dup-IF  ['] off  THEN  rdrop EXIT  THEN
+    rdrop 2drop false ;
+
+: .%drop ( n -- )
+    precision >r
+    4 to precision s>f 42949672.96e f/ f. '%' forth:emit
+    r> to precision ;
+
+: %droprate-recognizer ( addr u -- float translator | 0 )
+    2dup + 1- c@ '%' <> IF  2drop 0 EXIT  THEN
+    prefix-number IF
+	1e fmin -1e fmax $FFFFFFFF fm* f>d
+	0< IF
+	    [: negate to rec-droprate#
+		[: ." Set rec drop rate to " rec-droprate# .%drop cr ;] do-debug
+	    ;]
+	ELSE
+	    [: to droprate#
+		[: ." Set drop rate to " droprate# .%drop cr ;] do-debug
+	    ;]
+	THEN
+    ELSE  0  THEN ;
+
+' %droprate-recognizer ' debug-recognizer ' n2o >wordlist
+3 recognizer-sequence: n2o-cmd-recognize
+
+: n2o-option ( addr u -- flag )
+    cmd-args n2o-cmd-recognize  ?dup-IF  execute
+    ELSE
+	[: !!no-net2o-cmd!! DoError cr ;] do-debug
+	n2o:help n2o:bye
+    THEN  true ;
+' n2o-option is process-option
+
+:noname  true to script? net2o-bye ; is bootmessage
+
 load-rc? off \ do not load ~/.config/gforthrc
 
 \\\

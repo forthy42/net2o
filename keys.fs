@@ -1466,7 +1466,8 @@ Variable tries#
 forward read-chatgroups
 
 : get-skc ( -- )
-    secret-keys# IF  read-chatgroups  EXIT  THEN
+    secret-keys# IF  read-chatgroups  EXIT
+    ELSE  n2o-greeting THEN
     tries# off
     debug-vector @ op-vector !@ >r <default>
     secret-keys#
@@ -1498,7 +1499,7 @@ scope: n2o
 
 : get-my-key ( -- xt )
     lacks-key?
-    IF  [: ." Generate a new keypair:" cr
+    IF  [: n2o-greeting ." Generate a new keypair:" cr
 	  get-nick dup 0= #-56 and throw \ empty nick: pretend to quit
 	  new-key .keys ?rsk read-chatgroups ;]
     ELSE  ['] get-skc  THEN ;

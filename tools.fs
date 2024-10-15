@@ -160,15 +160,13 @@ debug: dummy(
     BEGIN  ?peekarg  WHILE  +-?(  WHILE  ?nextarg drop set-debug  REPEAT  THEN ;
 
 Variable net2o-debug$
+: find-debug ( addr u -- nt | 0 )
+    [: type '(' emit ;] $tmp find-name dup
+    IF  dup >does-code ['] debug-doer = and  THEN ;
+
 : +net2o-debugs
     ${NET2O_DEBUGS} net2o-debug$ $!
-    net2o-debug$ ','
-    [: ( addr u -- )
-	[: type '(' emit ;] $tmp find-name ?dup-IF
-	    dup >does-code ['] debug-doer =
-	    IF  >body on  ELSE  drop  THEN
-	THEN
-    ;] $iter ;
+    net2o-debug$ ',' [: find-debug ?dup-IF  on  THEN ;] $iter ;
 
 \ logic memory modifiers
 

@@ -1573,7 +1573,7 @@ edit-terminal edit-out !
 $300 Constant maxmsg#
 
 : get-input-line ( -- addr u )
-    BEGIN  pad maxmsg# ['] accept catch
+    BEGIN  input-color pad maxmsg# ['] accept catch default-color
 	dup dup -56 = swap -28 = or \ quit or ^c to leave
 	IF    drop 2drop "/bye"
 	ELSE
@@ -2562,7 +2562,7 @@ scope{ /chat
 
 \ chat toplevel
 
-: do-chat ( addr u -- )
+: do-chat ( -- )
     status-xts get-stack n>r  get-order n>r
     chat-history  edit-curpos-off
     ['] /chat >wordlist 1 set-order
