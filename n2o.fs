@@ -876,11 +876,12 @@ scope{ /chat
 3 recognizer-sequence: n2o-cmd-recognize
 
 : n2o-option ( addr u -- flag )
-    cmd-args n2o-cmd-recognize  ?dup-IF  execute
-    ELSE
-	[: !!no-net2o-cmd!! DoError cr ;] do-debug
-	n2o:help n2o:bye
-    THEN  true ;
+    [: source cmd-args 2dup input-lexeme!  n2o-cmd-recognize  ?dup-IF  execute
+	ELSE
+	    [: !!no-net2o-cmd!! DoError cr ;] do-debug
+	    n2o:help n2o:bye
+	THEN ;] os-execute-parsing
+    true ;
 
 load-rc? off \ do not load ~/.config/gforthrc
 
