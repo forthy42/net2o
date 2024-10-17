@@ -531,7 +531,7 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
 
 : ]path ( addr u -- )
     2dup 2>r
-    ['] file>fpath catch dup
+    0 first-throw !@ >r ['] file>fpath catch r> first-throw ! dup
     IF
 	lit, ]] throw [[ 2drop
 	true
