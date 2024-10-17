@@ -14,5 +14,12 @@ c-lib:libcc-path path+ @LIBDIR@/net2o/@PACKAGE_VERSION@/@GFARCH@/libcc-named
 1 arg "+cov" str= [IF]  shift-args require coverage.fs  [THEN]
 
 require n2o.fs
-' n2o-option is process-option
-:noname  true to script? net2o-bye ; is bootmessage
+
+\ if we got here fine, set up processing the remaining arguments
+
+script? [IF]
+    load-rc? off \ do not load ~/.config/gforthrc
+    ' n2o-option is process-option \ process net2o options
+    cmd-args
+    :noname  true to script? n2o:bye ; is bootmessage \ no interactive part
+[ELSE] word-args [THEN]

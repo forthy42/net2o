@@ -57,12 +57,14 @@ align cmd-args-c , here constant cmd-args^
 cmd-args
 
 :noname ( -- addr u t / f )
-    argc @ 1 > IF  next-arg true  ELSE  false  THEN ; is ?nextarg
+    refill dup IF  source rot  THEN ; is ?nextarg
 :noname ( -- addr u t / f )
     argc @ 1 > IF  1 arg true  ELSE  false  THEN ; is ?peekarg
 :noname ( -- addr u t / f )
     argc @ 1 > IF
-	1 arg drop c@ '@' = IF  next-arg 1 /string true  EXIT  THEN
+	refill IF  source drop c@ '@' = IF  source 1 /string true  EXIT
+	    THEN
+	THEN
     THEN  false ; is ?@nextarg
 
 cmd-args-c uclass arg-o

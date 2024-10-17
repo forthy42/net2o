@@ -514,7 +514,7 @@ warnings !
 : chatlog ( -- )
     \U chatlog @user1|group1 .. @usern|groupn 
     \G chatlog: dump chat log
-    ?get-me ?cr init-client
+    ?get-me ?cr
     BEGIN  ?nextarg  WHILE  ." ====== Chat log for " 2dup type
 	    over c@ '@' = IF  1 /string nick>pk key| ."  key: " 2dup 85type  THEN
 	    ."  ======" cr msg-group$ $!
@@ -872,18 +872,11 @@ scope{ /chat
 	THEN
     ELSE  0  THEN ;
 
+:noname ( -- ) \ if unknown, just process help
+    [: !!no-net2o-cmd!! DoError cr ;] do-debug
+    ?nextarg IF  2drop  THEN  n2o:help n2o:bye ;
 ' %droprate-recognizer ' debug-recognizer ' n2o >wordlist
-3 recognizer-sequence: n2o-cmd-recognize
-
-: n2o-option ( addr u -- flag )
-    [: source cmd-args 2dup input-lexeme!  n2o-cmd-recognize  ?dup-IF  execute
-	ELSE
-	    [: !!no-net2o-cmd!! DoError cr ;] do-debug
-	    n2o:help n2o:bye
-	THEN ;] os-execute-parsing
-    true ;
-
-load-rc? off \ do not load ~/.config/gforthrc
+4 recognizer-sequence: n2o-option
 
 \\\
 Local Variables:

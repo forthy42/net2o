@@ -139,7 +139,9 @@ Defer addr-changed ' noop is addr-changed
 	THEN
     AGAIN ;
 : create-netlink-task ( -- )
-    up@ [{: main :}h main netlink-loop ;] 1 net2o-task to netlink-task ;
+    up@ [{: main :}h main
+	BEGIN  ['] netlink-loop catch -9 = UNTIL  0 (bye) ;]
+    1 net2o-task to netlink-task ;
 
 :noname defers init-rest create-netlink-task ; is init-rest
 
