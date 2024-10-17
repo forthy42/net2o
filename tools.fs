@@ -337,11 +337,13 @@ Vocabulary net2o
 	    LOOP ;] $tmp ;] $10 base-execute ;
 
 : printable? ( addr u -- flag )
+    0 first-throw !@ >r
     true -rot bounds ?DO  I c@ $80 u>= IF
-	    I ['] u8@+ catch IF  nothrow drop 0 true
+	    I ['] u8@+ catch IF  drop 0 true
 	    ELSE  drop dup I - swap I' u>  THEN
 	ELSE  1 I c@ $7F bl within  THEN
-	IF  2drop false  LEAVE  THEN  +LOOP ;
+    IF  2drop false  LEAVE  THEN  +LOOP
+    r> first-throw ! ;
 
 : ?sane-file ( addr u -- addr u ) \ net2o
     \G check if file name is sane, and if not, fail
@@ -394,6 +396,7 @@ false Value hash-sanitize?
 \ utf8 sanitizer
 
 : utf8-sanitize ( addr u -- )
+    0 first-throw !@ >r
     bounds ?DO
 	I ['] xc@+ catch IF
 	    [ xc-vector @ fixed-width = ] [IF] '?' [ELSE] '�' [THEN] xemit
@@ -402,7 +405,7 @@ false Value hash-sanitize?
 	ELSE
 	    dup #tab = IF  drop ."         "  ELSE  xemit  THEN
 	    I -  THEN
-    +LOOP  nothrow ;
+    +LOOP  r> first-throw ! ;
 
 \ config stuff
 
