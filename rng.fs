@@ -165,7 +165,7 @@ Sema rng-sema
 User ?salt-init  ?salt-init off
 
 : salt-init ( -- )
-    rng( [: cr ." init salt: " up@ h. getpid . ;] do-debug )
+    rng( [: cr ." init salt: " up@ h. (getpid) . ;] do-debug )
     init-rng$ $@ r/o open-file IF  drop random-init
     ELSE  read-initrng  0= IF  random-init  THEN  THEN
     rng-init rng-step ?check-rng write-initrng
