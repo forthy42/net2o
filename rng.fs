@@ -41,7 +41,6 @@ object uclass rng-o
     c:key#  uvar rng-key
     cell uvar rng-pos
     cell uvar rng-pid
-    cell uvar rng-task
 end-class rng-c
 
 : rng-exec ( xt -- ) \ net2o
@@ -162,7 +161,6 @@ $10 cells buffer: rngstat-buf
 \ init salt
 
 Sema rng-sema
-User ?salt-init  ?salt-init off
 
 : salt-init ( -- )
     rng( [: cr ." init salt: " up@ h. (getpid) . ;] do-debug )
@@ -170,7 +168,7 @@ User ?salt-init  ?salt-init off
     ELSE  read-initrng  0= IF  random-init  THEN  THEN
     rng-init rng-step ?check-rng write-initrng
     \ never do this stuff below without having checked the RNG:
-    ?salt-init on  getpid rng-pid !  up@ rng-task ! ;
+    getpid rng-pid ! ;
 
 [IFDEF] atfork:
     :noname ['] salt-init rng-sema c-section ; atfork:
@@ -190,13 +188,11 @@ User ?salt-init  ?salt-init off
 
 : ?rng ( -- ) \ net2o
     \G alloc rng if not there
-    rng-o @ 0= IF  rng-allot
-    ELSE  up@ rng-task @ <> IF   rng-allot  THEN  THEN
+    rng-o @ 0= IF  rng-allot  THEN
     [IFUNDEF] pthread_atfork
 	getpid rng-pid @ <>
 	IF  ['] salt-init rng-sema c-section  THEN
-    [THEN]
-    ?salt-init @ 0= !!no-salt!! ; \ fatal
+    [THEN] ;
 
 : rng-step? ( n -- ) \ net2o
     \G check if n bytes are available in the buffer
@@ -236,5 +232,5 @@ User ?salt-init  ?salt-init off
     rng-pos @ rng-buffer + c@
     1 rng-pos +! ;
 
-:noname defers 'image check-old$ $free ?salt-init off rng-o off
+:noname defers 'image check-old$ $free rng-o off
     rngstat-buf $10 cells erase ; is 'image

@@ -157,7 +157,7 @@ alloc-io
 Variable net2o-tasks
 
 :noname defers thread-init
-    ?salt-init off  rng-o off \ make double sure no rng is active
+    rng-o off \ make sure no rng is active
 ; is thread-init
 
 : net2o-pass ( params xt n task -- )
