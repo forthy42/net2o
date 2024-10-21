@@ -67,7 +67,7 @@ Variable recs-backlog
 : save-net2o-cmds ( -- )
     action-of forth-recognize  recs-backlog >stack ;
 : set-net2o-cmds ( -- )
-    ['] n2o >wordlist is forth-recognize ;
+    ['] n2o >wordlist dup 1 set-order  is forth-recognize ;
 : reset-net2o-cmds ( -- )
     recs-backlog stack# IF  recs-backlog stack> is forth-recognize  THEN ;
 
