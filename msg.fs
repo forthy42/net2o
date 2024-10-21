@@ -191,7 +191,7 @@ msg-notify-class ' new static-a with-allocater Constant msg-notify-o
 
 : display-one-msg { d: msgt -- }
     msg-group-o >o
-    msgt ['] msg:display catch IF  ." invalid entry"  cr  2drop  THEN
+    msgt ['] msg:display catch-nothrow IF  ." invalid entry"  cr  2drop  THEN
     o> ;
 
 Forward silent-join
@@ -724,7 +724,7 @@ end-class msg-?hash-class
 	    msg( ." I really should have this myself" forth:cr )
 	    \ don't fetch from myself
 	ELSE
-	    want $@ [: $8 $E pk1-connect? ;] catch 0=
+	    want $@ [: $8 $E pk1-connect? ;] catch-nothrow 0=
 	    IF
 		IF
 		    +resend +flow-control
@@ -733,7 +733,7 @@ end-class msg-?hash-class
 		THEN
 	    ELSE
 		fetch( ." failed, doesn't connect" forth:cr )
-		nothrow 2drop
+		2drop
 	    THEN
 	THEN ;] #map
     want# #frees
@@ -1390,7 +1390,7 @@ previous
 	    cell- 2dup + $@ sigpksize# - 1- + c@
 	    [ also net2o-base net2o' msg-lock ]L
 	    [ net2o' msg-unlock 1+ previous ]L within IF
-		2dup + $@ ['] msg:display catch IF  2drop  THEN
+		2dup + $@ ['] msg:display catch-nothrow IF  2drop  THEN
 		msg-group-o .msg:keys[] $[]# IF  drop 0  THEN
 	    THEN
     REPEAT  2drop ;
@@ -1442,7 +1442,7 @@ forward key-from-dht
       log u u' /string bounds ?DO
 	  I log - cell/ to log#
 	  I $@ { d: msgt }
-	  msgt ['] msg:display catch IF  ." invalid entry" cr
+	  msgt ['] msg:display catch-nothrow IF  ." invalid entry" cr
 	      2drop  THEN
       cell +LOOP
       log free throw ;] catch
@@ -1575,7 +1575,7 @@ $300 Constant maxmsg#
 : get-input-line ( -- addr u )
     BEGIN  input-color pad maxmsg# ['] accept catch default-color
 	dup dup -56 = swap -28 = or \ quit or ^c to leave
-	IF    drop 2drop "/bye"
+	IF    nothrow drop 2drop "/bye"
 	ELSE
 	    dup 0= IF
 		drop pad swap 2dup xclear
@@ -2022,7 +2022,7 @@ is /help
     r>  display-lastn ; is /log
 
 :noname ( addr u -- )
-    ['] logstyles ['] evaluate-in catch IF
+    ['] logstyles ['] evaluate-in catch-nothrow IF
 	2drop drop "logstyle" /help
     THEN ; is /logstyle
 

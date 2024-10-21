@@ -1423,7 +1423,7 @@ forward >qr-key
     pk scanned-key-in
     up@ pk $10 + $make [{: task w^ pk :}h1
 	pk $@ keysize2 /string >qr-key
-	pk $@ keysize2 umin [: net2o:pklookup send-qr-invitation ;] catch
+	pk $@ keysize2 umin [: net2o:pklookup send-qr-invitation ;] catch-nothrow
 	IF    2drop ." send qr invitation, aborted" 0
 	ELSE  ." sent qr invitation, got " dup h. THEN
 	forth:cr
@@ -1509,7 +1509,7 @@ scope: n2o
     <info> ." generate a new one with 'keygen'" cr <default> ;
 
 : get-me ( -- )
-    get-my-key catch dup #-56 = IF drop .keyinfo ELSE throw THEN ;
+    get-my-key catch dup #-56 = IF nothrow drop .keyinfo ELSE throw THEN ;
 
 : ?get-me ( -- )
     \G this version of get-me fails hard if no key is opened
