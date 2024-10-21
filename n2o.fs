@@ -92,7 +92,7 @@ Variable recs-backlog
 
 : n2o-cmds ( -- )
     init-client word-args ['] n2o-quit ['] do-net2o-cmds catch
-    dup #-56 = swap #-28 = or IF  drop subme net2o-bye  ELSE  throw  THEN ;
+    dup #-56 = swap #-28 = or IF  nothrow drop subme net2o-bye  ELSE  throw  THEN ;
 
 : .usage ( addr u -- addr u )
     source 7 /string type cr ;
@@ -828,7 +828,7 @@ n2o-history
 \ allow issuing commands during chat
 
 scope{ /chat
-:noname [: word-args ['] evaluate do-net2o-cmds ;] catch
+:noname [: word-args ['] evaluate do-net2o-cmds ;] catch-nothrow
     ?dup-IF  <err> ." error: " error$ type cr <default> 2drop  THEN ; is /n2o
 ' n2o:nick is /nick
 }scope
