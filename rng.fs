@@ -40,7 +40,9 @@ object uclass rng-o
     rngbuf# uvar rng-buffer
     c:key#  uvar rng-key
     cell uvar rng-pos
-    cell uvar rng-pid
+    [IFUNDEF] child-fork
+	cell uvar rng-pid
+    [THEN]
 end-class rng-c
 
 : rng-exec ( xt -- ) \ net2o
@@ -168,20 +170,22 @@ Sema rng-sema
     ELSE  read-initrng  0= IF  random-init  THEN  THEN
     rng-init rng-step ?check-rng write-initrng
     \ never do this stuff below without having checked the RNG:
-    getpid rng-pid ! ;
+    [IFDEF] rng-pid
+	getpid rng-pid !
+    [THEN]
+;
 
-[IFDEF] atfork:
-    :noname ['] salt-init rng-sema c-section ; atfork:
-    Constant salt-init-atfork
+[IFDEF] child-fork
+    :noname defers child-fork
+	rng-o @ IF
+	    ['] salt-init rng-sema c-section
+	THEN ; is child-fork
 [THEN]
 
 : rng-allot ( -- )
     rng-c >osize @ kalloc rng-o !
     rngbuf# rng-pos !
     ['] salt-init rng-sema c-section
-    [IFDEF] pthread_atfork
-	0 0 salt-init-atfork pthread_atfork errno-throw
-    [THEN]
 ;
 
 \ buffered random numbers to output 64 bit at a time
@@ -189,7 +193,7 @@ Sema rng-sema
 : ?rng ( -- ) \ net2o
     \G alloc rng if not there
     rng-o @ 0= IF  rng-allot  THEN
-    [IFUNDEF] pthread_atfork
+    [IFDEF] rng-pid
 	getpid rng-pid @ <>
 	IF  ['] salt-init rng-sema c-section  THEN
     [THEN] ;
