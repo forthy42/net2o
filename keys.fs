@@ -1423,7 +1423,7 @@ forward >qr-key
     pk scanned-key-in
     up@ pk $10 + $make [{: task w^ pk :}h1
 	pk $@ keysize2 /string >qr-key
-	pk $@ keysize2 umin [: net2o:pklookup send-qr-invitation ;] catch-nothrow
+	pk $@ keysize2 umin [: net2o:pklookup send-qr-invitation ;] catch-nobt
 	IF    2drop ." send qr invitation, aborted" 0
 	ELSE  ." sent qr invitation, got " dup h. THEN
 	forth:cr

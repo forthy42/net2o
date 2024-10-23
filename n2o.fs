@@ -828,7 +828,7 @@ n2o-history
 \ allow issuing commands during chat
 
 scope{ /chat
-:noname [: word-args ['] evaluate do-net2o-cmds ;] catch-nothrow
+:noname [: word-args ['] evaluate do-net2o-cmds ;] catch-nobt
     ?dup-IF  <err> ." error: " error$ type cr <default> 2drop  THEN ; is /n2o
 ' n2o:nick is /nick
 }scope
