@@ -2,8 +2,19 @@
 
 #Usage ./bump major.minor.patch
 
+RELEASE=$1
+OLDRELEASE=$(grep AC_INIT configure.ac | cut -f3 -d'[' | cut -f1 -d'-' | cut -f1 -d']')
+if test -z "$RELEASE"
+then
+    RELEASE=$OLDRELEASE
+fi
+if [ "$RELEASE" = "$OLDRELEASE" ]
+then
+    V="${RELEASE}-$(date +%Y%m%d)"
+else
+    V="${RELEASE}"
+fi
 GFVER=$(gforth --version 2>&1 | cut -f1-2 -d' ' | tr ' ' '-')
-V="$1-$(date +%Y%m%d)"
 sed -e "s/AC_INIT(\([^ ,]*, *\[\)[0-9._\-]*/AC_INIT(\1$V/g" configure.ac >configure.ac+ && mv configure.ac+ configure.ac
 sed -e "s/GFORTH=gforth-[0-9._]*/GFORTH=$GFVER/g" <do >do+ && mv do+ do
 make doc
