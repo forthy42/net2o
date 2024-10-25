@@ -189,16 +189,12 @@ kill-seconds# 1+ #1000000000 um* 2constant kill-timeout# \ 3s
     0 to timeout-task
     0 to query-task
     net2o-tasks get-stack kills !  net2o-tasks $free
-    kills @ 0 ?DO  send-kill  LOOP
-    ntime kill-timeout# d+ { d: timeout }
-    kill-seconds# >r \ give time to terminate
-    BEGIN  timeout ntime d- 2dup d0> kills @ and  WHILE
-	    stop-dns
-	    timeout ntime d- 1000000000 fm/mod nip
-	    dup r> <> IF  '.' emit  THEN  >r
-    REPEAT
-    r> kill-seconds# <> IF  cr  THEN  2drop
-    kill-wait2# stop-dns ;
+    kills @ 0 ?DO
+	dup user' pthread-id +
+	{ | thread-id[ 0 pthread+ ] }  thread-id[ 0 pthread+ move
+	send-kill
+	thread-id[ 0 pthread_join drop
+    LOOP ;
 
 \ packet&header size
 
