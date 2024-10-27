@@ -190,7 +190,7 @@ kill-seconds# 1+ #1000000000 um* 2constant kill-timeout# \ 3s
     0 to query-task
     net2o-tasks get-stack kills !  net2o-tasks $free
     kills @ 0 ?DO
-	send-kill (kill)
+	['] send-kill (kill)
     LOOP ;
 
 \ packet&header size
