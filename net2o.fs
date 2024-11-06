@@ -21,7 +21,8 @@ require version.fs
 
 : n2o-greeting ( -- )
     [:  ." net2o " net2o-version type space (c) ."  2010-2024 Bernd Paysan" cr ;]
-    do-debug ;
+    do-debug
+    is-color-terminal? IF  +status  ELSE  -status  THEN ;
 
 require err.fs
 
