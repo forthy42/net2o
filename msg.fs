@@ -2572,7 +2572,7 @@ scope{ /chat
     [: #0. /chat:/stats ;]
     ['] .stacks
     ['] .order 4 status-xts set-stack
-    BEGIN  .status get-input-line .unstatus
+    BEGIN  .status get-input-line .unstatus default-color
 	2dup "/bye" str= >r 2dup "\\bye" str= r> or 0= WHILE
 	    do-chat-cmd? 0= IF  avalanche-text  THEN
     REPEAT  2drop leave-chats  xchar-history

@@ -1924,7 +1924,7 @@ also [IFDEF] jni jni [THEN]
 	k-f7 of  >normalscreen   endof
 	k-f8 of  >fullscreen     endof
 	[ box-actor ] defers ekeyed  EXIT
-    endcase ; net2o-actor to ekeyed
+    endcase ; net2o-actor is ekeyed
 
 previous
 
