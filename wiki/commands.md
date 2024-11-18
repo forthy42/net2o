@@ -456,3 +456,61 @@ Commands are context-sensitive in an OOP method hierarchy sense.
 * $5 msg-end-with ( -- )
   push out avalanche
 
+### DVCS patch commands ###
+
+DVCS metadata is stored in messages, containing message text, refs
+and patchset objects. Patchset objects are constructed in a way
+that makes identical transactions have the same hash.
+
+* $20 dvcs-read ( $:hash -- )
+  read in an object
+* $21 dvcs-rm ( $:hash+name -- )
+  delete file
+* $22 dvcs-rmdir ( $:name -- )
+  delete directory
+* $23 dvcs-patch ( $:diff len -- )
+  apply patch, len is the size of the result
+* $24 dvcs-write ( $:perm+name size -- )
+  write out file
+* $25 dvcs-unzip ( $:diffgz size algo -- $:diff )
+  unzip an object
+* $26 dvcs-ref ( $:hash+perm+name -- )
+  external hash reference
+
+### payment commands ###
+
+* $20 pay-source ( $:source -- )
+  source, pk[+hash] for lookup
+* $21 pay-sink ( n $:sig -- )
+  sink, signature
+* $22 pay-asset ( asset -- )
+  select global asset type
+* $23 pay-obligation ( $:enc-asset -- )
+  select per-contract obligation
+* $24 pay-amount ( 64amount -- )
+  add/subtract amount to current asset
+* $25 pay-damount ( 128amount -- )
+  add/subtract 128 bit amount
+* $26 pay-comment ( $:enc-comment -- )
+  comment, encrypted for selected key
+* $27 pay-balance ( u -- )
+  select&balance asset
+* $28 pay-#source ( u -- )
+  select source
+
+### Contracts ###
+
+Contracts are state changes to wallets.  A serialized wallet is a contract
+that contains all the changes from an empty wallet to fill it; it is not
+checked for balance.
+
+A dumb contract is checked for balance.  It consists of several selectors
+(source/account, asset), transactions (amounts added or subtracted from an
+asset), comments (encoded for the receiver, with a ephermeral pubkey as
+start and a HMAC as end). Comments are fixed 64 bytes, either plain text or
+hashes to files.  Transactions have to balance, which is facilitated with
+the balance command, which balances the selected asset.
+
+The signature of a contract signs the wallet's state (serialized in
+normalized form) after the contract has been executed.  The current
+contract's hash is part of the serialization.

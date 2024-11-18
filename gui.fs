@@ -15,7 +15,7 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-utf-8 set-encoding
+\ utf-8 set-encoding
 
 require minos2/widgets.fs
 
@@ -409,9 +409,7 @@ new-htab tab-glue: pk-tab
 new-htab tab-glue: group-tab
 new-htab tab-glue: chatname-tab
 
-[IFUNDEF] child+
-    : child+ ( o -- ) o over >o to parent-w o> childs[] >stack ;
-[THEN]
+?: child+ ( o -- ) o over >o to parent-w o> childs[] >stack ;
 
 Create ke-imports#rgb
 

@@ -62,18 +62,16 @@ $20 value hash-size#
 
 \ commands for the command line user interface
 
-Variable recs-backlog
-
-: save-net2o-cmds ( -- )
-    action-of forth-recognize  recs-backlog >stack ;
 : set-net2o-cmds ( -- )
-    ['] n2o >wordlist dup 1 set-order  is forth-recognize ;
+    ['] .base ['] .stacks 2 status-xts set-stack
+    ['] n2o >wordlist is forth-recognize ;
 : reset-net2o-cmds ( -- )
-    recs-backlog stack# IF  recs-backlog stack> is forth-recognize  THEN ;
+    ['] .base ['] .stacks ['] .order 3 status-xts set-stack
+    [ action-of forth-recognize ]L is forth-recognize ;
 
 : do-net2o-cmds ( xt -- )
     rp0 @ >r  rp@ 3 cells + rp0 !
-    save-net2o-cmds set-net2o-cmds
+    set-net2o-cmds
     catch reset-net2o-cmds
     r> rp0 !  throw ;
 
@@ -196,7 +194,7 @@ scope{ n2o
     ?.net2o-config
     reset-net2o-cmds
     [ "qrscan.fs" ]path required  run-scan-qr
-    save-net2o-cmds set-net2o-cmds ;
+    set-net2o-cmds ;
 
 : keysearch ( -- )
     \U keysearch|searchkey 85string1 .. 85stringn
@@ -796,7 +794,7 @@ synonym #! \ ( -- )
     ?.net2o-config
     reset-net2o-cmds
     [ "gui.fs" ]path required
-    save-net2o-cmds set-net2o-cmds
+    set-net2o-cmds
     false to script? net2o-gui ;
 
 : ... ( -- )

@@ -2243,10 +2243,8 @@ forward hash-in
 : file-in ( addr u -- hash u )
     slurp-file over >r hash-in r> free throw >have+group ;
 
-[IFUNDEF] suffix
-    : suffix ( addr u -- addr' u' )
-	2dup '.' scan-back nip /string ;
-[THEN]
+?: suffix ( addr u -- addr' u' )
+    2dup '.' scan-back nip /string ;
 
 : filename, ( addr u -- )
     basename $, msg:filename# ulit, msg-object ;

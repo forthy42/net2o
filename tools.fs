@@ -26,12 +26,6 @@ require forward.fs
 require set-compsem.fs
 require hash-table.fs
 
-\ events API change
-
-[defined] estring, 0= [defined] e$, and [IF]
-    synonym estring, e$,
-[THEN]
-
 \ enum
 
 : enum ( n "name" -- n+1 )  dup Constant 1+ ;
@@ -106,33 +100,25 @@ word-args
 	nip move
     THEN ;
 
-[IFUNDEF] safe/string
-: safe/string ( c-addr u n -- c-addr' u' ) \ net2o
+?: safe/string ( c-addr u n -- c-addr' u' ) \ net2o
 \G protect /string against overflows.
     dup negate >r  dup 0> IF
         /string dup r> u>= IF  + 0  THEN
     ELSE
         /string dup r> u< IF  + 1+ -1  THEN
     THEN ;
-[THEN]
 
-[IFUNDEF] string-suffix?
-    : string-suffix? ( addr1 u1 addr2 u2 -- flag ) \ net2o
+?: string-suffix? ( addr1 u1 addr2 u2 -- flag ) \ net2o
 	\G return true if addr2 u2 is a suffix of addr1 u1
 	tuck 2>r over swap - 0 max /string 2r> str= ;
-[THEN]
 
 : -skip ( addr u char -- ) >r
     BEGIN  1- dup  0>= WHILE  2dup + c@ r@ <>  UNTIL  THEN  1+ rdrop ;
-[IFUNDEF] -scan
-    : -scan ( addr u char -- addr u' ) >r
+?: -scan ( addr u char -- addr u' ) >r
 	BEGIN  dup  WHILE  1- 2dup + c@ r@ =  UNTIL  1+  THEN  rdrop ;
-[THEN]
 
-[IFUNDEF] basename
-: basename ( addr u -- addr' u' )
+?: basename ( addr u -- addr' u' )
     2dup '/' -scan nip /string ;
-[THEN]
 
 : str0? ( addr u -- flag )
     \ check if string is all zero
@@ -150,13 +136,11 @@ debug: dummy(
 	IF  >does-code ['] dummy( >does-code =  THEN
     ELSE  2drop false  THEN ;
 
-[IFUNDEF] set-debug
-    : set-debug ( addr u -- )
+?: set-debug ( addr u -- )
 	debug-eval $!
 	s" db " debug-eval 1 $ins
 	s" (" debug-eval $+!
 	debug-eval $@ evaluate ;
-[THEN]
 
 : ++debug ( -- )
     BEGIN  ?peekarg  WHILE  +-?(  WHILE  ?nextarg drop set-debug  REPEAT  THEN ;
@@ -172,13 +156,13 @@ Variable net2o-debug$
 
 \ logic memory modifiers
 
-[IFUNDEF] or!   : or!   ( x addr -- )    dup >r @ or   r> ! ; [THEN]
-[IFUNDEF] xor!  : xor!  ( x addr -- )    dup >r @ xor  r> ! ; [THEN]
-[IFUNDEF] and!  : and!  ( x addr -- )    dup >r @ and  r> ! ; [THEN]
+?: or!   ( x addr -- )    dup >r @ or   r> ! ;
+?: xor!  ( x addr -- )    dup >r @ xor  r> ! ;
+?: and!  ( x addr -- )    dup >r @ and  r> ! ;
 
-[IFUNDEF] cxor! : cxor! ( x c-addr -- )  dup >r c@ xor r> c! ; [THEN]
-[IFUNDEF] cand! : cand! ( x c-addr -- )  dup >r c@ and r> c! ; [THEN]
-[IFUNDEF] cor!  : cor!  ( x c-addr -- )  dup >r c@ or  r> c! ; [THEN]
+?: cxor! ( x c-addr -- )  dup >r c@ xor r> c! ;
+?: cand! ( x c-addr -- )  dup >r c@ and r> c! ;
+?: cor!  ( x c-addr -- )  dup >r c@ or  r> c! ;
 
 : max!@ ( n addr -- )    dup >r @ max  r> !@ ;
 : umax!@ ( n addr -- )   dup >r @ umax r> !@ ;
@@ -373,9 +357,7 @@ no-fat-chars bounds [?DO] filechars [I] c@ -bit [LOOP]
 
 \ '%' is allowed, but we use '%' to replace the others
 
-[IFUNDEF] .##
-    : .## ( u -- ) 0 <# # # #> type ;
-[THEN]
+?: .## ( u -- ) 0 <# # # #> type ;
 : sane-type ( addr u -- )
     [: bounds ?DO
 	  I c@ filechars over bit@
@@ -422,14 +404,12 @@ require config.fs
     #-512 EEXIST - Constant file-exist#
 [THEN]
 
-[IFUNDEF] init-dir
-    : init-dir ( addr u mode -- flag ) \ net2o
+?: init-dir ( addr u mode -- flag ) \ net2o
 	\G create a directory with access mode,
 	\G return true if the dictionary is new, false if it already existed
 	>r 2dup file-status nip no-file# = IF
 	    r> mkdir-parents drop  true
 	ELSE  2drop rdrop  false  THEN ;
-[THEN]
 
 \ dirstack
 
@@ -621,9 +601,7 @@ previous
 
 \ print time
 
-[IFUNDEF] ftime
-    : ftime ( -- r ) ntime d>f 1e-9 f* ;
-[THEN]
+?: ftime ( -- r ) ntime d>f 1e-9 f* ;
 
 64Variable tick-adjust
 : ticks ( -- u64 )  ntime d>64 tick-adjust 64@ 64+ ;

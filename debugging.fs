@@ -163,9 +163,7 @@ timer: +ack
 
 Ustack b$
 
-[IFUNDEF] inskey
-    : inskey ( key -- )  key-buffer c$+! ;
-[THEN]
+?: inskey ( key -- )  key-buffer c$+! ;
 
 up@ Value main-up@
 
