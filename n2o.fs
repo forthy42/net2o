@@ -65,14 +65,14 @@ $20 value hash-size#
 : set-net2o-cmds ( -- )
     ['] .base ['] .stacks 2 status-xts set-stack
     ['] n2o >wordlist is forth-recognize ;
-: reset-net2o-cmds ( -- )
+: set-forth-cmds ( -- )
     ['] .base ['] .stacks ['] .order 3 status-xts set-stack
     [ action-of forth-recognize ]L is forth-recognize ;
 
 : do-net2o-cmds ( xt -- )
     rp0 @ >r  rp@ 3 cells + rp0 !
     set-net2o-cmds
-    catch reset-net2o-cmds
+    catch set-forth-cmds
     r> rp0 !  throw ;
 
 : n2o-quit ( -- )
@@ -192,7 +192,7 @@ scope{ n2o
     \U keyscan|scankey|scanqr|qrscan
     \G keyscan: scan a key in color QR form
     ?.net2o-config
-    reset-net2o-cmds
+    set-forth-cmds
     [ "qrscan.fs" ]path required  run-scan-qr
     set-net2o-cmds ;
 
@@ -792,7 +792,7 @@ synonym #! \ ( -- )
     \U gui
     \G gui: start net2o's graphical user interface
     ?.net2o-config
-    reset-net2o-cmds
+    set-forth-cmds
     [ "gui.fs" ]path required
     set-net2o-cmds
     false to script? net2o-gui ;
