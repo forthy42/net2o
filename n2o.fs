@@ -78,7 +78,7 @@ $20 value hash-size#
 : n2o-quit ( -- )
     clear-tibstack
     BEGIN
-	[compile] [  ['] (quit1) catch dup #-56 <> and dup
+	[compile] [  ['] (quit1) catch dup #-56 <> over #-28 <> and
     WHILE
 	    <# \ reset hold area, or we may get another error
 	    DoError
@@ -86,7 +86,7 @@ $20 value hash-size#
 	    clearstacks
 	    clear-tibstack
     REPEAT
-    drop clear-tibstack #-56 throw ;
+    clear-tibstack throw ;
 
 : n2o-cmds ( -- )
     init-client word-args ['] n2o-quit ['] do-net2o-cmds catch
@@ -119,6 +119,7 @@ scope{ n2o
 		THEN  $tmp ['] .usage search-help
 		." === Details ===" cr
 		[: ."     \G " type ':' emit ;] $tmp ['] .cmd search-help
+		2drop
 	    THEN
 	?nextarg 0= UNTIL
     ELSE

@@ -4,7 +4,7 @@ e? os-type s" linux-android" string-prefix? [IF] require starta.fs [THEN]
 page ." loading n2o..." key? drop
 warnings off \ no warnings please
 require n2o.fs
-:noname load-rc page set-net2o-cmds
-    ." loading n2o:gui..." key? drop
+:noname
+    page ." loading n2o:gui..." key? drop
     n2o:gui ; is bootmessage
 ' bye is 'quit
