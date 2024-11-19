@@ -20,10 +20,10 @@ also android also jni
 0x01080077 Value net2o-icon# \ default
 : get-net2o-icon# "gnu.gforth:drawable/net2o_notify" R.id ;
 get-net2o-icon# to net2o-icon#
-jvalue nb
-jvalue ni
-jvalue nf
-jvalue notification-manager
+JValue nb
+JValue ni
+JValue nf
+JValue notification-manager
 
 : notify@ ( -- addr u )
     notify-otr? @ 0> IF  "expired message"  EXIT  THEN
