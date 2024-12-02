@@ -105,15 +105,16 @@ Defer next-element
 	    ['] translate-nt     of                   endof
 	    ['] translate-num    of        r@ >stack  endof
 	    ['] translate-dnum   of  drop  r@ >stack  endof
+	    [IFDEF] scan-translate-string
+		['] scan-translate-string of  scan-string
+		    over >r s>number? r> free throw
+		    0= IF json-err THEN
+		    drop r@ >stack  endof
+	    [THEN]
 	    [IFDEF] translate-string
-	    ['] translate-string of  over >r s>number? r> free throw
-		0= IF json-err THEN
-		drop r@ >stack  endof
-	    [ELSE]
-	    ['] scan-translate-string of  scan-string
-		over >r s>number? r> free throw
-		0= IF json-err THEN
-		drop r@ >stack  endof
+		['] translate-string of  over >r s>number? r> free throw
+		    0= IF json-err THEN
+		    drop r@ >stack  endof
 	    [THEN]
 	    ['] translate-float  of  f>s   r@ >stack  endof
 	    ['] translate-bool   of        r@ >stack  endof
@@ -129,12 +130,13 @@ Defer next-element
 	case previous-type
 	    ['] translate-nt     of                    endof
 	    ['] translate-float  of        r@ f>stack  endof
+	    [IFDEF] scan-translate-string
+		['] scan-translate-string of  scan-string over >r >float r> free throw
+		    0= IF json-err THEN  r@ f>stack  endof
+	    [THEN]
 	    [IFDEF] translate-string
-	    ['] translate-string of  over >r >float r> free throw
-		0= IF json-err THEN  r@ f>stack  endof
-	    [ELSE]
-	    ['] scan-translate-string of  scan-string over >r >float r> free throw
-		0= IF json-err THEN  r@ f>stack  endof
+		['] translate-string of  over >r >float r> free throw
+		    0= IF json-err THEN  r@ f>stack  endof
 	    [THEN]
 	    ['] translate-num    of  s>f   r@ f>stack  endof
 	    ['] translate-dnum   of  d>f   r@ f>stack  endof
@@ -147,10 +149,11 @@ Defer next-element
     array-item ?dup-IF  >r
 	case previous-type
 	    ['] translate-nt     of                    endof
+	    [IFDEF] scan-translate-string
+		['] scan-translate-string of  scan-string over >r $make r> free throw  r@ >stack  endof
+	    [THEN]
 	    [IFDEF] translate-string
-	    ['] translate-string of  over >r $make r> free throw  r@ >stack  endof
-	    [ELSE]
-	    ['] scan-translate-string of  scan-string over >r $make r> free throw  r@ >stack  endof
+		['] translate-string of  over >r $make r> free throw  r@ >stack  endof
 	    [THEN]
 	    ['] translate-num    of  [: 0 .r ;] $tmp $make r@ >stack  endof
 	    ['] translate-dnum   of  [: 0 d.r ;] $tmp $make r@ >stack  endof
@@ -228,10 +231,11 @@ Defer next-element
 : eval-json ( .. tag -- )
     case
 	['] translate-nt     of  name?int execute       endof
+	[IFDEF] scan-translate-string
+	    ['] scan-translate-string of  scan-string json-string!           endof
+	[THEN]
 	[IFDEF] translate-string
-	['] translate-string of  json-string!           endof
-	[ELSE]
-	['] scan-translate-string of  scan-string json-string!           endof
+	    ['] translate-string of  json-string!           endof
 	[THEN]
 	['] translate-num    of  '#' key$ c$+! set-int  endof
 	['] translate-dnum   of  '&' key$ c$+! set-val  endof
