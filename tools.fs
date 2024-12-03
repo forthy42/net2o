@@ -947,7 +947,8 @@ Variable tmp-file$
     tmp-file$ $@ ;
 
 : >backup ( addr u -- )
-    2dup 2dup [: type '~' emit ;] $tmp rename-file >r
+    2dup 2dup [: type '~' emit ;] $tmp link
+    IF  -512 errno -  ELSE 0  THEN >r
     tmp-file$ $@ 2swap rename-file
     r> throw?exists throw?exists ;
 
