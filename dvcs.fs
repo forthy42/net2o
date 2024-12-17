@@ -368,8 +368,6 @@ User tmp1$
 : mode! ( -- mode )
     statbuf st_mode [ sizeof st_mode 2 = ] [IF] w! [ELSE] l! [THEN] ;
 
-$1000 Constant path-max#
-
 Defer xstat ' lstat is xstat
 Defer xfiles[] ' new-files[] is xfiles[]
 Defer hash-import ' noop is hash-import

@@ -822,7 +822,10 @@ n2o-history
     THEN ;
 ?set-debug
 
-:noname defers 'cold ?set-debug n2o-history ; is 'cold
+:noname  defers 'cold ?set-debug n2o-history ; is 'cold
+[IFDEF] 'debug-cold
+    [: r@ addr>view .sourceview cr ~~ ;] is 'debug-cold
+[THEN]
 
 \ allow issuing commands during chat
 

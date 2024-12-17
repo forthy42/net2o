@@ -103,7 +103,7 @@ User keyak-t
 
 : keccak-free
     keccak-t @ ?dup-IF  [: .dispose ;] crypto-a with-allocater  THEN
-    0 to @keccak crypto-o off  keccak-t off ;
+    0 to @keccak crypto-o off  keccak-t off  0 to keccak-o ;
 
 keccak-init
 
@@ -185,13 +185,12 @@ end-class keyak
 
 : keyak-free
     keyak-t @ ?dup-IF  [: .dispose ;] crypto-a with-allocater  THEN
-    0 to @keccak crypto-o off  keyak-t off ;
+    0 to @keccak crypto-o off  keyak-t off  0 to keyak-o ;
 
 keyak-init
 
 ' keyak-init is c:init
 ' keyak-free is c:free
 
-:noname defers 'cold keccak-init keyak-init ; is 'cold
-:noname defers 'image crypto-o off  keccak-t off  keyak-t off
-    0 to keccak-o  0 to keyak-o ; is 'image
+:is 'cold defers 'cold keccak-init keyak-init ;
+:is 'image defers 'image keccak-free keyak-free ;

@@ -70,8 +70,8 @@ User threefish-t
 
 threefish-init
 
-:noname defers 'cold threefish-init ; is 'cold
-:noname defers 'image  threefish-t off  0 to threefish-o ; is 'image
+:is 'cold  defers 'cold threefish-init ;
+:is 'image defers 'image  threefish-t off  0 to threefish-o  0 to @threefish ;
 
 ' threefish-init is c:init
 ' threefish-free is c:free

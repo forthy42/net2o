@@ -403,6 +403,7 @@ require config.fs
     17 Constant EEXIST
     #-512 EEXIST - Constant file-exist#
 [THEN]
+$1000 Constant path-max#
 
 ?: init-dir ( addr u mode -- flag ) \ net2o
 	\G create a directory with access mode,
@@ -496,7 +497,7 @@ default-dir-config
 
 #2 date# !
 #20 logsize# !
-pad $400 get-dir rootdirs$ $!
+pad path-max# get-dir rootdirs$ $!
 "Hello!" invite$ $!
 [defined] android 1 and passmode# ! \ default is all entry is masked out
 #14 timeouts# !
@@ -559,7 +560,7 @@ Variable configured?
 
 :noname defers 'cold
     configured? off
-    pad $400 get-dir rootdirs$ $!
+    pad path-max# get-dir rootdirs$ $!
 ; is 'cold
 :noname ( -- )
     config:host$ $free
