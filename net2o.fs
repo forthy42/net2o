@@ -307,7 +307,7 @@ Defer do-disconnect
 
 $Variable dest-map s" " dest-map $!
 
-:is 'image defers 'image dest-map off
+:is 'image defers 'image
     0 to inbuf 0 to outbuf 0 to tmpbuf  io-mem off ;
 :is 'cold defers 'cold false to terminating? keccak-o crypto-o !
     hash-init-rng alloc-io ;
