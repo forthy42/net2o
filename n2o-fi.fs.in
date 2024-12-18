@@ -1,0 +1,18 @@
+\ -*- mode: Forth -*-
+
+fpath+ @DATADIR@/net2o/@PACKAGE_VERSION@
+c-lib:libcc-path path+ @LIBDIR@/net2o/@PACKAGE_VERSION@/@GFARCH@/libcc-named
+
+@HAS_GPSD@ [IF] \ gpsd
+    s" unix/gps.fs" open-fpath-file
+    0= [IF] 2drop close-file throw : has-gpsd? ; [THEN]
+[THEN]
+
+require n2o.fs
+
+\ if we got here fine, set up processing the remaining arguments
+
+load-rc? off \ do not load ~/.config/gforthrc
+load-rc0? off \ also do not load ~/.config/gforthrc0
+:is 'image  defers 'image ['] n2o-option is process-option ;
+locs[] $free wheres $free

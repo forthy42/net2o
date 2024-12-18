@@ -29,16 +29,20 @@ Variable key-readin
     [: nick-key ?dup-IF  out-key  THEN ;] @arg-loop ;
 
 $20 value hash-size#
+hash-size# buffer: hash-out-buf
+: >hash-out ( -- addr u )
+    { | pad[ keccak#max ] } pad[ c:key>
+    pad[ hash-out-buf hash-size# move
+    hash-out-buf hash-size# ;
 
 : hash-file ( addr u -- hash u' )
-    c:0key slurp-file 2dup c:hash drop free throw pad c:key>
-    pad hash-size# ;
+    c:0key slurp-file 2dup c:hash drop free throw >hash-out ;
 
 : hash-file-blocks ( addr u -- )
-    slurp-file over { start } bounds ?DO
+    slurp-file over { start |  } bounds ?DO
 	c:0key I dup $400 + I' umin over - c:hash
-	pad c:key>
-	I start - $400 / h. pad hash-size# .85info cr
+	I start - $400 / h.
+	>hash-out .85info cr
     $400 +LOOP
     start free throw ;
 
@@ -658,7 +662,7 @@ synonym #! \ ( -- )
     \G init: The default branch name is "master"
     \G init: The default project name is the directory it resides in
     ?get-me
-    ?nextarg 0= IF  pad path-max# get-dir basename  THEN
+    ?nextarg 0= IF  { | pad[ path-max# ] } pad[ path-max# get-dir basename  THEN
     dvcs-init ;
 
 : add ( -- )

@@ -92,7 +92,7 @@ ARCH	  =
 DEBARCH   =
 GFORTH_FAST = `which gforth-fast`-`gforth-fast --version 2>&1| cut -f2- -d' ' | tr ' ' '-'`
 
-INS = Makefile n2o qrscan version.fs debian/changelog debian/control
+INS = Makefile n2o n2o-fi.fs qrscan version.fs debian/changelog debian/control
 
 TESTS = tests/alice2-msg.fs tests/alice-msg.fs tests/bob-msg.fs		\
 	  tests/copy.fs tests/cryptspeed.fs tests/dht.fs		\
@@ -199,8 +199,8 @@ libcc:	$(FORTHLIB:%=%.libcc)
 	-echo "generating library $(@:%.libcc=%)"
 	-for flags in $(CPUFLAGS); do $(ENGINE) unix/cpu.fs -e "also c-lib s\" $(LIBCCNAMED)/\" >libcc-named-dir libcc>named-path :noname 2drop s\" $(libccdir)/\" ; is replace-rpath previous s\" $$flags\" cpuflags \$$!" $(srcdir)/$(@:%.libcc=%) -e bye; done
 
-net2o.fi:	$(SOURCES) $(FORTHLIB)
-	GFORTH=$(GFORTH_FAST) gforthmi net2o.fi $(srcdir)/n2o.fs -e 'locs[] $$free wheres $$free'
+net2o.fi:	$(SOURCES) $(FORTHLIB) n2o-fi.fs
+	env GFORTH=$(GFORTH_FAST) GFORTH_PREAMBLE="#! $(GFORTH_FAST) --image-file" gforthmi net2o.fi ./n2o-fi.fs
 
 libccdest:
 	$(MKDIR) -p $(LIBCCDEST)

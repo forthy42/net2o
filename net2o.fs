@@ -305,7 +305,7 @@ Defer do-disconnect
 
 \ check for valid destination
 
-Variable dest-map s" " dest-map $!
+$Variable dest-map s" " dest-map $!
 
 :is 'image defers 'image dest-map off
     0 to inbuf 0 to outbuf 0 to tmpbuf  io-mem off ;

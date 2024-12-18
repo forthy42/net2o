@@ -560,7 +560,7 @@ Variable configured?
 
 :noname defers 'cold
     configured? off
-    pad path-max# get-dir rootdirs$ $!
+    { | pad[ path-max# ] } pad[ path-max# get-dir rootdirs$ $!
 ; is 'cold
 :noname ( -- )
     config:host$ $free

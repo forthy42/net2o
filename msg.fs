@@ -1573,12 +1573,13 @@ edit-terminal edit-out !
 $300 Constant maxmsg#
 
 : get-input-line ( -- addr u )
-    BEGIN  input-color pad maxmsg# ['] accept catch default-color
+    { | pad[ maxmsg# ] }
+    BEGIN  input-color pad[ maxmsg# ['] accept catch default-color
 	dup dup -56 = swap -28 = dup second-ctrl-c !@ and or \ quit or ^c to leave
 	IF    nothrow drop 2drop "/bye"
 	ELSE
 	    dup 0= IF
-		drop pad swap 2dup xclear
+		drop pad[ swap 2dup xclear
 	    ELSE
 		DoError drop 0  THEN
 	THEN

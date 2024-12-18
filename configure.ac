@@ -139,7 +139,7 @@ AC_SUBST(LIBDIR)
 
 AC_CONFIG_SUBDIRS([keccak-low threefish ed25519-donna bdelta])
 
-AC_CONFIG_FILES([Makefile n2o qrscan version.fs debian/changelog debian/control])
+AC_CONFIG_FILES([Makefile n2o n2o-fi.fs qrscan version.fs debian/changelog debian/control])
 AC_CONFIG_COMMANDS([stamp-h],[[date > stamp-h
 chmod +x n2o qrscan]],[PACKAGE_VERSION=$PACKAGE_VERSION
  machine=$machine
