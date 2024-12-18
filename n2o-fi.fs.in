@@ -14,5 +14,5 @@ require n2o.fs
 
 load-rc? off \ do not load ~/.config/gforthrc
 load-rc0? off \ also do not load ~/.config/gforthrc0
-:is 'image  defers 'image ['] n2o-option is process-option ;
+:is 'image  defers 'image ['] n2o-option is process-option cmd-args ;
 locs[] $free wheres $free
