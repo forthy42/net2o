@@ -65,7 +65,7 @@ ICONS = $(patsubst %,icons/hicolor/%/apps/net2o.png,$(ICONSIZES))	\
 ICONDIRS = $(patsubst %,icons/hicolor/%/apps,$(ICONSIZES) scalable)
 
 DESKTOPDIR = applications
-NOTIFYDIR = knotifications5
+NOTIFYDIR = knotifications6
 DESKTOP = $(DESKTOPDIR)/net2o.desktop
 NOTIFYRC = $(NOTIFYDIR)/net2o.notifyrc
 

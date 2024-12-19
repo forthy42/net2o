@@ -492,6 +492,10 @@ msg-table $save
     64dup 64#-1 64= IF  64drop  notify-otr? off  EXIT  THEN
     ticks 64- 64dup fuzzedtime# 64negate 64< IF  64drop .otr-err  EXIT  THEN
     otrsig-delta# fuzzedtime# 64+ 64< IF  .otr-info  THEN ;
+: >notify-otr? ( tick -- )
+    64dup 64#-1 64= IF  64drop  notify-otr? off  EXIT  THEN
+    ticks 64- 64dup fuzzedtime# 64negate 64< IF  64drop 1 notify-otr? !  EXIT  THEN
+    otrsig-delta# fuzzedtime# 64+ 64< IF  notify-otr? on  THEN ;
 
 config:logmask-tui# Value logmask#
 

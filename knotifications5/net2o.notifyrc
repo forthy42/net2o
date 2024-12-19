@@ -8,7 +8,7 @@ DesktopEntry=net2o
 [Event/im-message-in]
 Name=MessageIn
 Comment=A message arrived
-Sound=Oxygen-Im-Message-In.ogg
+Sound=message-new-instant
 Action=Sound|Popup
 IconName=net2o
 Urgency=Normal
@@ -16,7 +16,7 @@ Urgency=Normal
 [Event/im-message-out]
 Name=MessageOut
 Comment=A message was sent
-Sound=Oxygen-Im-Message-Out.ogg
+Sound=message-sent-instant
 Action=Sound|Popup
 IconName=net2o
 Urgency=Normal

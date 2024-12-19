@@ -59,12 +59,16 @@ $Variable net2o-logo
 	"net2o\0" drop ,
 	"-u\0" drop ,
 	"normal\0" drop ,
-	"-h\0" drop dup ,
+	"-h\0" drop
+	dup ,
 	"string:x-kde-appname:net2o\0" drop ,
 	dup ,
 	"string:x-kde-eventId:im-message-in\0" drop ,
-	,
+	dup ,
 	"string:desktop-entry:net2o\0" drop ,
+	dup ,
+	"string:sound-name:message-new-instant\0" drop ,
+	drop
 	net2o-logo $@len IF
 	    "-i\0" drop ,
 	    net2o-logo $@ drop ,
@@ -105,10 +109,10 @@ $Variable net2o-logo
 	['] notify-title $tmp ['] escape-<&> $tmp "TITLE" 2swap 1 setenv ?ior
 	"MESSAGE" notify@ 2dup d0= IF  2drop "n/a"  THEN  1 setenv ?ior
 	[: notify-send $. space
-	    ." -a net2o -u normal -h string:x-kde-appname:net2o -h string:x-kde-eventId:MessageIn -h string:desktop-entry:net2o "
+	    ." -a net2o -u normal -h string:x-kde-appname:net2o -h string:x-kde-eventId:im-message-in -h string:desktop-entry:net2o -h string:sound-name:message-new-instant "
 	    net2o-logo $@len IF
 		." -i " net2o-logo $. space  THEN
-	    .\" \"$TITLE\" \"$MESSAGE\""
+	    .\" -- \"$TITLE\" \"$MESSAGE\""
 	;] $tmp system
 	"TITLE" unsetenv ?ior
 	"MESSAGE" unsetenv ?ior

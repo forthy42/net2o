@@ -1049,10 +1049,9 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
     pk key| to msg:id$  pk startdate@ to msg:timestamp
     pk [: .simple-id ." : " ;] $tmp notify-nick!
     pk key| pkc over str= { me? }
-    pk enddate@ otr? { otr }
+    pk enddate@ 64dup to end-tick 64dup >notify-otr? otr? { otr }
     pk key| last-bubble-pk $@ str= otr last-otr? = and
     pk startdate@ last-tick 64over to last-tick
-    pk enddate@ to end-tick
     64- delta-bubble 64u< and
     IF
 	new-msg-par
