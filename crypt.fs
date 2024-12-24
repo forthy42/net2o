@@ -367,7 +367,7 @@ keccak#max dup 1 64s / * pw-diffuse-plows * 2* Value pw-acc-increment
 : pw-diffuse-ecc-mem ( diffuse# -- )
     kregion 2@ { d: old-region }
     to diffuse#  cilk-init
-    1 diffuse# 2* lshift pw-diffuse-size * dup alloc+guard
+    1 diffuse# 2* lshift pw-diffuse-size * dup alloc-mmap-guard
     to pool-addr to pool-size
     keccak#max diffuse# lshift dup allocate throw
     to seeds-addr to seeds-size

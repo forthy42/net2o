@@ -441,6 +441,8 @@ sfvalue: grow
 
 user-o io-mem
 
+:is 'image  io-mem off ;
+
 object uclass io-mem
     pollfd 4 *      uvar pollfds \ up to four file descriptors
     sockaddr_in     uvar sockaddr< \ incoming socket

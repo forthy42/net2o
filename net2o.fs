@@ -94,11 +94,11 @@ max-size^2 6 + Value chunk-p2
 $10 Constant key-salt#
 $10 Constant key-cksum#
 
-\ for bigger blocks, we use use alloc+guard, i.e. mmap with a
+\ for bigger blocks, we use use alloc-mmap-guard, i.e. mmap with a
 \ guard page after the end.
 
 : alloc-buf ( -- addr )
-    maxpacket-aligned buffers# * alloc+guard ;
+    maxpacket-aligned buffers# * alloc-mmap-guard ;
 : alloc-buf+6 ( -- addr )  alloc-buf 6 + ;
 : free-buf ( addr -- )
     maxpacket-aligned buffers# * 2dup erase free+guard ;
@@ -377,11 +377,11 @@ scope{ mapc
 
 : alloc-data ( addr u -- u )
     dup >r to dest-size to dest-vaddr r>
-    dup alloc+guard to dest-raddr
+    dup alloc-mmap-guard to dest-raddr
     c:key# crypt-align + alloz to dest-ivsgen \ !!FIXME!! should be a kalloc
     >code-flag @
     IF
-	dup addr>replies  alloc+guard to dest-replies
+	dup addr>replies  alloc-mmap-guard to dest-replies
 	3 to dest-ivslastgen
     ELSE
 	dup addr>ts       alloz to dest-timestamps

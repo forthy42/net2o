@@ -48,8 +48,8 @@ $20 Constant crypt-align
     >r /kregion u> !!kr-size!!
     kregion 2@ dup r@ u< IF
 	/kregion +to /kregion#  2drop /kregion
-	\ we have to fall back to alloc+guard if we want more than 64k
-	/kregion# /kregion-max u> IF  alloc+guard  ELSE  alloc+lock  THEN
+	\ we have to fall back to alloc-mmap-guard if we want more than 64k
+	/kregion# /kregion-max u> IF  alloc-mmap-guard  ELSE  alloc+lock  THEN
 	/kregion 2dup kregion 2!  THEN
     over swap r> safe/string kregion 2! ( kalloc( ." kalloc: " dup h. cr ) ;
 
