@@ -109,7 +109,7 @@ keccak-init
 
 ' keccak-init is c:init
 ' keccak-free is c:free
-:noname to @keccak ; is c:key! ( addr -- )
+:is c:key! ( addr -- ) to @keccak ;
 \G use addr as key storage
 ' @keccak is c:key@ ( -- addr )
 \G obtain the key storage
@@ -117,35 +117,35 @@ keccak-init
 \G obtain key storage size
 ' keccak0 is c:0key ( -- )
 \G set zero key
-:noname keccak0 keccak#max >keccak ; is >c:key ( addr -- )
+:is >c:key ( addr -- ) keccak0 keccak#max >keccak ;
 \G move 128 bytes from addr to the state
-:noname keccak#max keccak> ; is c:key> ( addr -- )
+:is c:key> ( addr -- ) keccak#max keccak> ;
 \G get 128 bytes from the state to addr
 ' keccak* is c:diffuse ( -- )
 \G perform a diffuse round
-:noname ( addr u -- )
+:is c:encrypt ( addr u -- )
     \G Encrypt message in buffer addr u
     @keccak -rot keccak-rounds @ KeccakEncryptLoop  drop
-; is c:encrypt
-:noname ( addr u -- )
+;
+:is c:decrypt ( addr u -- ) ( addr u -- )
     \G Decrypt message in buffer addr u
     @keccak -rot keccak-rounds @ KeccakDecryptLoop  drop
-; is c:decrypt ( addr u -- )
-:noname ( addr u tag -- )
+;
+:is c:encrypt+auth ( addr u tag -- ) ( addr u tag -- )
     \G Encrypt message in buffer addr u with auth
     { tag } @keccak -rot keccak-rounds @ KeccakEncryptLoop
     keccak*
     >r keccak-checksums keccak#cks keccak>
     keccak-checksums tag 7 and 4 lshift + r> $10 move
-; is c:encrypt+auth ( addr u tag -- )
-:noname ( addr u tag -- flag )
+;
+:is c:decrypt+auth ( addr u tag -- flag ) ( addr u tag -- flag )
     \G Decrypt message in buffer addr u, with auth check
     { tag } @keccak -rot keccak-rounds @ KeccakDecryptLoop
     keccak*
     keccak-checksums keccak#cks keccak>
     keccak-checksums tag 7 and 4 lshift + $10 tuck str=
-; is c:decrypt+auth ( addr u tag -- flag )
-:noname ( addr u -- )
+;
+:is c:hash ( addr u -- )
 \G Hash message in buffer addr u
     BEGIN  2dup keccak#max umin tuck
 	dup keccak#max u< IF
@@ -153,24 +153,22 @@ keccak-init
 	    keccak-padded keccak#max
 	THEN  >keccak  keccak*
     /string dup 0= UNTIL  2drop
-; is c:hash
-:noname ( addr u -- )
+;
+:is c:prng ( addr u -- )
 \G Fill buffer addr u with PRNG sequence
     2dup erase @keccak -rot keccak-rounds @ KeccakEncryptLoop drop
-; is c:prng
-:noname ( addr u -- ) >keccak keccak* ;
+;
+:is c:shorthash ( addr u -- ) >keccak keccak* ;
 \G absorb + hash for a message <= 64 bytes
-is c:shorthash
 ' keccak> ( addr u -- )
     \G extract short hash (up to 64 bytes)
 is c:hash@
-:noname ( x128 addr u -- )
+:is c:tweakkey! ( x128 addr u -- )
     \G set key plus tweak
     keccak-padded keccak#max dup 2/ /string move-rep
     keccak-padded keccak#max 2/ bounds DO
 	64over 64over I le-128!  $10 +LOOP  64drop 64drop
     keccak0 keccak-padded keccak#max >keccak ;
-is c:tweakkey!
 
 \ 12 rounds variation
 

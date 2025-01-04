@@ -170,7 +170,7 @@ scope{ pay
 $10 buffer: balance0
 $10 cell+ buffer: new-asset
 
-:noname { d: pk -- } \ pk[+hash]
+pay:class :method source { d: pk -- } \ pk[+hash]
     pk dup keysize = IF  [: type keysize spaces ;] $tmp  THEN
     sources[] dup $[]# to current-pk $+[]!
     pk key| SwapDragonKeys# #@
@@ -179,7 +179,7 @@ $10 cell+ buffer: new-asset
 	keysize /string
     THEN
     current-pk assets[] $[]!
-; pay:class is source
+;
 
 : ?double-transaction ( hash u pk u -- hash u )
      SwapDragonKeys'# #@ 2dup d0= IF
@@ -188,11 +188,11 @@ $10 cell+ buffer: new-asset
 	2over str= 0= !!double-transaction!!
     THEN ;
 
-:noname ( n -- )
+pay:class :method #source ( n -- )
     dup sources[] $[]# u>= !!inv-index!! to current-pk
-; pay:class is #source
+;
 
-:noname ( n addr u -- )
+pay:class :method sink ( n addr u -- )
     rot #source
     sigsize# <> !!no-sig!! { sig }
     cmdbuf$ over + sig umin over umax over - 2 - \ cmdbuf up to the sig string
@@ -208,20 +208,20 @@ $10 cell+ buffer: new-asset
     pk+hash key| ?double-transaction
     pk+hash key| SwapDragonKeys'# #!
     current-pk sources[] $[]free
-; pay:class is sink
+;
 
-:noname ( n -- )
+pay:class :method asset ( n -- )
     dup $SwapAssets[] $[]# u>= !!inv-index!!
     to current-asset
     current-asset balances[] $[]@ nip 0= IF
 	balance0 $10 current-asset balances[] $[]!
     THEN
-; pay:class is asset
+;
 
 : 128+!? ( 128x addr -- flag )
     dup >r 128@ 128+ r> over >r 128! r> 0< ;
 
-:noname ( 128asset -- )
+pay:class :method amount ( 128asset -- )
     64over 64over current-asset balances[] $[]@ drop 128+!? drop
     current-pk assets[] $[]@ bounds U+DO
 	I @ current-asset = IF  I cell+ 128+!? !!insufficient-asset!!
@@ -230,21 +230,21 @@ $10 cell+ buffer: new-asset
     dup 0< !!insufficient-asset!!
     current-asset new-asset !  new-asset cell+ 128!
     new-asset $10 cell+ current-pk assets[] $[]+!
-; pay:class is amount
+;
 
-:noname ( n -- ) asset
+pay:class :method balance ( n -- ) asset
     64#0 64dup current-asset balances[] $[]@ drop 128@ 128- \ just a 128negate
     amount
-; pay:class is balance
+;
 
-:noname ( -- )  sink? invert !!not-sunk!!
+pay:class :method finalize ( -- )  sink? invert !!not-sunk!!
     balances[] $[]# 0 ?DO
 	I balances[] $[]@ balance0 over str= 0= !!not-balanced!!
     LOOP
     sources[] $[]# 0 ?DO
 	I sources[] $[]@ nip !!not-sunk!!
     LOOP
-; pay:class is finalize
+;
 
 : update ( -- )
     SwapDragonKeys'#

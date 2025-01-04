@@ -142,8 +142,8 @@ Variable task-id#
     alloc-code-bufs
     init-ed25519 c:init ;
 
-:noname ( -- ) defers thread-init
-    alloc-io b-out op-vector @ debug-vector ! ; is thread-init
+:is thread-init ( -- ) defers thread-init
+    alloc-io b-out op-vector @ debug-vector ! ;
 
 : free-io ( -- )
     free-ed25519 c:free
@@ -157,9 +157,9 @@ alloc-io
 
 Variable net2o-tasks
 
-:noname defers thread-init
+:is thread-init defers thread-init
     rng-o off \ make sure no rng is active
-; is thread-init
+;
 
 : net2o-pass ( params xt n task -- )
     dup net2o-tasks >stack  pass  debug-out debug-vector !
@@ -595,15 +595,15 @@ scope{ mapc
     addr dest-replies r@ addr>replies ?free+guard
     rdrop dispose ;
 ' free-code code-class is free-data
-:noname ( o:data -- )
-    free-resend free-code ; data-class is free-data
+data-class :method free-data ( o:data -- )
+    free-resend free-code ;
 
 : free-rcode ( o:data --- )
     data-ackbits dest-size addr>bytes ?free
     data-ackbits-buf $free
     free-code ;
-:noname ( o:data -- )
-    free-resend' free-rcode ; rdata-class is free-data
+rdata-class :method free-data ( o:data -- )
+    free-resend' free-rcode ;
 ' free-rcode rcode-class is free-data
 
 }scope
@@ -1311,28 +1311,24 @@ in net2o : send-chunks  sender-task 0= IF  do-send-chunks  EXIT  THEN
 
 scope{ mapc
 
-:noname ( o:map -- ) dest-size addr>ts 
+data-class :method rewind-timestamps ( o:map -- ) dest-size addr>ts 
     dest-timestamps over erase
     data-resend# @ swap $FF fill ;
-data-class is rewind-timestamps
-:noname ( o:map -- ) dest-size addr>ts
+rdata-class :method rewind-timestamps ( o:map -- ) dest-size addr>ts
     dest-timestamps over erase ;
-rdata-class is rewind-timestamps
 
 : rewind-ts-partial ( old-back new-back addr o:map -- )
     { addr } addr>ts swap addr>ts U+DO
 	I I' fix-tssize	{ len } addr + len erase
     len +LOOP ;
-:noname ( old-back new-back o:map -- )
+data-class :method rewind-partial ( old-back new-back o:map -- )
     2dup data-resend# @ rewind-ts-partial
     2dup dest-timestamps rewind-ts-partial
     regen-ivs-part ;
-data-class is rewind-partial
-:noname ( old-back new-back o:map -- )
+rdata-class :method rewind-partial ( old-back new-back o:map -- )
     2dup ackbits-erase
     2dup dest-timestamps rewind-ts-partial
     regen-ivs-part ;
-rdata-class is rewind-partial
 
 }scope
 
@@ -1824,7 +1820,7 @@ Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
     ticks beacons# [: >r 64dup r> cell+ $@ drop 64! ;] #map
     64drop ;
 
-:noname o-beacon defers extra-dispose ; is extra-dispose
+:is extra-dispose o-beacon defers extra-dispose ;
 
 : gen-beacon-hash ( -- hash u )
     dest-0key sec@ "beacon" keyed-hash#128 2/ ;
@@ -1923,11 +1919,11 @@ in net2o : request-done ( n -- )
 
 Defer init-rest
 
-:noname ( port -- )  init-mykey init-mykey \ generate two keys
+:is init-rest ( port -- )  init-mykey init-mykey \ generate two keys
     init-myekey
     my-0key @ 0= IF  init-my0key  THEN  init-header-key
     init-timer net2o-socket init-route prep-socks
-    sender( create-sender-task ) create-timeout-task ; is init-rest
+    sender( create-sender-task ) create-timeout-task ;
 
 Variable initialized
 

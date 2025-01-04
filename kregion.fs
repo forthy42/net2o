@@ -53,7 +53,7 @@ $20 Constant crypt-align
 	/kregion 2dup kregion 2!  THEN
     over swap r> safe/string kregion 2! ( kalloc( ." kalloc: " dup h. cr ) ;
 
-:noname defers 'image  #0. kregion 2!  0 to /kregion# kfree64' off ; is 'image
+:is 'image defers 'image  #0. kregion 2!  0 to /kregion# kfree64' off ;
 
 \ fixed size secrets are assumed to be all 64 bytes long
 \ if they are just 32 bytes, the second half is all zero
@@ -94,10 +94,10 @@ $20 Constant crypt-align
 
 storage class end-class crypto-alloc
 
-:noname  ( len -- addr )
+crypto-alloc :method :allocate  ( len -- addr )
     [ crypt-align cell- crypt-align 1- + ]L +
     [ crypt-align negate ]L and kalloc [ crypt-align cell- ]L +
-; crypto-alloc is :allocate
+;
 ' drop crypto-alloc is :free
 \ we never free these classes, they are per-task temporary storages
 

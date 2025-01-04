@@ -260,8 +260,8 @@ User peer-buf
 	ELSE
 	    start-gps
 	THEN ;
-    :noname level# @ 0> IF  -1 level# +!
-	ELSE  ctrl U inskey ctrl D inskey THEN ; is aback
+    :is aback level# @ 0> IF  -1 level# +!
+	ELSE  ctrl U inskey ctrl D inskey THEN ;
     previous
 [ELSE]
     [IFDEF] has-gpsd?
@@ -334,11 +334,11 @@ Variable fetch-queue[]
 forward ihave>push
 
 also fetcher
-:noname fetching# to state ; fetcher:class is fetch
+fetcher:class :method fetch fetching# to state ;
 ' 2drop fetcher:class is fetching
-:noname have# to state
+fetcher:class :method got-it have# to state
     last# $@ 2dup ihave$ $+! ihave>push
-    >send-have ; fetcher:class is got-it
+    >send-have ;
 previous
 
 : .@host.id ( pk+host u -- )
@@ -527,41 +527,41 @@ scope: logstyles
 : -perm log:perm invert logmask# and! update-log ;
 }scope
 
-:noname ( addr u -- )
+msg-notify-class :method msg:start ( addr u -- )
     2dup key| 0 .pk@ key| str= IF  2drop un-cmd  EXIT  THEN
     last# >r  2dup key| to msg:id$
     [: .simple-id ." : " ;] $tmp notify-nick!
-    r> to last# ; msg-notify-class is msg:start
+    r> to last# ;
 ' 2drop msg-notify-class is msg:silent-start
-:noname ( addr u -- ) "#" notify+ $utf8> notify+
-; msg-notify-class is msg:tag
-:noname ( addr u -- )
-    2dup [: ." @" .simple-id ;] $tmp notify+ ; msg-notify-class is msg:signal
-:noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:text
-:noname ( addr u format -- ) drop $utf8> notify+ ; msg-notify-class is msg:text+format
-:noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:url
-:noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:action
+msg-notify-class :method msg:tag ( addr u -- ) "#" notify+ $utf8> notify+
+;
+msg-notify-class :method msg:signal ( addr u -- )
+    2dup [: ." @" .simple-id ;] $tmp notify+ ;
+msg-notify-class :method msg:text ( addr u -- ) $utf8> notify+ ;
+msg-notify-class :method msg:text+format ( addr u format -- ) drop $utf8> notify+ ;
+msg-notify-class :method msg:url ( addr u -- ) $utf8> notify+ ;
+msg-notify-class :method msg:action ( addr u -- ) $utf8> notify+ ;
 ' 2drop msg-notify-class is msg:chain
 ' 2drop msg-notify-class is msg:re
 ' 2drop  msg-notify-class is msg:lock
 ' noop  msg-notify-class is msg:unlock
-:noname 2drop 64drop ; msg-notify-class is msg:perms
+msg-notify-class :method msg:perms 2drop 64drop ;
 ' drop  msg-notify-class is msg:away
 ' 2drop msg-notify-class is msg:coord
-:noname 2drop 2drop ." otrify " ; msg-notify-class is msg:otrify
+msg-notify-class :method msg:otrify 2drop 2drop ." otrify " ;
 ' 2drop msg-notify-class is msg:hashs
 ' 2drop msg-notify-class is msg:hash-id
-:noname case
+msg-notify-class :method msg:object case
 	msg:image# of 2drop "img[] " notify+ endof
 	msg:thumbnail# of 2drop "thumb[] " notify+ endof
 	msg:audio# of 2drop "audio[] " notify+ endof
 	msg:video# of 2drop "video[] " notify+ endof
 	2drop
-    endcase ; msg-notify-class is msg:object
-:noname ( -- )
-    msg-notify ; msg-notify-class is msg:end
-:noname ( xchar -- ) ['] xemit $tmp notify+ ; msg-notify-class is msg:like
-:noname ( xchar -- ) [: cr ." vote: " xemit ;] $tmp notify+ ; msg-notify-class is msg:vote
+    endcase ;
+msg-notify-class :method msg:end ( -- )
+    msg-notify ;
+msg-notify-class :method msg:like ( xchar -- ) ['] xemit $tmp notify+ ;
+msg-notify-class :method msg:vote ( xchar -- ) [: cr ." vote: " xemit ;] $tmp notify+ ;
 
 \ msg scan for hashes class
 
@@ -577,18 +577,18 @@ end-class msg-?hash-class
 ' 2drop msg-?hash-class is msg:id
 ' 2drop msg-?hash-class is msg:re
 ' 2drop msg-?hash-class is msg:text
-:noname 2drop drop ; msg-?hash-class is msg:text+format
+msg-?hash-class :method msg:text+format 2drop drop ;
 ' 2drop msg-?hash-class is msg:url
 ' drop  msg-?hash-class is msg:like
 ' drop  msg-?hash-class is msg:vote
-:noname ( addr u -- )
+msg-?hash-class :method msg:lock ( addr u -- )
     0 .v-dec$ dup IF
-	msg-key!  msg-group-o .msg:+lock  THEN ; msg-?hash-class is msg:lock
-:noname ( -- )
-    msg-group-o .msg:-lock ; msg-?hash-class is msg:unlock
+	msg-key!  msg-group-o .msg:+lock  THEN ;
+msg-?hash-class :method msg:unlock ( -- )
+    msg-group-o .msg:-lock ;
 ' drop msg-?hash-class is msg:away
-:noname 2drop 64drop ; msg-?hash-class is msg:perms
-:noname ( addr u id -- )
+msg-?hash-class :method msg:perms 2drop 64drop ;
+msg-?hash-class :method msg:object ( addr u id -- )
     case
 	msg:image#      of  key| ?hashs[] $+[]!  endof
 	msg:thumbnail#  of  key| ?hashs[] $+[]!  endof
@@ -599,7 +599,7 @@ end-class msg-?hash-class
 	msg:video#      of  key| ?hashs[] $+[]!  endof
 	msg:video-idx#  of  key| ?hashs[] $+[]!  endof
 	2drop
-    endcase ; msg-?hash-class is msg:object
+    endcase ;
 
 : msg-scan-hash ( ... xt -- ... )
     msg-?hash-class new >o
@@ -608,77 +608,77 @@ end-class msg-?hash-class
 
 \ main message class
 
-:noname ( addr u -- )
+msg:class :method msg:start ( addr u -- )
     last# >r  2dup key| to msg:id$
     false to msg:silent?
     .log-num
     2dup startdate@ .log-date
     2dup enddate@ .log-end
     .key-id ." : " 
-    r> to last# ; msg:class is msg:start
-:noname ( addr u -- )
+    r> to last# ;
+msg:class :method msg:silent-start ( addr u -- )
     silent( 2dup startdate@ .log-date 2dup .key-id ." : Silent: " )
-    key| to msg:id$ true to msg:silent? ; msg:class is msg:silent-start
-:noname ( addr u -- ) $utf8>
-    <warn> '#' forth:emit .group <default> ; msg:class is msg:tag
-:noname ( addr u -- ) last# >r
+    key| to msg:id$ true to msg:silent? ;
+msg:class :method msg:tag ( addr u -- ) $utf8>
+    <warn> '#' forth:emit .group <default> ;
+msg:class :method msg:signal ( addr u -- ) last# >r
     key| 2dup 0 .pk@ key| str=
     IF   <err>  THEN ." @" .key-id? <default>
-    r> to last# ; msg:class is msg:signal
-:noname ( addr u -- )
+    r> to last# ;
+msg:class :method msg:chain ( addr u -- )
     2dup sighash? IF  <info>  ELSE  <err>  THEN
     ."  <" over le-64@ .ticks
     verbose( dup keysize - /string ." ," 85type )else( 2drop ) <default>
-; msg:class is msg:chain
-:noname ( addr u -- )
-    space <warn> ." [" 85type ." ]->" <default> ; msg:class is msg:re
-:noname ( addr u -- )
-    space <warn> ." [" 85type ." ]:" <default> ; msg:class is msg:id
-:noname ( addr u -- ) utf8-sanitize ; msg:class is msg:text
+;
+msg:class :method msg:re ( addr u -- )
+    space <warn> ." [" 85type ." ]->" <default> ;
+msg:class :method msg:id ( addr u -- )
+    space <warn> ." [" 85type ." ]:" <default> ;
+msg:class :method msg:text ( addr u -- ) utf8-sanitize ;
 : format>ansi ( format -- ansi )
     0
     over msg:#bold and 0<> Bold and or
     over msg:#italic and 0<> Italic and or
     over msg:#underline and 0<> Underline and or
     swap msg:#strikethrough and 0<> Strikethrough and or ;
-:noname ( addr u format -- )
+msg:class :method msg:text+format ( addr u format -- )
     format>ansi attr!
-    utf8-sanitize 0 attr! ; msg:class is msg:text+format
-:noname ( addr u -- ) $utf8>
-    <warn> encode-% forth:type <default> ; msg:class is msg:url
-:noname ( xchar -- )
-    <info> utf8emit <default> ; msg:class is msg:like
-:noname ( xchar -- )
-    <info> cr ." vote: " utf8emit <default> ; msg:class is msg:vote
-:noname ( addr u -- )
+    utf8-sanitize 0 attr! ;
+msg:class :method msg:url ( addr u -- ) $utf8>
+    <warn> encode-% forth:type <default> ;
+msg:class :method msg:like ( xchar -- )
+    <info> utf8emit <default> ;
+msg:class :method msg:vote ( xchar -- )
+    <info> cr ." vote: " utf8emit <default> ;
+msg:class :method msg:lock ( addr u -- )
     0 .v-dec$ dup IF
 	msg-key!  msg-group-o .msg:+lock
 	<info> ." chat is locked" <default>
     ELSE  2drop
 	<err> ." locked out of chat" <default>
-    THEN ; msg:class is msg:lock
-:noname ( -- )  msg-group-o .msg:-lock
-    <info> ." chat is free for all" <default> ; msg:class is msg:unlock
+    THEN ;
+msg:class :method msg:unlock ( -- )  msg-group-o .msg:-lock
+    <info> ." chat is free for all" <default> ;
 ' drop msg:class is msg:away
 : .perms ( n -- )
     "👹" bounds U+DO
 	dup 1 and IF  I xc@ xemit  THEN  2/
     I delta-I x-size  +LOOP  drop ;
-:noname { 64^ perm d: pk -- }
+msg:class :method msg:perms { 64^ perm d: pk -- }
     perm [ 1 64s ]L pk msg-group-o .msg:perms# #!
     pk .key-id ." : " perm 64@ 64>n .perms space
-; msg:class is msg:perms
-:noname ( hash u -- )
+;
+msg:class :method msg:hashs ( hash u -- )
     silent( ." hash: " 2dup 85type forth:cr )
     to msg:hashs$
-; msg:class is msg:hashs
-:noname ( id u -- )
+;
+msg:class :method msg:hash-id ( id u -- )
     silent( ." id: " 2dup forth:type forth:cr )
     fetch( ." ihave:" msg:id$ .key-id '.' emit 2dup type msg:hashs$ bounds U+DO
     forth:cr I keysize 85type keysize +LOOP forth:cr )
     msg:id$ key| [: type type ;] $tmp
     msg:hashs$ 2swap >ihave.id
-; msg:class is msg:hash-id
+;
 
 : >hash-finish { w^ xt d: hash -- }
     xt cell hash key| fetch-finish# #+! ;
@@ -798,7 +798,7 @@ forward need-hashed?
 : rotate@ ( addr u -- rotate )
     keysize safe/string IF  c@  ELSE  0  THEN ;
 
-:noname ( addr u type -- )
+msg:class :method msg:object ( addr u type -- )
     space <warn> case
 	msg:image#     of  ." img["      2dup 85type ?fetch  endof
 	msg:thumbnail# of  ." thumb["    2dup key| 85type
@@ -816,22 +816,21 @@ forward need-hashed?
 	drop .posting
 	0
     endcase ." ]" <default> ;
-msg:class is msg:object
-:noname ( addr u -- ) $utf8>
-    <warn> forth:type <default> ; msg:class is msg:action
-:noname ( addr u -- )
-    <warn> ."  GPS: " .coords <default> ; msg:class is msg:coord
+msg:class :method msg:action ( addr u -- ) $utf8>
+    <warn> forth:type <default> ;
+msg:class :method msg:coord ( addr u -- )
+    <warn> ."  GPS: " .coords <default> ;
 
 : wait-2s-key ( -- )
     ntime 50 0 DO  key? ?LEAVE
     2dup i #40000000 um* d+ deadline  LOOP  2drop ;
 : xclear ( addr u -- ) x-width 1+ x-erase ;
 
-:noname ( -- )
+msg:class :method msg:.nobody ( -- )
     <info>
     [: ." nobody's online" msg-group-o .msg:?otr 0= IF ." , saving away"  THEN ;] $tmp
     2dup type <default>
-    wait-2s-key xclear ; msg:class is msg:.nobody
+    wait-2s-key xclear ;
 
 \ encrypt+sign
 \ features: signature verification only when key is known
@@ -870,7 +869,7 @@ msg:class is msg:object
     ['] .sig r@ select $tmp
     2dup + 2 - r> swap cor!
     ( 2dup dump ) 1 64s /string ;
-:noname { sig u' addr u -- }
+msg:class :method msg:otrify { sig u' addr u -- }
     u' 64'+ u =  u sigsize# = and IF
 	addr u startdate@ 64dup date>i >r 64#1 64+ date>i' r>
 	\ 2dup = IF  ."  [otrified] "  addr u startdate@ .ticks  THEN
@@ -890,10 +889,10 @@ msg:class is msg:object
 		2drop
 	    THEN
 	LOOP
-    THEN ; msg:class is msg:otrify
+    THEN ;
 
-:noname ( -- )
-    msg:silent? 0= IF  forth:cr  THEN  enqueue ; msg:class is msg:end
+msg:class :method msg:end ( -- )
+    msg:silent? 0= IF  forth:cr  THEN  enqueue ;
 
 \g 
 \g ### group description commands ###
@@ -1079,10 +1078,10 @@ net2o' end-with net2o: msg-end-with ( -- ) \g push out avalanche
 \ nest-sig for msg/msging classes
 
 ' message msging-class is start-req
-:noname check-date \ quicksig( check-date )else( pk-sig? )
-    >r 2dup r> ; msging-class is nest-sig
+msging-class :method nest-sig check-date \ quicksig( check-date )else( pk-sig? )
+    >r 2dup r> ;
 ' message msg:class is start-req
-:noname 2dup msg-dec?-sig? ; msg:class is nest-sig
+msg:class :method nest-sig 2dup msg-dec?-sig? ;
 
 ' context-table is gen-table
 
@@ -1214,7 +1213,7 @@ Variable ask-msg-files[]
     THEN
     r> to last# ;
 
-:noname ( -- 64len )
+msgfs-class :method fs-poll ( -- 64len )
     \ poll serializes the 
     fs-outbuf $free
     fs-path $@ 2 64s /string >group
@@ -1225,12 +1224,12 @@ Variable ask-msg-files[]
     cells safe/string r> cells umin
     req? @ >r req? off  serialize-log   r> req? !  fs-outbuf $!buf
     r> free throw
-    fs-outbuf $@len u>64 ; msgfs-class is fs-poll
-:noname ( addr u mode -- )
+    fs-outbuf $@len u>64 ;
+msgfs-class :method fs-open ( addr u mode -- )
     \G addr u is starttick endtick name concatenated together
     fs-close drop fs-path $!  fs-poll fs-size!
     ['] noop is file-xt
-; msgfs-class is fs-open
+;
 
 \ syncing done
 : chat-sync-done ( group-addr u -- )
@@ -1256,33 +1255,33 @@ Variable ask-msg-files[]
 	msg( ." msg file done: " fs-path $@ .chat-file forth:cr )
 	['] fs-flush file-sema c-section
     THEN ;
-:noname ( addr u mode -- )
+msgfs-class :method fs-create ( addr u mode -- )
     fs-close drop fs-path $!
     ['] msg-file-done is file-xt
-; msgfs-class is fs-create
-:noname ( addr u -- u )
+;
+msgfs-class :method fs-read ( addr u -- u )
     [ termserver-class ] defers fs-read
-; msgfs-class is fs-read
-:noname ( -- )
+;
+msgfs-class :method fs-flush ( -- )
     parent 0 fs-inbuf !@ 0 fs-path !@
     [{: px $pack $addr :}h1 px $pack $addr ev-msg-eval ;]
     parent .wait-task-event
     fs:fs-clear
-; msgfs-class is fs-flush
-:noname ( -- )
+;
+msgfs-class :method fs-close ( -- )
     fs-path @ 0= ?EXIT
     fs-inbuf $@len IF
 	msg( ." Closing file " fs-path $@ .chat-file forth:cr )
 	fs-flush
     THEN
-; msgfs-class is fs-close
-:noname ( perm -- )
+;
+msgfs-class :method fs-perm? ( perm -- )
     perm%msg and 0= !!msg-perm!!
-; msgfs-class is fs-perm?
-:noname ( -- date perm )
-    64#0 0 ; msgfs-class is fs-get-stat
-:noname ( date perm -- )
-    drop 64drop ; msgfs-class is fs-set-stat
+;
+msgfs-class :method fs-get-stat ( -- date perm )
+    64#0 0 ;
+msgfs-class :method fs-set-stat ( date perm -- )
+    drop 64drop ;
 ' file-start-req msgfs-class is start-req
 
 \ message composer
@@ -1468,8 +1467,8 @@ end-class textmsg-class
 ' 2drop textmsg-class is msg:hashs
 ' 2drop textmsg-class is msg:hash-id
 ' 2drop textmsg-class is msg:updates
-:noname '#' emit type ; textmsg-class is msg:tag
-:noname '@' emit .simple-id ; textmsg-class is msg:signal
+textmsg-class :method msg:tag '#' emit type ;
+textmsg-class :method msg:signal '@' emit .simple-id ;
 ' 2drop textmsg-class is msg:re
 ' 2drop textmsg-class is msg:chain
 ' 2drop textmsg-class is msg:id
@@ -1478,15 +1477,15 @@ end-class textmsg-class
 ' drop textmsg-class is msg:away
 ' type textmsg-class is msg:text
 ' type textmsg-class is msg:url
-:noname drop 2drop ; textmsg-class is msg:object
-:noname
-    dup >r .formatter type r> .formatter ; textmsg-class is msg:text+format
-:noname ." /me " type ; textmsg-class is msg:action
-:noname ." /here " 2drop ; textmsg-class is msg:coord
-:noname ." vote:" utf8emit ; textmsg-class is msg:vote
-:noname ." /like " utf8emit ; textmsg-class is msg:like
+textmsg-class :method msg:object drop 2drop ;
+textmsg-class :method msg:text+format
+    dup >r .formatter type r> .formatter ;
+textmsg-class :method msg:action ." /me " type ;
+textmsg-class :method msg:coord ." /here " 2drop ;
+textmsg-class :method msg:vote ." vote:" utf8emit ;
+textmsg-class :method msg:like ." /like " utf8emit ;
 ' noop textmsg-class is msg:end
-:noname 2drop 2drop ; textmsg-class is msg:otrify
+textmsg-class :method msg:otrify 2drop 2drop ;
 ' 2drop textmsg-class is msg:payment
 
 textmsg-class ' new static-a with-allocater Constant textmsg-o
@@ -1924,23 +1923,23 @@ text-chat-cmd-o to chat-cmd-o
 scope{ /chat
 ' 2drop is /imgs \ stub
 
-:noname ( addr u -- )
-    [: $, msg-action ;] send-avalanche ; is /me
+:is /me ( addr u -- )
+    [: $, msg-action ;] send-avalanche ;
 
-:noname ( addr u -- )
+:is /away ( addr u -- )
     dup 0= IF  2drop
 	away? IF  "I'm back"  ELSE  "Away from keyboard"  THEN
     THEN  away? 0= to away?
-    [: $, msg-action ;] send-avalanche ; is /away
+    [: $, msg-action ;] send-avalanche ;
 
-:noname ( flag -- )
+:is ./otr-info ( flag -- )
     <info> ." === " IF  ." enter"  ELSE  ." leave"  THEN
-    ."  otr mode ===" <default> forth:cr ; is ./otr-info
-:noname ( flag -- )
+    ."  otr mode ===" <default> forth:cr ;
+:is ./mono-info ( flag -- )
     <info> ." === " IF  ." enter"  ELSE  ." leave"  THEN
-    ."  mono mode ===" <default> forth:cr ; is ./mono-info
+    ."  mono mode ===" <default> forth:cr ;
 
-:noname ( addr u -- )
+:is /otr ( addr u -- )
     2dup -trailing s" on" str= >r
     2dup -trailing s" off" str= r@ or IF   2drop
 	msg-group-o r@ IF  .msg:+otr  ELSE  .msg:-otr  THEN
@@ -1949,103 +1948,102 @@ scope{ /chat
 	msg-group-o .msg:mode @ >r
 	msg-group-o .msg:+otr avalanche-text
 	r> msg-group-o .msg:mode !
-    THEN ; is /otr
+    THEN ;
 
-:noname ( addr u -- )  2drop
+:is /peers ( addr u -- )  2drop
     [: msg:name$ .group ." : "
 	msg:peers[] $@ bounds ?DO
 	    space I @ >o .con-id space
 	    ack@ .rtdelay 64@ 64>f 1n f* (.time) o>
-	cell +LOOP  forth:cr ;] group#map ; is /peers
+	cell +LOOP  forth:cr ;] group#map ;
 
-:noname ( addr u -- )  2drop
+:is /stats ( addr u -- )  2drop
     ." send: " packets @ 0 .r '+' forth:emit packets2 @ forth:.
-    ." recv: " packetr @ 0 .r '+' forth:emit packetr2 @ forth:. ; is /stats
+    ." recv: " packetr @ 0 .r '+' forth:emit packetr2 @ forth:. ;
 
-:noname ( addr u -- )  2drop
+:is /gps ( addr u -- )  2drop
     coord! coord@ 2dup 0 -skip nip 0= IF  2drop
     ELSE
 	[: $, msg-coord ;] send-avalanche
-    THEN ; is /gps
+    THEN ;
 
-:noname ( addr u -- )
+:is /help ( addr u -- )
     bl skip '/' skip
     2dup [: ."     \U " forth:type ;] $tmp ['] .chathelp search-help
     [: ."     \G " forth:type ':' forth:emit ;] $tmp ['] .cmd search-help ;
-is /help
 
-:noname ( addr u -- )
-    2drop .invitations ; is /invitations
+:is /invitations ( addr u -- )
+    2drop .invitations ;
 
-:noname ( addr u -- )
+:is /chats ( addr u -- )
     2drop ." ===== chats: "
     [:  msg:name$ msg-group$ $@ str= IF ." *" THEN
 	msg:name$ .group
 	." [" msg:peers[] $[]# 0 .r ." ]#"
 	msg:log[] $[]# u. ;] group#map
-    ." =====" forth:cr ; is /chats
+    ." =====" forth:cr ;
 
-:noname ( addr u -- )  2drop
+:is /nat ( addr u -- )  2drop
     [:  ." ===== Group: " msg:name$ .group ."  =====" forth:cr
 	msg:peers[] $@ bounds ?DO
 	    ." --- " I @ >o .con-id ." @" remote-host$ $. ." : " return-address .addr-path
 	    ."  ---" forth:cr .nat-addrs o>
-	cell +LOOP ;] group#map ; is /nat
+	cell +LOOP ;] group#map ;
 
-:noname ( addr u -- )
+:is /myaddrs ( addr u -- )
     2drop
     ." ===== all =====" forth:cr    .my-addr$s
     ." ===== public =====" forth:cr .pub-addr$s
-    ." ===== private =====" forth:cr .priv-addr$s ; is /myaddrs
-:noname ( addr u -- )
-    2drop !my-addr ; is /!myaddrs
+    ." ===== private =====" forth:cr .priv-addr$s ;
+:is /!myaddrs ( addr u -- )
+    2drop !my-addr ;
 
-:noname ( addr u -- )
-    ['] notify-cmds evaluate-in .notify ; is /notify
+:is /notify ( addr u -- )
+    ['] notify-cmds evaluate-in .notify ;
 
-:noname ( addr u -- )
+:is /beacons ( addr u -- )
     2drop ." === beacons ===" forth:cr
     beacons# [: dup $@ .address space
       cell+ $@ over 64@ .ticks space
       1 64s safe/string bounds ?DO
 	  I 2@ ?dup-IF ..con-id space THEN id.
-      2 cells +LOOP forth:cr ;] #map ; is /beacons
+      2 cells +LOOP forth:cr ;] #map ;
 
-:noname ( addr u -- )
+:is /sync ( addr u -- )
     s>unumber? IF  drop  ELSE  2drop 0  THEN  cells >r
     msg-group-o .msg:peers[] $@ r@ u<= IF  drop rdrop  EXIT  THEN
     r> + @ >o o to connection
     ." === sync ===" forth:cr
-    net2o-code expect-msg [: msg-group last?, ;] [msg,] end-code o> ; is /sync
+    net2o-code expect-msg [: msg-group last?, ;] [msg,] end-code o> ;
 
-:noname ( addr u -- )
-    2drop .n2o-version space .gforth-version forth:cr ; is /version
+:is /version ( addr u -- )
+    2drop .n2o-version space .gforth-version forth:cr ;
 
-:noname ( addr u -- )
+:is /log ( addr u -- )
     s>unumber? IF  drop >r  ELSE  2drop rows >r  THEN
     msg-group$ $@ >group purge-log
-    r>  display-lastn ; is /log
+    r>  display-lastn ;
 
-:noname ( addr u -- )
+:is /logstyle ( addr u -- )
     ['] logstyles ['] evaluate-in catch-nobt IF
 	2drop drop "logstyle" /help
-    THEN ; is /logstyle
+    THEN ;
 
-:noname ( addr u -- )
+:is /like ( addr u -- )
     bl $split 2swap s>unumber? 0= abort" Line number needed!" drop >r
     IF  xc@  ELSE  drop   [ e? xchar-maxmem 1 = ] [IF] '+' [ELSE] '👍' [THEN]  THEN  r>
     msg-group-o .msg:log[] $[]# >r
     dup 0< IF   r@ +  THEN  r> dup 0<> - umin
     [: msg-group-o .msg:log[] $[]@ chain,
-	ulit, msg-like ;] (send-avalanche) drop .chat save-msgs& ; is /like
+	ulit, msg-like ;] (send-avalanche) drop .chat save-msgs& ;
 
-:noname ( addr u -- )
+:is /otrify ( addr u -- )
     [: BEGIN  bl $split 2>r dup  WHILE  s>number? WHILE
 		    drop do-otrify  2r>  REPEAT THEN
 	2drop 2r> 2drop  now>otr
-    ;] (send-avalanche) drop .chat save-msgs& ; is /otrify
+    ;] (send-avalanche) drop .chat save-msgs& ;
 
-:noname ( addr u -- )
+:is /cancel ( addr u -- )
     [: BEGIN  bl $split 2>r dup  WHILE
 		'-' $split dup 0= IF
 		    2drop s>number? IF  drop 1  ELSE  0 0  THEN
@@ -2064,50 +2062,50 @@ is /help
 		2r>  REPEAT  2drop 2r> 2drop
 	0 msg-group-o .msg:log[] del$cell
     ;] msglog-sema c-section save-msgs&
-; is /cancel
+;
 
-:noname ( addr u -- )
+:is /lock ( addr u -- )
     msg-group-o .msg:-lock
     word-args ['] args>keylist execute-parsing
     [: key-list v-enc$ $, net2o-base:msg-lock ;] send-avalanche
     vkey keysize $make msg-group-o .msg:keys[] >back
     msg-group-o .msg:+lock
-; is /lock
-:noname ( addr u -- )
+;
+:is /unlock ( addr u -- )
     2drop msg-group-o .msg:-lock
     [: net2o-base:msg-unlock ;] send-avalanche
-; is /unlock
-:noname ( addr u -- )
+;
+:is /lock? ( addr u -- )
     2drop msg-group-o .msg:?lock 0= IF  ." un"  THEN  ." locked" forth:cr
-; is /lock?
-:noname 2drop .ihaves ; is /have
-:noname 2drop scan-log-hashs
+;
+:is /have 2drop .ihaves ;
+:is /rescan# 2drop scan-log-hashs
     ihave>push push[] [: >msg-log 2drop ;] $[]map
-    avalanche-msg ; is /rescan#
+    avalanche-msg ;
 
-:noname ( addr u -- )
+:is /perms ( addr u -- )
     word-args [: parse-name >perms args>keylist ;] execute-parsing
     [{: perm :}l
 	perm key-list [: key| $, dup ulit, net2o-base:msg-perms ;] $[]map drop
     ;] send-avalanche
-; is /perms
+;
 
-:noname ( addr u -- )
-    2drop -1 [IFDEF] android android:level# [ELSE] level# [THEN] +! ; is /bye
+:is /bye ( addr u -- )
+    2drop -1 [IFDEF] android android:level# [ELSE] level# [THEN] +! ;
 
-:noname ( addr u -- )
+:is /connections ( addr u -- )
     2drop [:
       remote-host$ $. ." @" pubkey $@ .simple-id ." :" forth:cr
-	true ;] search-context ; is /connections
+	true ;] search-context ;
 
-:noname ( addr u -- )  2drop enqueue ; is /fetch
+:is /fetch ( addr u -- )  2drop enqueue ;
 
-:noname ( addr u -- )
+:is /format ( addr u -- )
     2dup s" off" str= IF  config:chat-format$ $free  2drop  EXIT  THEN
     2dup s" on" str=  IF  2drop "*/_-`"  THEN
-    5 umin  config:chat-format$ $! ; is /format
+    5 umin  config:chat-format$ $! ;
 
-:noname ( addr u -- )  2drop
+:is /want ( addr u -- )  2drop
     ." Want:" forth:cr
     fetch# [: { item }
 	." hash: " item $@ 85type space
@@ -2120,14 +2118,14 @@ is /help
 	    1 of  ." fetching..."  endof
 	    2 of  ." got it"  endof
 	endcase forth:cr
-    ;] #map ; is /want
+    ;] #map ;
 }scope
 
 : ?slash ( addr u -- addr u flag )
     over c@ dup '/' = swap '\' = or ;
 
 Defer chat-cmd-file-execute
-:noname catch ?dup-IF  nip nip DoError THEN ; is chat-cmd-file-execute
+:is chat-cmd-file-execute catch ?dup-IF  nip nip DoError THEN ;
 
 Forward ```
 
@@ -2477,7 +2475,7 @@ $B $E 2Value chat-bufs#
     msg-group$ $@ ; \ stub
 
 scope{ /chat
-:noname ( addr u -- )
+:is /chat ( addr u -- )
     chat-keys $[]free nick>chat 0 chat-keys $[]@ key>group
     msg-group$ $@ >group msg-group-o .msg:peers[] $@ dup 0= IF  2drop
 	nip IF  chat-connects
@@ -2485,7 +2483,7 @@ scope{ /chat
     ELSE
 	bounds ?DO  2dup I @ .pubkey $@ key2| str= 0= WHILE  cell +LOOP
 	    2drop chat-connects  ELSE  UNLOOP 2drop THEN
-    THEN  #0. /chats ; is /chat
+    THEN  #0. /chats ;
 }scope
 
 also net2o-base
@@ -2559,8 +2557,8 @@ previous
     REPEAT drop rdrop ;
 
 scope{ /chat
-:noname ( addr u -- )  2drop
-    msg-group$ $@ >group msg-group-o .split-load ; is /split
+:is /split ( addr u -- )  2drop
+    msg-group$ $@ >group msg-group-o .split-load ;
 }scope
 
 \ chat toplevel

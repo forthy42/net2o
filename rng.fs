@@ -176,10 +176,10 @@ Sema rng-sema
 ;
 
 [IFDEF] child-fork
-    :noname defers child-fork
+    :is child-fork defers child-fork
 	rng-o @ IF
 	    ['] salt-init rng-sema c-section
-	THEN ; is child-fork
+	THEN ;
 [THEN]
 
 : rng-allot ( -- )
@@ -236,5 +236,5 @@ Sema rng-sema
     rng-pos @ rng-buffer + c@
     1 rng-pos +! ;
 
-:noname defers 'image check-old$ $free rng-o off
-    rngstat-buf $10 cells erase ; is 'image
+:is 'image defers 'image check-old$ $free rng-o off
+    rngstat-buf $10 cells erase ;

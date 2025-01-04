@@ -513,9 +513,9 @@ Variable thumb.png$
     user-avatar# @ 0= ?EXIT \ nobody has a dummy thumb
     read-user user-avatar# $@ smove ;
 
-:noname defers free-thumbs
+:is free-thumbs defers free-thumbs
     re-user re-dummy avatar# ['] re-avatar #map
-    fetch-finish# #frees ; is free-thumbs
+    fetch-finish# #frees ;
 
 : ev-update-avatar ( thumb hash u1 -- )
     avatar-frame swap .childs[] $@ drop @ >o to frame# o>
@@ -697,8 +697,8 @@ $F235 Constant 'user-times'
     'signal' 'spinner' online? select ['] xemit $tmp ;
 : !online-symbol ( -- )
     online-symbol online-flag >o to text$ o> +sync ;
-:noname  true to online? ['] announce-me catch nothrow 0= to online?
-    !online-symbol ; is addr-changed
+:is addr-changed  true to online? ['] announce-me catch nothrow 0= to online?
+    !online-symbol ;
 
 : nicks-title ( -- )
     {{ glue*l black# slide-frame dup .button1
@@ -816,20 +816,20 @@ end-class posting-log-class
 
 Variable like-char
 
-:noname ( addr u -- )
+posting-log-class :method msg:start ( addr u -- )
     + sigpksize# - [ keysize $10 + ]L dvcs-log:id$ $!
     like-char off  false to msg:silent?
-; posting-log-class is msg:start
-:noname ( addr u -- )
-    key| to msg:id$ true to msg:silent? ; posting-log-class is msg:silent-start
-:noname ( xchar -- )  like-char ! ; posting-log-class is msg:like
+;
+posting-log-class :method msg:silent-start ( addr u -- )
+    key| to msg:id$ true to msg:silent? ;
+posting-log-class :method msg:like ( xchar -- )  like-char ! ;
 ' 2drop posting-log-class is msg:tag
 ' 2drop posting-log-class is msg:id
 ' 2drop posting-log-class is msg:text
-:noname 2drop drop ; posting-log-class is msg:text+format
+posting-log-class :method msg:text+format 2drop drop ;
 ' 2drop posting-log-class is msg:action
 ' drop  posting-log-class is msg:vote \ !!FIXME!! what do we need here?
-:noname ( addr u -- )
+posting-log-class :method msg:chain ( addr u -- )
     like-char @ 0= IF  2drop  EXIT  THEN
     8 umin { | w^ id+like }
     like-char @ dvcs-log:id$ $@ [: forth:type forth:xemit ;] id+like $exec
@@ -839,10 +839,10 @@ Variable like-char
     ELSE
 	2nip last# cell+ $+!
     THEN
-; posting-log-class is msg:chain
-:noname ( addr u -- )
+;
+posting-log-class :method msg:url ( addr u -- )
     [: dvcs-log:id$ $. forth:type ;] dvcs-log:urls[] dup $[]# swap $[] $exec
-; posting-log-class is msg:url
+;
 
 : new-posting-log ( -- o )
     posting-log-class new >o msg-table @ token-table ! o o> ;
@@ -880,10 +880,10 @@ Variable like-char
 >o "posting-zbox" to name$ o o>
 to post-frame
 
-:noname defers re-config
+:is re-config defers re-config
     posting-box >o
     font-size# dpy-w @ s>f fover maxcols# fm* f- f2/ 0e fmax fover f-
-    fdup fnegate to borderv f+ to border o> ; is re-config
+    fdup fnegate to borderv f+ to border o> ;
 
 hash: buckets#
 
@@ -971,14 +971,14 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 	fdrop +sync +resize +resizeall ;] >animate
     dir> ;
 
-:noname ( -- )
+wmsg-class :method msg:end ( -- )
     msg:silent? IF  false to msg:silent?  EXIT  THEN
     glue*ll }}glue msg-box .child+
     dpy-w @ 80% fm* msg-par .par-split
     {{ msg-par unbox }} cbl
     dup >r 0 ?DO  I pick box[] >bl "unboxed" name! drop  LOOP  r>
     msg-vbox .+childs  enqueue
-; wmsg-class is msg:end
+;
 0 Value edit-infobar-text \ nobody is online warning
 l" Deactivate Verbatim"
 l" Activate Verbatim"
@@ -997,9 +997,9 @@ Create edit-infos
     dup to l-text  locale@ to text$ 
     o> +resize
     2e edit-infobar-text [: f2* sin-t .fade +sync ;] >animate ;
-:noname ( -- )
+wmsg-class :method msg:.nobody ( -- )
     0 change-edit-info
-; wmsg-class is msg:.nobody
+;
 
 : +log#-date-token ( log-mask -- o ) >r
     {{
@@ -1044,7 +1044,7 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
     msg-start-par
     \sans \script cbl re-green logmask# @ +log#-date-token msg-box .child+
     \normal cbl ;
-:noname { d: pk -- o }
+wmsg-class :method msg:start { d: pk -- o }
     false to msg:silent?
     pk key| to msg:id$  pk startdate@ to msg:timestamp
     pk [: .simple-id ." : " ;] $tmp notify-nick!
@@ -1092,22 +1092,22 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 	}}h box[] "msgs-box" name! >msgs-box
 	blackish
     THEN
-; wmsg-class is msg:start
-:noname ( addr u -- )
-    key| to msg:id$ true to msg:silent? ; wmsg-class is msg:silent-start
-:noname dup 0= IF  2drop EXIT  THEN { d: string -- o }
+;
+wmsg-class :method msg:silent-start ( addr u -- )
+    key| to msg:id$ true to msg:silent? ;
+wmsg-class :method msg:tag dup 0= IF  2drop EXIT  THEN { d: string -- o }
     link-blue \mono string [: '#' emit type ;] $tmp
     ['] utf8-sanitize $tmp }}text text-color! \sans
     msg-box .child+
-; wmsg-class is msg:tag
-:noname dup 0= IF  2drop EXIT  THEN { d: string -- o }
+;
+wmsg-class :method msg:text dup 0= IF  2drop EXIT  THEN { d: string -- o }
     text-color!
     string ['] utf8-sanitize $tmp }}text 25%bv
     "text" name! msg-box .child+
-; wmsg-class is msg:text
+;
 : mono-col? ( -- )
     msg-group-o .msg:?otr  IF  mono-otr-col  ELSE  mono-col  THEN ;
-:noname over 0= IF  drop 2drop EXIT  THEN { d: string format -- o }
+wmsg-class :method msg:text+format over 0= IF  drop 2drop EXIT  THEN { d: string format -- o }
     text-color!
     case  format msg:#bold msg:#italic or and
 	msg:#bold  of  \bold  endof
@@ -1121,13 +1121,13 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
     format msg:#strikethrough and IF  -strikethrough-  THEN
     "text" name! msg-box .child+
     \regular \normal \sans
-; wmsg-class is msg:text+format
-:noname { xc -- }
+;
+wmsg-class :method msg:like { xc -- }
     text-color!
     xc ['] xemit $tmp }}text 25%bv
     "like" name! msg-box .child+
-; wmsg-class is msg:like
-:noname { xc -- }
+;
+wmsg-class :method msg:vote { xc -- }
     msg:end msg-start-par
     {{
 	glue*l send-color x-color font-size# 40% f* }}frame dup .button2
@@ -1135,14 +1135,14 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 	xc [: ." vote: " xemit ;] $tmp }}text 25%b
     }}z box[]
     "vote" name! msg-box .child+
-; wmsg-class is msg:vote
-:noname dup 0= IF  2drop EXIT  THEN { d: string -- o }
+;
+wmsg-class :method msg:action dup 0= IF  2drop EXIT  THEN { d: string -- o }
     \italic last-otr? IF light-blue ELSE dark-blue THEN
     string ['] utf8-sanitize $tmp }}text 25%bv \regular
     text-color!
     "action" name! msg-box .child+
-; wmsg-class is msg:action
-:noname dup 0= IF  2drop EXIT  THEN { d: string -- o }
+;
+wmsg-class :method msg:url dup 0= IF  2drop EXIT  THEN { d: string -- o }
     last-otr? IF light-blue ELSE dark-blue THEN
     string ['] utf8-sanitize $tmp }}text _underline_ 25%bv
     text-color!
@@ -1150,8 +1150,8 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
     over click[]
     click( ." url: " dup ..parents cr )
     "url" name! msg-box .child+
-; wmsg-class is msg:url
-:noname dup 0= IF  2drop EXIT  THEN ( d: string -- )
+;
+wmsg-class :method msg:lock dup 0= IF  2drop EXIT  THEN ( d: string -- )
     0 .v-dec$ dup IF
 	msg-key!  msg-group-o .msg:+lock
 	{{
@@ -1163,19 +1163,19 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 	    glue*l lockout-color x-color slide-frame dup .button1
 	    show-error-color 1e +to x-color l" locked out of chat" }}text' 25%bv
 	}}z
-    THEN "lock" name! msg-box .child+ ; wmsg-class is msg:lock
-:noname ( -- o )
+    THEN "lock" name! msg-box .child+ ;
+wmsg-class :method msg:unlock ( -- o )
 	{{
 	    glue*l lock-color x-color slide-frame dup .button1
 	    blackish l" chat is unlocked" }}text' 25%bv
-	}}z msg-box .child+ ; wmsg-class is msg:unlock
-:noname dup 0= IF  2drop EXIT  THEN { d: string -- o }
+	}}z msg-box .child+ ;
+wmsg-class :method msg:coord dup 0= IF  2drop EXIT  THEN { d: string -- o }
     {{
 	glue*l gps-color# slide-frame dup .button1
 	blackish string [: ."  GPS: " .coords ;] $tmp }}text 25%b
     }}z "gps" name! msg-box .child+
-; wmsg-class is msg:coord
-:noname { 64^ perm d: pk -- }
+;
+wmsg-class :method msg:perms { 64^ perm d: pk -- }
     perm [ 1 64s ]L pk msg-group-o .msg:perms# #!
     {{
 	glue*l perm-color# slide-frame dup .button1
@@ -1184,15 +1184,15 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 	    perm 64@ 64>n ['] .perms $tmp }}text 25%b
 	}}h
     }}z msg-box .child+
-; wmsg-class is msg:perms
-:noname dup 0= IF  2drop EXIT  THEN { d: string -- o }
+;
+wmsg-class :method msg:chain dup 0= IF  2drop EXIT  THEN { d: string -- o }
     {{
 	glue*l chain-color# slide-frame dup .button1
 	string sighash? IF  re-green  ELSE  obj-red  THEN
 	log:date log:perm or +log#-date-token
     }}z "chain" name! msg-box .child+
-; wmsg-class is msg:chain
-:noname { d: pk -- o }
+;
+wmsg-class :method msg:signal { d: pk -- o }
     {{
 	x-color { f: xc }
 	pk key|
@@ -1204,19 +1204,18 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 	[: '@' emit .key-id ;] $tmp ['] utf8-sanitize $tmp }}text 25%b r> swap
 	xc to x-color
     }}z msg-box .child+
-; wmsg-class is msg:signal
-:noname ( addr u -- )
+;
+wmsg-class :method msg:re ( addr u -- )
     re-green [: ." [" 85type ." ]→" ;] $tmp }}text msg-box .child+
-    text-color!
-; wmsg-class is msg:re
-:noname ( addr u -- )
+    text-color! ;
+wmsg-class :method msg:id ( addr u -- )
     obj-red [: ." [" 85type ." ]:" ;] $tmp }}text msg-box .child+
     text-color!
-; wmsg-class is msg:id
+;
 : +otr-box ( addr u -- )
      light-blue \italic }}text 25%bv \regular blackish
      "otrify" name! msg-box .child+ ;
-:noname { sig u' addr u -- }
+wmsg-class :method msg:otrify { sig u' addr u -- }
     u' 64'+ u =  u sigsize# = and IF
 	addr u startdate@ 64dup date>i >r 64#1 64+ date>i' r>
 	\ 2dup = IF  ."  [otrified] "  addr u startdate@ .ticks  THEN
@@ -1236,7 +1235,7 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 		2drop
 	    THEN
 	LOOP
-    THEN ; wmsg-class is msg:otrify
+    THEN ;
 
 : >rotate ( addr u -- )
     rotate@ to rotate# ;
@@ -1459,7 +1458,7 @@ Variable current-player
 	dup 0= IF  nip  THEN
     THEN  2rdrop ;
 
-:noname ( addr u type -- )
+wmsg-class :method msg:object ( addr u type -- )
     obj-red
     case
 	msg:image#     of
@@ -1502,7 +1501,7 @@ Variable current-player
     endcase
     msg-box .child+
     text-color!
-; wmsg-class is msg:object
+;
 
 in net2o : new-wmsg ( o:connection -- o )
     o wmsg-class new >o  parent!  msg-table @ token-table ! o o> ;
@@ -1890,8 +1889,8 @@ gui-chat-cmds new Constant gui-chat-cmd-o
 
 gui-chat-cmd-o to chat-cmd-o
 scope{ /chat
-:noname ( flag -- ) 2 + change-edit-info ; is ./otr-info
-:noname ( flag -- ) 4 + change-edit-info ; is ./mono-info
+:is ./otr-info ( flag -- ) 2 + change-edit-info ;
+:is ./mono-info ( flag -- ) 4 + change-edit-info ;
 ' .imgs is /imgs
 }scope
 
@@ -1904,7 +1903,7 @@ end-class net2o-actor
 
 also [IFDEF] jni jni [THEN]
 
-:noname ( ekey -- )
+net2o-actor :method ekeyed ( ekey -- )
     case
 	[IFDEF] jni
 	    k-volup of  audio-playing IF  1 1 clazz .audioManager .adjustVolume
@@ -1921,7 +1920,7 @@ also [IFDEF] jni jni [THEN]
 	k-f7 of  >normalscreen   endof
 	k-f8 of  >fullscreen     endof
 	[ box-actor ] defers ekeyed  EXIT
-    endcase ; net2o-actor is ekeyed
+    endcase ;
 
 previous
 

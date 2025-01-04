@@ -33,7 +33,7 @@ object class
     method nest-sig     \ check sig first and then nest
 end-class cmd-class \ command interpreter
 ' noop cmd-class is start-req
-:noname ( addr u -- flag ) 2drop -1 ; cmd-class is nest-sig
+cmd-class :method nest-sig ( addr u -- flag ) 2drop -1 ;
 
 : new-tok ( token-table class -- o )
     new >o @ token-table ! o o> ;
@@ -441,7 +441,7 @@ sfvalue: grow
 
 user-o io-mem
 
-:is 'image  io-mem off ;
+:is 'image  defers 'image io-mem off ;
 
 object uclass io-mem
     pollfd 4 *      uvar pollfds \ up to four file descriptors

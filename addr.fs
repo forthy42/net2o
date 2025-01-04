@@ -67,10 +67,10 @@ in net2o : dispose-addr ( o:addr -- o:addr )
 in net2o : dispose-addrs ( addr -- )
     dup >r [: .net2o:dispose-addr ;] $[]o-map
     r> $free ;
-:noname ( -- )
+:is extra-dispose ( -- )
     dest-addrs  net2o:dispose-addrs
     punch-addrs net2o:dispose-addrs
-    defers extra-dispose ; is extra-dispose
+    defers extra-dispose ;
 
 : $>addr ( addr u -- o ) \G create a new address object from string
     net2o:new-addr n:>o nest-cmd-loop o n:o> ;

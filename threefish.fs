@@ -82,30 +82,30 @@ threefish-init
 \G obtain key storage size
 ' threefish0 is c:0key ( -- ) \ net2o
 \G set zero key
-:noname threefish0 dup threefish#max >threefish
+:is >c:key ( addr -- ) \ net2o threefish0 dup threefish#max >threefish
     threefish#max + threefish-padded threefish#max move
     threefish-state threefish-padded threefish#max $E dup tf_encrypt_loop
-    64#0 64dup tf-tweak! ; is >c:key ( addr -- ) \ net2o
+    64#0 64dup tf-tweak! ;
 \G move 128 bytes from addr to the key
-:noname threefish#max threefish> ; is c:key> ( addr -- ) \ net2o
+:is c:key> ( addr -- ) \ net2o threefish#max threefish> ;
 \G get 64 bytes from the key to addr
-:noname ( -- )
+:is c:diffuse ( -- ) \ no diffusing ( -- )
     threefish-padded threefish#max erase
     threefish-state threefish-padded threefish#max $E dup tf_encrypt_loop
-; is c:diffuse ( -- ) \ no diffusing
-:noname ( addr u -- ) \ net2o
+;
+:is c:encrypt ( addr u -- ) \ net2o
     \G Encrypt message in buffer addr u, must be by *64
     $C >r
     BEGIN  dup threefish#max u>=  WHILE
 	    over >r threefish-state r> dup r> tf_encrypt
 	    threefish#max /string +threefish 4 >r
     REPEAT  2drop rdrop
-; is c:encrypt
-:noname ( addr u -- ) \ net2o
+;
+:is c:prng ( addr u -- ) \ net2o
 \G Fill buffer addr u with PRNG sequence
     2>r threefish-state 2r> $E dup tf_encrypt_loop
-; is c:prng
-:noname ( addr u tag -- ) \ net2o
+;
+:is c:encrypt+auth ( addr u tag -- ) \ net2o
     \G Encrypt message in buffer addr u, must be by *64
     \G authentication is stored in the 16 bytes following that buffer
     { tag }
@@ -113,16 +113,16 @@ threefish-init
     $80 tag + threefish-state tf_ctx-tweak $F + c! \ last block flag
     c:diffuse
     threefish-padded 128@ 2r> + 128!
-; is c:encrypt+auth
-:noname ( addr u -- ) \ net2o
+;
+:is c:decrypt ( addr u -- ) \ net2o
     \G Decrypt message in buffer addr u, must be by *64
     $C >r
     BEGIN  dup threefish#max u>=  WHILE
 	    over >r threefish-state r> dup r> tf_decrypt
 	    threefish#max /string +threefish 4 >r
     REPEAT  2drop rdrop
-; is c:decrypt
-:noname ( addr u tag -- flag ) \ net2o
+;
+:is c:decrypt+auth ( addr u tag -- flag ) \ net2o
     \G Decrypt message in buffer addr u, must be by *64
     { tag }
     2>r threefish-state 2r@ $E dup tf_decrypt_loop
@@ -130,8 +130,8 @@ threefish-init
     $80 tag + threefish-state tf_ctx-tweak $F + c! \ last block flag
     threefish-state threefish-padded dup $E tf_encrypt
     2r> + threefish-padded $10 tuck str=
-; is c:decrypt+auth
-:noname ( addr u -- ) \ net2o
+;
+:is c:hash ( addr u -- ) \ net2o
     \G Hash message in buffer addr u
     BEGIN  2dup threefish#max umin tuck
 	dup threefish#max u< IF
@@ -139,18 +139,17 @@ threefish-init
 	    threefish-padded threefish#max
 	THEN  drop threefish-state swap over $D tf_encrypt
     +threefish /string dup 0= UNTIL  2drop
-; is c:hash
-:noname ( addr u -- ) \ net2o
+;
+:is c:shorthash ( addr u -- ) \ net2o
 \G absorb + hash for a message <= 64 bytes
     threefish-padded threefish#max >padded
     threefish-state threefish-padded over $D tf_encrypt
-; is c:shorthash
+;
 ' threefish> is c:hash@
 \G extract short hash (up to 64 bytes)
-:noname ( x128 addr u -- ) \ net2o
+:is c:tweakkey! ( x128 addr u -- ) \ net2o
     \G set key plus tweak
     threefish#max umin threefish-state swap move
     tf-tweak! ;
-is c:tweakkey!
 
 

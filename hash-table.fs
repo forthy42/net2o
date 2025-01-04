@@ -19,7 +19,7 @@
 
 2 64s buffer: hashinit
 
-:noname defers 'image hashinit 2 64s erase ; is 'image
+:is 'image defers 'image hashinit 2 64s erase ;
 
 \ this computes a cryptographic somewhat secure hash over the input string
 

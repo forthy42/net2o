@@ -263,15 +263,15 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
 dvcs-table $save
 
 ' dvcs-in-hash ( addr u -- ) dvcs-class is dvcs:read
-:noname ( addr u -- )
+dvcs-class :method dvcs:rm ( addr u -- )
     2dup hash#128 /string ?sane-file
     dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #free
-    hash#128 umin dvcs-in-hash ; dvcs-class is dvcs:rm
-:noname ( addr u -- )
+    hash#128 umin dvcs-in-hash ;
+dvcs-class :method dvcs:rmdir ( addr u -- )
     2dup 2 /string ?sane-file 2drop
     dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #free
-; dvcs-class is dvcs:rmdir
-:noname ( 64len addr u -- )
+;
+dvcs-class :method dvcs:patch ( 64len addr u -- )
     dvcs:patch$ $! dvcs( ." -patch: " 64dup u64. )
     dvcs:out-fileoff off
     64dup config:patchlimit& 2@ d>64 64u> !!patch-limit!!
@@ -283,8 +283,8 @@ dvcs-table $save
     dvcs:in-files$ dvcs:patch$ ['] bpatch$2 dvcs:out-files$ $exec
     dvcsfiles( ." ===== " dvcs:out-files$ $@len u. ."  =====" cr
     dvcs:out-files$ $. ." ========================" cr )
-; dvcs-class is dvcs:patch
-:noname ( 64size addr u -- )
+;
+dvcs-class :method dvcs:write ( 64size addr u -- )
     2dup 2 /string ?sane-file 2drop
     2>r dvcs( ." -write: " 64dup u64. cr )
     64>n { fsize }
@@ -293,9 +293,9 @@ dvcs-table $save
     [: forth:type ticks { 64^ ts } ts 1 64s forth:type forth:type ;]
     dvcs:fileentry$ $exec dvcs:fileentry$ $@
     2dup +fileentry  dvcs-outfile-hash
-    fsize dvcs:out-fileoff +! ; dvcs-class is dvcs:write
+    fsize dvcs:out-fileoff +! ;
 ' !!FIXME!! ( 64size algo addr u --- ) dvcs-class is dvcs:unzip
-:noname ( addr u -- ) \ hash+perm+name
+dvcs-class :method dvcs:ref ( addr u -- ) \ hash+perm+name
     0 patch-in$ !@ >r
     dvcs:fileentry$ $free
     [: over hash#128 forth:type ticks { 64^ ts } ts 1 64s forth:type
@@ -303,20 +303,20 @@ dvcs-table $save
     dvcs:fileentry$ $@ +fileentry
     ?fileentry-hash
     patch-in$ $free  r> patch-in$ !
-; dvcs-class is dvcs:ref
+;
 
 \ DVCS refs are scanned for in patchsets, and then fetched
 
 ' 2drop dvcs-refs is dvcs:read
 ' 2drop dvcs-refs is dvcs:rm
 ' 2drop dvcs-refs is dvcs:rmdir
-:noname 2drop 64drop ; dup dvcs-refs is dvcs:patch
+dup dvcs-refs :method dvcs:patch 2drop 64drop ;
 dvcs-refs is dvcs:write
-:noname 2drop drop 64drop ; dvcs-refs is dvcs:unzip
-:noname ( addr u -- )
+dvcs-refs :method dvcs:unzip 2drop drop 64drop ;
+dvcs-refs :method dvcs:ref ( addr u -- )
     hash#128 umin 2dup dvcs-objects #@ d0<> IF  2drop  EXIT  THEN
     2dup enchash>filename file-status nip no-file# <> IF  2drop  EXIT  THEN
-    dvcs:refs[] $+[]! ; dvcs-refs is dvcs:ref
+    dvcs:refs[] $+[]! ;
 
 scope{ dvcs
 : new-dvcs ( -- o )
@@ -563,17 +563,17 @@ previous
 ' noop  commit-class is msg:end
 ' drop  commit-class is msg:redisplay
 
-:noname ( addr u -- )
-    re$ $+! ; commit-class is msg:re
-:noname ( addr u -- )
-    id$ $! re$ $free ; commit-class is msg:id
-:noname ( addr u type -- )
+commit-class :method msg:re ( addr u -- )
+    re$ $+! ;
+commit-class :method msg:id ( addr u -- )
+    id$ $! re$ $free ;
+commit-class :method msg:object ( addr u type -- )
     object$ hash+type
     object$ $@ key| id$ $@
     id>patch# id>snap# re$ $@len select #!
     re$ $@len IF
 	re$ $@ last# cell+ $+!
-    THEN ; commit-class is msg:object
+    THEN ;
 
 \ search for a specific id
 
@@ -591,21 +591,21 @@ previous
 
 : 3drop  2drop drop ;
 
-:noname match:tag$ $@ str= match:flag ! ; search-class is msg:tag
-:noname match:flag @ IF  match:id$ $!  ELSE  2drop  THEN ; search-class is msg:id
+search-class :method msg:tag match:tag$ $@ str= match:flag ! ;
+search-class :method msg:id match:flag @ IF  match:id$ $!  ELSE  2drop  THEN ;
 ' 3drop search-class is msg:object
 
 ' 2drop dvcs-log-class is msg:re
 ' 2drop dvcs-log-class is msg:coord
 ' 3drop dvcs-log-class is msg:object
 ' noop  dvcs-log-class is msg:end
-:noname dvcs-log:sig$    $! ; dvcs-log-class is msg:start
-:noname dvcs-log:tag$    $! ; dvcs-log-class is msg:tag
-:noname dvcs-log:id$     $! ; dvcs-log-class is msg:id
-:noname dvcs-log:text$   $! ; dvcs-log-class is msg:text
-:noname dvcs-log:action$ $! ; dvcs-log-class is msg:action
-:noname dvcs-log:chain$  $! ; dvcs-log-class is msg:chain
-:noname dvcs-log:urls[] $+[]! ; dvcs-log-class is msg:url
+dvcs-log-class :method msg:start dvcs-log:sig$    $! ;
+dvcs-log-class :method msg:tag dvcs-log:tag$    $! ;
+dvcs-log-class :method msg:id dvcs-log:id$     $! ;
+dvcs-log-class :method msg:text dvcs-log:text$   $! ;
+dvcs-log-class :method msg:action dvcs-log:action$ $! ;
+dvcs-log-class :method msg:chain dvcs-log:chain$  $! ;
+dvcs-log-class :method msg:url dvcs-log:urls[] $+[]! ;
 ' drop dvcs-log-class is msg:like
 ' drop dvcs-log-class is msg:redisplay
 

@@ -50,16 +50,16 @@ align cmd-args-c , here constant cmd-args^
 : cmd-args ( -- )  cmd-args^ arg-o ! ;
 cmd-args
 
-:noname ( -- addr u t / f )
-    refill dup IF  source rot  THEN ; is ?nextarg
-:noname ( -- addr u t / f )
-    argc @ 1 > IF  1 arg true  ELSE  false  THEN ; is ?peekarg
-:noname ( -- addr u t / f )
+:is ?nextarg ( -- addr u t / f )
+    refill dup IF  source rot  THEN ;
+:is ?peekarg ( -- addr u t / f )
+    argc @ 1 > IF  1 arg true  ELSE  false  THEN ;
+:is ?@nextarg ( -- addr u t / f )
     argc @ 1 > IF
 	refill IF  source drop c@ '@' = IF  source 1 /string true  EXIT
 	    THEN
 	THEN
-    THEN  false ; is ?@nextarg
+    THEN  false ;
 
 cmd-args-c uclass arg-o
 end-class word-args-c
@@ -76,13 +76,13 @@ word-args
 : ?word-nextarg ( -- addr u t / f )
     parse-name" dup 0= IF  2drop  false  ELSE  true  THEN
 ; latestxt is ?nextarg
-:noname ( -- addr u t / f )  >in @ >r
+:is ?peekarg ( -- addr u t / f )  >in @ >r
     parse-name" dup 0= IF  2drop  false  ELSE  true  THEN  r> >in !
-; is ?peekarg
-:noname ( -- addr u t / f )
+;
+:is ?@nextarg ( -- addr u t / f )
     >in @ >r ?word-nextarg 0= IF  rdrop false  EXIT  THEN
     over xc@ '@' = IF  rdrop 1 /string true  EXIT  THEN
-    r> >in ! 2drop false ; is ?@nextarg
+    r> >in ! 2drop false ;
 
 : arg-loop { xt -- }
     begin  ?nextarg  while  xt execute  repeat ;
@@ -558,14 +558,13 @@ Variable keys-file$
 
 Variable configured?
 
-:noname defers 'cold
+:is 'cold defers 'cold
     configured? off
-    { | pad[ path-max# ] } pad[ path-max# get-dir rootdirs$ $!
-; is 'cold
-:noname ( -- )
+    { | pad[ path-max# ] } pad[ path-max# get-dir rootdirs$ $! ;
+:is 'image ( -- )
     config:host$ $free
     config:rootdirs$ $free
-    defers 'image ; is 'image
+    defers 'image ;
 
 : rootdirs>path ( -- )
     config:rootdirs$ $@ bounds ?DO  I c@ ':' = IF 0 I c! THEN LOOP ;

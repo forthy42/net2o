@@ -145,25 +145,25 @@ in fs : fs-close ( -- )
     fs-fid off
     fs:fs-clear
 ; ' fs:fs-close fs-class is fs-close
-:noname ( -- 64size )
+fs-class :method fs-poll ( -- 64size )
     fs-fid @ file-size throw d>64
-; fs-class is fs-poll
-:noname ( addr u mode -- ) fs-close
+;
+fs-class :method fs-open ( addr u mode -- ) fs-close
     msg( dup 2over ." open file: " forth:type ."  with mode " . forth:cr )
     >r ?sane-file
     config:rootdirs$ open-path-file throw fs-path $! fs-fid !
     r@ r/o <> IF  0 fs-fid !@ close-file throw
 	fs-path $@ r@ open-file throw fs-fid  !  THEN  rdrop
     fs-poll fs-size!
-; fs-class is fs-open
-:noname ( addr u -- )  fs-close
+;
+fs-class :method fs-create ( addr u -- )  fs-close
     msg( 2dup ." create file: " forth:type forth:cr )
     ?sane-file
     2dup fs-path $! >rename+ r/w create-file throw fs-fid !
-; fs-class is fs-create
-:noname ( perm -- )
+;
+fs-class :method fs-perm? ( perm -- )
     perm%filename and 0= !!filename-perm!!
-; fs-class is fs-perm?
+;
 
 \ access to encrypted hash files
 
@@ -186,59 +186,57 @@ end-class hashfs-class
     2dup fs-path $!
     r> c:key! ;
 
-:noname ( addr u mode -- )  fs-close
+hashfs-class :method fs-open ( addr u mode -- )  fs-close
     >r hashfs>file r> open-file throw fs-fid ! fs-poll fs-size!
-; hashfs-class is fs-open
-:noname ( addr u -- )  fs-close
+;
+hashfs-class :method fs-create ( addr u -- )  fs-close
     hashfs>file >rename+ r/w create-file throw fs-fid !
-; hashfs-class is fs-create
-:noname ( perm -- )
+;
+hashfs-class :method fs-perm? ( perm -- )
     perm%filehash and 0= !!filehash-perm!!
-; hashfs-class is fs-perm?
-:noname ( addr u -- n )
+;
+hashfs-class :method fs-read ( addr u -- n )
     c:key@ >r
     over >r fs:fs-read
     fs-cryptkey $@ drop c:key!
     r> over c:decrypt
-    r> c:key! ; hashfs-class is fs-read
-:noname ( addr u -- n )
+    r> c:key! ;
+hashfs-class :method fs-write ( addr u -- n )
     dup 0= IF  nip  EXIT  THEN
     $make { w^ file-pad$ } file-pad$ $@
     c:key@ >r  fs-cryptkey $@ drop c:key!
     2dup c:encrypt fs:fs-write file-pad$ $free
-    r> c:key! ; hashfs-class is fs-write
-:noname ( -- )
+    r> c:key! ;
+hashfs-class :method fs-close ( -- )
     fs:fs-close
-    fs-cryptkey $free ; hashfs-class is fs-close
+    fs-cryptkey $free ;
 
 \ subclassing for other sorts of files
 
 fs-class class
 end-class socket-class
 
-:noname ( addr u port -- ) fs-close 64>n
+dup socket-class is fs-open  socket-class :method fs-create ( addr u port -- ) fs-close 64>n
     msg( dup 2over ." open socket: " type ."  with port " . cr )
     open-socket fs-fid ! 64#0 fs-size! ;
-dup socket-class is fs-open  socket-class is fs-create
-:noname ( -- size )
+socket-class :method fs-poll ( -- size )
     fs-fid @ fileno check_read dup 0< IF  -512 + throw  THEN
-    n>64 fs-size 64+ ; socket-class is fs-poll
-:noname ( perm -- )
+    n>64 fs-size 64+ ;
+socket-class :method fs-perm? ( perm -- )
     perm%socket and 0= !!socket-perm!!
-; socket-class is fs-perm?
+;
 
 fs-class class
 end-class termclient-class
 
-:noname ( addr u -- u ) tuck type ; termclient-class is fs-write
-:noname ( addr u -- u ) 0 -rot bounds ?DO
-	key? 0= ?LEAVE  key I c! 1+  LOOP ; termclient-class is fs-read
-:noname ( addr u 64n -- ) 64drop 2drop ;
-dup termclient-class is fs-open  termclient-class is fs-create
-:noname ( -- ) ; termclient-class is fs-close
-:noname ( perm -- )
+termclient-class :method fs-write ( addr u -- u ) tuck type ;
+termclient-class :method fs-read ( addr u -- u ) 0 -rot bounds ?DO
+	key? 0= ?LEAVE  key I c! 1+  LOOP ;
+dup termclient-class is fs-open  termclient-class :method fs-create ( addr u 64n -- ) 64drop 2drop ;
+termclient-class :method fs-close ( -- ) ;
+termclient-class :method fs-perm? ( perm -- )
     perm%terminal and 0= !!terminal-perm!!
-; termclient-class is fs-perm?
+;
 
 termclient-class class
 end-class termserver-class
@@ -273,30 +271,30 @@ is parse-name
     termserver-in termserver-out ;
 : ev-termclose ( -- ) termfile off  default-in default-out ;
 
-:noname ( addr u -- u )
+termserver-class :method fs-write ( addr u -- u )
     dup 0= IF  nip  EXIT  THEN
     fs-limit 64>n fs-inbuf $@len - min  tuck fs-inbuf $+!
     fs-size fs-inbuf $@len u>64 64= fs-inbuf $@len 0<> and IF
 	parent-file-done
-    THEN ; termserver-class is fs-write
-:noname ( addr u -- u ) fs-outbuf $@len umin >r
+    THEN ;
+termserver-class :method fs-read ( addr u -- u ) fs-outbuf $@len umin >r
     fs-outbuf $@ r@ umin rot swap move
-    fs-outbuf 0 r@ $del r> ; termserver-class is fs-read
-:noname ( addr u 64n -- )  64drop 2drop
+    fs-outbuf 0 r@ $del r> ;
+dup termserver-class is fs-open  termserver-class :method fs-create ( addr u 64n -- )  64drop 2drop
     [: termserver-tasks $@ 0= !!no-termserver!!
 	@ termserver-tasks 0 cell $del dup fs-termtask !
 	o [{: xo :}h1 xo ev-termfile ;] swap send-event
     ;] file-sema c-section
-; dup termserver-class is fs-open  termserver-class is fs-create
-:noname ( -- )
+;
+termserver-class :method fs-close ( -- )
     [: fs-termtask @ ?dup-IF
 	    ['] ev-termclose swap send-event
 	    fs-termtask cell termserver-tasks $+! fs-termtask off
 	THEN ;] file-sema c-section
-; termserver-class is fs-close
-:noname ( perm -- )
+;
+termserver-class :method fs-perm? ( perm -- )
     perm%termserver and 0= !!termserver-perm!!
-; termserver-class is fs-perm?
+;
 
 Create file-classes
 fs-class ,

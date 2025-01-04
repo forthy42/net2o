@@ -19,7 +19,7 @@ $Variable dhtnick "net2o-dhtroot" dhtnick $!
 $Variable dhtroot-addr$
 Variable dhtroot-addr
 
-:noname defers 'cold dhtroot-addr off ; is 'cold
+:is 'cold defers 'cold dhtroot-addr off ;
 
 require dhtroot.fs
 
@@ -178,7 +178,7 @@ Forward insert-addr ( o -- )
     beacon( ." done renat" cr ) ;
 
 scope{ /chat
-:noname ( addr u -- ) renat-all /nat ; is /renat
+:is /renat ( addr u -- ) renat-all /nat ;
 }scope
 
 \ beacon handling

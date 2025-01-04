@@ -98,12 +98,11 @@ state#  buffer: qr-hash \ hash of challenge
 
 init-keybuf
 
-:noname keytmp off keybuf off
+:is 'image keytmp off keybuf off
     qr-key keysize erase  qr-hash state# erase
-    defers 'image ; is 'image
-:noname defers 'cold init-keybuf ; is 'cold
-:noname defers alloc-code-bufs  new-keytmp ; is alloc-code-bufs
-\ :noname defers free-code-bufs ; is free-code-bufs
+    defers 'image ;
+:is 'cold defers 'cold init-keybuf ;
+:is alloc-code-bufs defers alloc-code-bufs  new-keytmp ;
 
 #60.000.000.000 d>64 64Constant :01'# \ one minute
 #10.000.000.000 d>64 64Constant 10"#  \ ten second

@@ -68,7 +68,7 @@ init-ed25519
     edbuf @ ?dup-IF  [: .dispose ;] crypto-a with-allocater  THEN
     edbuf off ;
 
-:noname defers 'image edbuf off ; is 'image
+:is 'image defers 'image edbuf off ;
 
 : clean-ed25519 ( -- )
     \g do this every time you computed using something secret

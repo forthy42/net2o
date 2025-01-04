@@ -826,7 +826,7 @@ n2o-history
     THEN ;
 ?set-debug
 
-:noname  defers 'cold ?set-debug n2o-history ; is 'cold
+:is 'cold  defers 'cold ?set-debug n2o-history ;
 [IFDEF] 'debug-cold
     [: r@ addr>view .sourceview cr ~~ ;] is 'debug-cold
 [THEN]
@@ -834,8 +834,8 @@ n2o-history
 \ allow issuing commands during chat
 
 scope{ /chat
-:noname [: word-args ['] evaluate do-net2o-cmds ;] catch-nobt
-    ?dup-IF  <err> ." error: " error$ type cr <default> 2drop  THEN ; is /n2o
+:is /n2o [: word-args ['] evaluate do-net2o-cmds ;] catch-nobt
+    ?dup-IF  <err> ." error: " error$ type cr <default> 2drop  THEN ;
 ' n2o:nick is /nick
 }scope
 

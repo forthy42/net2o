@@ -299,16 +299,16 @@ cmd-buf-c ' new static-a with-allocater code-buf^ !
 
 code-buf
 
-:noname ( -- )  cmdbuf# off  connection >o
-	req? off  ['] send-cX code-reply is send-xt o> ; is cmdreset
-:noname ( -- addr )   connection .code-sema ; is cmdlock
-:noname ( -- addr u ) connection .code-dest cmdbuf# @ ; is cmdbuf$
-:noname ( -- n )  maxdata cmdbuf# @ - ; is maxstring
-:noname ( addr u -- ) dup maxstring u> IF
+:is cmdreset ( -- )  cmdbuf# off  connection >o
+	req? off  ['] send-cX code-reply is send-xt o> ;
+:is cmdlock ( -- addr )   connection .code-sema ;
+:is cmdbuf$ ( -- addr u ) connection .code-dest cmdbuf# @ ;
+:is maxstring ( -- n )  maxdata cmdbuf# @ - ;
+:is +cmdbuf ( addr u -- ) dup maxstring u> IF
 	cmdbuf$ ~~ net2o:see true !!cmdfit!!  THEN
-    tuck cmdbuf$ + swap move cmdbuf# +! ; is +cmdbuf
-:noname ( n -- )  cmdbuf# +! ; is -cmdbuf
-:noname ( -- 64dest ) code-vdest 64dup 64-0= !!no-dest!! ; is cmddest
+    tuck cmdbuf$ + swap move cmdbuf# +! ;
+:is -cmdbuf ( n -- )  cmdbuf# +! ;
+:is cmddest ( -- 64dest ) code-vdest 64dup 64-0= !!no-dest!! ;
 
 Sema cmd0lock
 
@@ -333,12 +333,12 @@ cmd-buf$ ' new static-a with-allocater code-buf$^ !
 code-buf$
 
 ' cmd$lock is cmdlock
-:noname  cmd$ $@ ; is cmdbuf$
-:noname  cmd$ $free ; is cmdreset
+:is cmdbuf$  cmd$ $@ ;
+:is cmdreset  cmd$ $free ;
 ' true is maxstring \ really maxuint = -1 = true
-:noname ( addr u -- ) cmd$ $+! ; is +cmdbuf
-:noname ( n -- )  cmd$ $@len + cmd$ $!len ; is -cmdbuf
-:noname ( -- 64dest ) 64#0 ; is cmddest
+:is +cmdbuf ( addr u -- ) cmd$ $+! ;
+:is -cmdbuf ( n -- )  cmd$ $@len + cmd$ $!len ;
+:is cmddest ( -- 64dest ) 64#0 ;
 
 : gen-cmd ( xt -- $addr )
     cmdbuf-o @ >r code-buf$ 0 cmd$ !@ >r cmdbuf# @ >r
@@ -349,19 +349,19 @@ code-buf$
 
 code0-buf \ reset default
 
-:noname ( -- addr u ) cmd0buf cmdbuf# @ ; is cmdbuf$
+:is cmdbuf$ ( -- addr u ) cmd0buf cmdbuf# @ ;
 ' cmd0lock is cmdlock
 ' rng64 is cmddest
-:noname ( -- )  cmdbuf# off  o IF  req? off  THEN ; is cmdreset
+:is cmdreset ( -- )  cmdbuf# off  o IF  req? off  THEN ;
 
-:noname ( -- )
+:is alloc-code-bufs ( -- )
     cmd-buf0 new code0-buf^ !
     cmd-buf-c new code-buf^ !
-    cmd-buf$ new code-buf$^ ! ; is alloc-code-bufs
-:noname
+    cmd-buf$ new code-buf$^ ! ;
+:is free-code-bufs
     code0-buf^ @ .dispose
     code-buf^ @ .dispose
-    code-buf$^ @ >o cmd$ $free dispose o> ; is free-code-bufs
+    code-buf$^ @ >o cmd$ $free dispose o> ;
 
 \ stuff into code buffers
 
@@ -436,10 +436,10 @@ compsem: cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 0 net2o: dummy ( -- ) ;
 
 [IFDEF] docgen
-    :noname ( -- )
-	>in @ >r ')' parse ."  ( " type ." )" cr r> >in ! ; is doc(gen
-    :noname ( n "name" -- )
-	." * " dup h. >in @ >r parse-name type r> >in ! ; is .n-name
+    :is doc(gen ( -- )
+	>in @ >r ')' parse ."  ( " type ." )" cr r> >in ! ;
+    :is .n-name ( n "name" -- )
+	." * " dup h. >in @ >r parse-name type r> >in ! ;
 [THEN]
 
 Variable version-warnings  1 version-warnings !

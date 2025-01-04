@@ -216,7 +216,7 @@ Sema id-sema
     [: my-error-id $@ ?dup-IF  id# #free  ELSE  drop  THEN
       my-error-id $free ;] id-sema c-section ;
 
-:noname  error-id$free defers extra-dispose ; IS extra-dispose
+:is extra-dispose  error-id$free defers extra-dispose ;
 
 \ compile a reply key
 

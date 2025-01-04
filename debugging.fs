@@ -8,7 +8,7 @@ false [IF]
     : )else(  ]] ) ( [[ ; immediate \ )
 [THEN]
 
-:noname .time defers printdebugdata !time ; is printdebugdata
+:is printdebugdata .time defers printdebugdata !time ;
 
 : nodebug: ['] ( Alias immediate ;
 
@@ -167,13 +167,13 @@ Ustack b$
 
 up@ Value main-up@
 
-:noname defers 'cold up@ to main-up@ ; is 'cold
-:noname defers 'image  0 to main-up@ ; is 'image
+:is 'cold defers 'cold up@ to main-up@ ;
+:is 'image defers 'image  0 to main-up@ ;
 
 Variable edit-restart
-:noname ( span addr u -- )
+:is edit-update ( span addr u -- )
     2 pick 0= IF  0 edit-restart !@ ?dup-IF  wake  THEN  THEN
-    defers edit-update ; is edit-update
+    defers edit-update ;
 
 : <hide> ( task -- ) up@ edit-restart !
     [: ctrl Z unkey ;] swap send-event
@@ -199,8 +199,8 @@ b-out
 op-vector !
 \ ' noop alias b-out
 
-:noname defers DoError bflush ; is DoError
-:noname defers .debugline bflush ; is .debugline
+:is DoError defers DoError bflush ;
+:is .debugline defers .debugline bflush ;
 
 \ misc
 
@@ -224,11 +224,11 @@ false [IF]
 \ more phony throw stuff, only for debugging engine
 
 debugging-method drop false [IF]
-:noname  ." Store backtrace..." cr defers store-backtrace
-    dobacktrace ; is store-backtrace
+:is store-backtrace  ." Store backtrace..." cr defers store-backtrace
+    dobacktrace ;
 
-:noname  ?dup-IF  ." Throw directly " dup . cr dobacktrace
-	defers throw  THEN ; is throw
+:is throw  ?dup-IF  ." Throw directly " dup . cr dobacktrace
+	defers throw  THEN ;
 [THEN]
 
 \ Emacs fontlock mode: Highlight more stuff

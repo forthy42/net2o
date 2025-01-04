@@ -39,15 +39,15 @@ cmd-keybuf-c ' new static-a with-allocater code-key^ !
 code-key
 cmd0lock 0 pthread_mutex_init drop
 
-:noname ( -- addr u ) keypack-buf cmdbuf# @ ; is cmdbuf$
-:noname ( -- n )  keypack# cmdbuf# @ - ; is maxstring
+:is cmdbuf$ ( -- addr u ) keypack-buf cmdbuf# @ ;
+:is maxstring ( -- n )  keypack# cmdbuf# @ - ;
 
 code0-buf
 
-:noname defers alloc-code-bufs
-    cmd-keybuf-c new code-key^ ! ; is alloc-code-bufs
-:noname defers free-code-bufs
-    code-key^ @ .dispose ; is free-code-bufs
+:is alloc-code-bufs defers alloc-code-bufs
+    cmd-keybuf-c new code-key^ ! ;
+:is free-code-bufs defers free-code-bufs
+    code-key^ @ .dispose ;
 
 \ hashed key data base
 
@@ -389,7 +389,7 @@ Variable sim-nick!
 	LOOP
     THEN  drop ;
 
-:noname defers 'cold  groups[] off read-groups ; is 'cold
+:is 'cold defers 'cold  groups[] off read-groups ;
 
 \ key display
 
@@ -1308,9 +1308,8 @@ Variable revtoken
 Variable invitations
 
 Defer do-invite
-:noname ( addr u -- )
+:is do-invite ( addr u -- )
     ." invite me: " over >r .pk2key$ cr r> free throw ctrl L inskey ;
-is do-invite
 
 : pk2key$-add ( addr u perm -- ) { perm }
     sample-key >o import#invited import-type ! cmd:nestsig

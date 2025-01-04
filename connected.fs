@@ -109,8 +109,8 @@ fs-table $save
 
 ' context-table is gen-table
 
-:noname ( uid useek -- ) 64>r ulit, file-id
-    64r> lit, set-seek end-with ; is do-track-seek
+:is do-track-seek ( uid useek -- ) 64>r ulit, file-id
+    64r> lit, set-seek end-with ;
 
 \ flow control functions
 \g 
@@ -122,7 +122,7 @@ $31 net2o: ack ( -- o:acko ) \g ack object
 ack-table >table
 reply-table $@ inherit-table ack-table
 
-:noname ack ; ack-class is start-req
+ack-class :method start-req ack ;
 $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
     net2o:ack-addrtime ;
 +net2o: ack-resend ( flag -- ) \g set resend toggle flag
@@ -184,7 +184,7 @@ in net2o : gen-reset ( -- )
 \ safe initialization
 
 : lit<   lit, push-lit ;
-:noname ( throwcode -- )
+:is >throw ( throwcode -- )
     remote? @ IF
 	?dup-IF  init-reply
 	    $error-id $@ dup IF  $, error-id  ELSE  2drop  THEN
@@ -193,7 +193,7 @@ in net2o : gen-reset ( -- )
 	error-id>o ?dup-IF
 	    >o [{: tc :}h1 tc throw ;] wait-task-event o>
 	ELSE  throw  THEN
-    THEN ; IS >throw
+    THEN ;
 
 also }scope
 
