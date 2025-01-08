@@ -145,7 +145,7 @@ Defer addr-changed ' noop is addr-changed
 	BEGIN  ['] netlink-loop catch -9 = UNTIL  0 (bye) ;]
     1 net2o-task to netlink-task ;
 
-:noname defers init-rest create-netlink-task ; is init-rest
+:is init-rest defers init-rest create-netlink-task ;
 
 \\\
 Local Variables:

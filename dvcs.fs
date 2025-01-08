@@ -310,8 +310,8 @@ dvcs-class :method dvcs:ref ( addr u -- ) \ hash+perm+name
 ' 2drop dvcs-refs is dvcs:read
 ' 2drop dvcs-refs is dvcs:rm
 ' 2drop dvcs-refs is dvcs:rmdir
-dup dvcs-refs :method dvcs:patch 2drop 64drop ;
-dvcs-refs is dvcs:write
+dvcs-refs :method dvcs:patch 2drop 64drop ;
+latestnt dvcs-refs is dvcs:write
 dvcs-refs :method dvcs:unzip 2drop drop 64drop ;
 dvcs-refs :method dvcs:ref ( addr u -- )
     hash#128 umin 2dup dvcs-objects #@ d0<> IF  2drop  EXIT  THEN

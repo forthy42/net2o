@@ -216,9 +216,10 @@ hashfs-class :method fs-close ( -- )
 fs-class class
 end-class socket-class
 
-dup socket-class is fs-open  socket-class :method fs-create ( addr u port -- ) fs-close 64>n
+socket-class :method fs-create ( addr u port -- ) fs-close 64>n
     msg( dup 2over ." open socket: " type ."  with port " . cr )
     open-socket fs-fid ! 64#0 fs-size! ;
+latestxt socket-class is fs-open
 socket-class :method fs-poll ( -- size )
     fs-fid @ fileno check_read dup 0< IF  -512 + throw  THEN
     n>64 fs-size 64+ ;
@@ -232,7 +233,8 @@ end-class termclient-class
 termclient-class :method fs-write ( addr u -- u ) tuck type ;
 termclient-class :method fs-read ( addr u -- u ) 0 -rot bounds ?DO
 	key? 0= ?LEAVE  key I c! 1+  LOOP ;
-dup termclient-class is fs-open  termclient-class :method fs-create ( addr u 64n -- ) 64drop 2drop ;
+termclient-class :method fs-create ( addr u 64n -- ) 64drop 2drop ;
+latestxt termclient-class is fs-open
 termclient-class :method fs-close ( -- ) ;
 termclient-class :method fs-perm? ( perm -- )
     perm%terminal and 0= !!terminal-perm!!
@@ -280,12 +282,13 @@ termserver-class :method fs-write ( addr u -- u )
 termserver-class :method fs-read ( addr u -- u ) fs-outbuf $@len umin >r
     fs-outbuf $@ r@ umin rot swap move
     fs-outbuf 0 r@ $del r> ;
-dup termserver-class is fs-open  termserver-class :method fs-create ( addr u 64n -- )  64drop 2drop
+termserver-class :method fs-create ( addr u 64n -- )  64drop 2drop
     [: termserver-tasks $@ 0= !!no-termserver!!
 	@ termserver-tasks 0 cell $del dup fs-termtask !
 	o [{: xo :}h1 xo ev-termfile ;] swap send-event
     ;] file-sema c-section
 ;
+latestxt termserver-class is fs-open
 termserver-class :method fs-close ( -- )
     [: fs-termtask @ ?dup-IF
 	    ['] ev-termclose swap send-event

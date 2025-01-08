@@ -82,11 +82,11 @@ $Variable net2o-logo
     !notify-args
 [THEN]
 
-:noname defers 'cold
+:is 'cold defers 'cold
     "notify-send" >upath notify-send $!
-    !net2o-logo [IFDEF] !notify-args !notify-args [THEN] ; is 'cold
-:noname defers 'image
-    notify-args #20 cells erase ; is 'image
+    !net2o-logo [IFDEF] !notify-args !notify-args [THEN] ;
+:is 'image defers 'image
+    notify-args #20 cells erase ;
 
 : dump-args ( arg -- )
     ." Dumping arguments" cr

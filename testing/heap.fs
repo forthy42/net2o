@@ -1,6 +1,6 @@
 \ binary heap
 
-require mini-oof.fs
+require mini-oof2.fs
 
 [defined] ntime 0= [IF]
     library: librt.so.1
@@ -26,15 +26,15 @@ object class
     method .h
 end-class heap
 
-:noname ( i1 i2 heap -- flag )
-    harray @ tuck + @ >r + @ r> < ; heap defines hless
-:noname ( i1 i2 heap -- )
+heap :method hless ( i1 i2 -- flag )
+    harray @ tuck + @ >r + @ r> < ;
+heap :method hswap ( i1 i2 -- )
     harray @ tuck + >r + r> { i1 i2 }
-    i1 @ i2 @  i1 ! i2 ! ; heap defines hswap
-:noname drop . ; heap defines .h
-:noname drop cell ; heap defines hcell
-:noname drop @ ; heap defines heap@
-:noname drop ! ; heap defines heap!
+    i1 @ i2 @  i1 ! i2 ! ;
+heap :method .h . ;
+heap :method hcell cell ;
+heap :method heap@ @ ;
+heap :method heap! ! ;
 
 : hnew ( -- heap )
     heap new dup
