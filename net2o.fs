@@ -618,9 +618,9 @@ rdata-class :method free-data ( o:data -- )
 \ data sending around
 
 : >blockalign ( n -- block )
-    blockalign @ dup >r 1- + r> negate and ;
+    blockalign @ naligned ;
 : >maxalign ( n -- block )
-    maxdata dup >r 1- + r> negate and ;
+    maxdata naligned ;
 : 64>blockalign ( 64 -- block )
     blockalign @ dup >r 1- n>64 64+ r> negate n>64 64and ;
 : /head ( u -- )

@@ -56,7 +56,8 @@ cmd-args
     argc @ 1 > IF  1 arg true  ELSE  false  THEN ;
 :is ?@nextarg ( -- addr u t / f )
     argc @ 1 > IF
-	refill IF  source drop c@ '@' = IF  source 1 /string true  EXIT
+	1 arg drop c@ '@' = IF  \ can access C strings one item beyond length
+	    refill IF  source 1 /string true  EXIT
 	    THEN
 	THEN
     THEN  false ;

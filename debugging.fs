@@ -39,6 +39,7 @@ debug: crypt( \ cryptography
 debug: noens( \ disable extra nanosecond delay
 debug: key( \ key stuff
 debug: vkey( \ vault key stuff
+debug: vault( \ vault stuff
 debug: genkey( \ See generated keys - never let this go to a log file!
 debug: mykey( \ debug mykey things
 debug: cookie( \ debug cookies
@@ -94,6 +95,7 @@ debug: silent( \ silent messages
 debug: otrify( \ otrify debug messages
 debug: restart( \ restart task on clean-request
 debug: msgparse( \ parse messages
+debug: args( \ parse arguments
 
 : search-debug ( addr u xt -- ) { xt }
     [: ." debug: " type ;] $tmp
