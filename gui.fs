@@ -1006,6 +1006,18 @@ Variable $selected
 '🔲' Constant unselecte-text-char
 '🔳' Constant selected-text-char
 
+: .$selected ( -- addr u )
+    $selected $@ cell mem+DO
+	I @ #msg-log@ textmsg-o .msg:display forth:cr
+    LOOP ;
+
+: select-click[] ( o text log# -- o )
+    [{: widget log# :}h log# $selected ~sorted$
+	selected-text-char unselecte-text-char rot select
+	['] xemit $tmp widget >o to text$ o> +sync
+	['] .$selected $tmp primary!
+    ;] log# click[] ;
+
 : +log#-date-token ( log-mask -- o ) >r
     {{
 	\sans
@@ -1022,9 +1034,7 @@ Variable $selected
 	    [: '>' emit end-tick  .ticks ;] $tmp }}text /left
 	    >r {{ r> }}v 25%bv "log:end"  name! r> log:end  and 0= IF  /flip  THEN
 	}}v
-    }}h textwidget log# [{: widget log# :}h log# $selected ~sorted$
-	selected-text-char unselecte-text-char rot select
-	['] xemit $tmp widget >o to text$ o> +sync ;] log# click[]
+    }}h textwidget log# select-click[]
     \normal ;
 
 : ?flip ( flag -- ) IF  o /flop  ELSE  o /flip  THEN  drop ;

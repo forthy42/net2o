@@ -66,6 +66,8 @@ Sema msglog-sema
 
 : msg-log@ ( -- addr u )
     [: msg-group-o .msg:log[] $@ save-mem ;] msglog-sema c-section ;
+: #msg-log@ ( i -- addr u )
+    [: msg-group-o .msg:log[] $[]@ ;] msglog-sema c-section ;
 
 : purge-log ( -- )
     [: msg-group-o .msg:log[] { a[] }
