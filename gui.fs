@@ -1001,17 +1001,31 @@ wmsg-class :method msg:.nobody ( -- )
     0 change-edit-info
 ;
 
+Variable $selected
+
+'🔲' Constant unselecte-text-char
+'🔳' Constant selected-text-char
+
 : +log#-date-token ( log-mask -- o ) >r
     {{
-	[: '#' emit log# 0 u.r       ;] $tmp }}text /left
-	>r {{ r> }}v 25%bv "log:num"  name! r@ log:num  and 0= IF  /flip  THEN
-	[: '<' emit last-tick .ticks ;] $tmp }}text /left
-	>r {{ r> }}v 25%bv
-	r@ log:perm and IF  "log:perm"  ELSE  "log:date"  THEN name!
-	r@ log:date and 0= IF  /flip  THEN
-	[: '>' emit end-tick  .ticks ;] $tmp }}text /left
-	>r {{ r> }}v 25%bv "log:end"  name! r> log:end  and 0= IF  /flip  THEN
-    }}v box[] ;
+	\sans
+	{{ "🔲" }}text dup { textwidget }
+	}}v 25%bv "log:select" name! r@ log:select and 0= IF  /flip  THEN
+	\script
+	{{
+	    [: '#' emit log# 0 u.r       ;] $tmp }}text /left
+	    >r {{ r> }}v 25%bv "log:num"  name! r@ log:num  and 0= IF  /flip  THEN
+	    [: '<' emit last-tick .ticks ;] $tmp }}text /left
+	    >r {{ r> }}v 25%bv
+	    r@ log:perm and IF  "log:perm"  ELSE  "log:date"  THEN name!
+	    r@ log:date and 0= IF  /flip  THEN
+	    [: '>' emit end-tick  .ticks ;] $tmp }}text /left
+	    >r {{ r> }}v 25%bv "log:end"  name! r> log:end  and 0= IF  /flip  THEN
+	}}v
+    }}h textwidget log# [{: widget log# :}h log# $selected ~sorted$
+	selected-text-char unselecte-text-char rot select
+	['] xemit $tmp widget >o to text$ o> +sync ;] log# click[]
+    \normal ;
 
 : ?flip ( flag -- ) IF  o /flop  ELSE  o /flip  THEN  drop ;
 Variable re-indent#
@@ -1042,8 +1056,8 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
     to msg-box to msg-par ;
 : new-msg-par ( -- )
     msg-start-par
-    \sans \script cbl re-green logmask# @ +log#-date-token msg-box .child+
-    \normal cbl ;
+    cbl re-green logmask# @ +log#-date-token msg-box .child+
+    cbl ;
 wmsg-class :method msg:start { d: pk -- o }
     false to msg:silent?
     pk key| to msg:id$  pk startdate@ to msg:timestamp

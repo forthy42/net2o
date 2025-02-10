@@ -525,6 +525,8 @@ scope: logstyles
 : -len  log:len  invert logmask# and! update-log ;
 : +perm log:perm logmask# or! update-log ;
 : -perm log:perm invert logmask# and! update-log ;
+: +select log:select logmask# or! update-log ;
+: -select log:select invert logmask# and! update-log ;
 }scope
 
 msg-notify-class :method msg:start ( addr u -- )
@@ -1849,6 +1851,8 @@ also net2o-base scope: /chat
     \G logstyle: +date      the date per log line
     \G logstyle: +end       the end date per log line
     \G logstyle: +len       the message length per log line
+    \G logstyle: +perm      permanent date per log line (GUI only)
+    \G logstyle: +select    show select buttons (GUI only)
     umethod /lock ( addr u -- )
     \U lock {@nick}         lock down
     \G lock: lock down communication to list of nicks

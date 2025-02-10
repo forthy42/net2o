@@ -429,7 +429,7 @@ $10 stack: dirstack
     dirstack $[]# 1- dirstack $[]@ ;
 
 scope: log
-1 5 bits: num date end len perm
+1 6 bits: num date end len perm select
 }scope
 
 scope{ config
@@ -1026,6 +1026,27 @@ Sema resize-sema
 : +unique$ ( x addr -- )
     [: 2dup unique$cell? IF  >stack  ELSE  2drop  THEN ;]
     resize-sema c-section ;
+
+\ sorted list of cells, not efficient
+
+: +sorted$ { w^ u string -- }
+    \G add an item to a presorted cell list
+    string $@ bounds U+DO
+	I @ u @ u> IF
+	    u cell string I string $@ drop - $ins  UNLOOP  EXIT  THEN
+    cell +LOOP
+    u @ string >stack ;
+
+: ~sorted$ { w^ u string -- flag }
+    \G add an item to a presorted cell list if not there,
+    \G remove it if there, return true if added, false if removed.
+    string $@ bounds U+DO
+	I @ u @ = IF
+	    string I over @ cell+ - cell $del false  UNLOOP  EXIT  THEN
+	I @ u @ u> IF
+	    u cell string I over @ cell+ - $ins true  UNLOOP  EXIT  THEN
+    cell +LOOP
+    u @ string >stack true ;
 
 \ xchar tool
 
