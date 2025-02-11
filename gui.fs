@@ -1037,7 +1037,7 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 	    THEN
 	THEN
 	o cell- @ boxes?  IF  ['] recurse do-childs  THEN
-    ;] msgs-box .do-childs 2drop +sync ['] +sync msgs-box .vp-needed
+    ;] ['] do-childs msgs-box .vp-needed 2drop +sync 
     ['] .$selected $tmp primary! ;
 
 : select-range ( -- ) { | w^ added }
