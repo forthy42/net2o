@@ -400,6 +400,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 0 Value msg-box
 0 Value msg-par
 0 Value msg-vbox
+0 Value msgs-title-box
 
 0 Value group-name
 0 Value group-members
@@ -685,13 +686,16 @@ also [ifdef] android android [then]
 
 tex: vp-title
 
-$F110 Constant 'spinner'
-$F012 Constant 'signal'
-$F234 Constant 'user-plus'
+'' Constant 'spinner'
+'' Constant 'signal'
+'' Constant 'user-plus'
 $F503 Constant 'user-minus'
-$F235 Constant 'user-times'
+'' Constant 'user-times'
 
 0 Value online-flag
+0 Value select-range-button
+0 Value deselect-all-button
+0 Value clipboard-button
 
 : online-symbol ( -- addr u )
     'signal' 'spinner' online? select ['] xemit $tmp ;
@@ -699,6 +703,13 @@ $F235 Constant 'user-times'
     online-symbol online-flag >o to text$ o> +sync ;
 :is addr-changed  true to online? ['] announce-me catch nothrow 0= to online?
     !online-symbol ;
+
+\ selection range
+
+Variable $selected
+
+: .sel ( -- ) \ net2o-debug
+    $selected $@ cell mem+do i ? Loop ;
 
 : nicks-title ( -- )
     {{ glue*l black# slide-frame dup .button1
@@ -818,8 +829,7 @@ Variable like-char
 
 posting-log-class :method msg:start ( addr u -- )
     + sigpksize# - [ keysize $10 + ]L dvcs-log:id$ $!
-    like-char off  false to msg:silent?
-;
+    like-char off  false to msg:silent? ;
 posting-log-class :method msg:silent-start ( addr u -- )
     key| to msg:id$ true to msg:silent? ;
 posting-log-class :method msg:like ( xchar -- )  like-char ! ;
@@ -838,11 +848,9 @@ posting-log-class :method msg:chain ( addr u -- )
 	2swap chain-tags# #!
     ELSE
 	2nip last# cell+ $+!
-    THEN
-;
+    THEN ;
 posting-log-class :method msg:url ( addr u -- )
-    [: dvcs-log:id$ $. forth:type ;] dvcs-log:urls[] dup $[]# swap $[] $exec
-;
+    [: dvcs-log:id$ $. forth:type ;] dvcs-log:urls[] dup $[]# swap $[] $exec ;
 
 : new-posting-log ( -- o )
     posting-log-class new >o msg-table @ token-table ! o o> ;
@@ -977,8 +985,7 @@ wmsg-class :method msg:end ( -- )
     dpy-w @ 80% fm* msg-par .par-split
     {{ msg-par unbox }} cbl
     dup >r 0 ?DO  I pick box[] >bl "unboxed" name! drop  LOOP  r>
-    msg-vbox .+childs  enqueue
-;
+    msg-vbox .+childs  enqueue ;
 0 Value edit-infobar-text \ nobody is online warning
 l" Deactivate Verbatim"
 l" Activate Verbatim"
@@ -998,30 +1005,66 @@ Create edit-infos
     o> +resize
     2e edit-infobar-text [: f2* sin-t .fade +sync ;] >animate ;
 wmsg-class :method msg:.nobody ( -- )
-    0 change-edit-info
-;
+    0 change-edit-info ;
 
-Variable $selected
-
-'🔲' Constant unselecte-text-char
+'🔲' Constant deselected-text-char
 '🔳' Constant selected-text-char
 
-: .$selected ( -- addr u )
+: .$selected ( -- )
     $selected $@ cell mem+DO
 	I @ #msg-log@ textmsg-o .msg:display forth:cr
     LOOP ;
 
 : select-click[] ( o text log# -- o )
-    [{: widget log# :}h log# $selected ~sorted$
-	selected-text-char unselecte-text-char rot select
+    swap [{: widget :}h data $selected ~sorted$
+	selected-text-char deselected-text-char rot select
 	['] xemit $tmp widget >o to text$ o> +sync
 	['] .$selected $tmp primary!
-    ;] log# click[] ;
+    ;] swap click[] ;
+
+Create boxes? parbox , hbox , vbox , zbox ,
+DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
+  cell +LOOP  drop false ;
+
+: re-run-selection ( -- )
+    $selected $@
+    [:  name$ "num:" string-prefix? IF
+	    dup IF  over @ name$ 4 /string s>number drop =  ELSE  dup  THEN  IF
+		selected-text-char ['] xemit $tmp to text$ +sync
+		cell /string
+	    ELSE
+		deselected-text-char ['] xemit $tmp to text$ +sync
+	    THEN
+	THEN
+	o cell- @ boxes?  IF  ['] recurse do-childs  THEN
+    ;] msgs-box .do-childs 2drop +sync ['] +sync msgs-box .vp-needed
+    ['] .$selected $tmp primary! ;
+
+: select-range ( -- ) { | w^ added }
+    $selected $@len 2 cells u< ?EXIT
+    true $selected $@ cell- cell mem+DO
+	IF
+	    I 2@ - 1 u> IF
+		I 2@ 1+ U+DO  I added >stack  LOOP
+	    THEN
+	    false
+	ELSE
+	    I 2@ - 1 u>
+	THEN
+    LOOP  drop
+    added $@ cell mem+DO
+	I @ $selected +sorted$
+    LOOP
+    added $free
+    re-run-selection ;
+
+: deselect-all ( -- )
+    $selected $free  re-run-selection ;
 
 : +log#-date-token ( log-mask -- o ) >r
     {{
 	\sans
-	{{ "🔲" }}text dup { textwidget }
+	{{ "🔲" }}text dup { textwidget } log# 0 <# #s "num:" holds #> name!
 	}}v 25%bv "log:select" name! r@ log:select and 0= IF  /flip  THEN
 	\script
 	{{
@@ -1039,9 +1082,6 @@ Variable $selected
 
 : ?flip ( flag -- ) IF  o /flop  ELSE  o /flip  THEN  drop ;
 Variable re-indent#
-Create boxes? parbox , hbox , vbox , zbox ,
-DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
-      cell +LOOP  drop false ;
 
 : re-box-run ( -- ) recursive
     gui( re-indent# @ spaces name$ type cr )
@@ -1055,8 +1095,9 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 	-1 re-indent# +!
     THEN ;
 : re-log#-token ( -- )
-    ['] re-box-run msgs-box+resize msgs-box .do-childs
-    [: +resize +sync ;] msgs-box .vp-needed ;
+    ['] re-box-run msgs-box .do-childs
+    ['] re-box-run msgs-title-box .do-childs
+    msgs-box+resize  [: +resize +sync ;] msgs-box .vp-needed ;
 ' re-log#-token is update-log
 
 : msg-start-par ( -- )
@@ -1115,20 +1156,17 @@ wmsg-class :method msg:start { d: pk -- o }
 	    me? IF  swap rot  THEN
 	}}h box[] "msgs-box" name! >msgs-box
 	blackish
-    THEN
-;
+    THEN ;
 wmsg-class :method msg:silent-start ( addr u -- )
     key| to msg:id$ true to msg:silent? ;
 wmsg-class :method msg:tag dup 0= IF  2drop EXIT  THEN { d: string -- o }
     link-blue \mono string [: '#' emit type ;] $tmp
     ['] utf8-sanitize $tmp }}text text-color! \sans
-    msg-box .child+
-;
+    msg-box .child+ ;
 wmsg-class :method msg:text dup 0= IF  2drop EXIT  THEN { d: string -- o }
     text-color!
     string ['] utf8-sanitize $tmp }}text 25%bv
-    "text" name! msg-box .child+
-;
+    "text" name! msg-box .child+ ;
 : mono-col? ( -- )
     msg-group-o .msg:?otr  IF  mono-otr-col  ELSE  mono-col  THEN ;
 wmsg-class :method msg:text+format over 0= IF  drop 2drop EXIT  THEN { d: string format -- o }
@@ -1144,13 +1182,11 @@ wmsg-class :method msg:text+format over 0= IF  drop 2drop EXIT  THEN { d: string
     format msg:#underline and IF  _underline_  THEN
     format msg:#strikethrough and IF  -strikethrough-  THEN
     "text" name! msg-box .child+
-    \regular \normal \sans
-;
+    \regular \normal \sans ;
 wmsg-class :method msg:like { xc -- }
     text-color!
     xc ['] xemit $tmp }}text 25%bv
-    "like" name! msg-box .child+
-;
+    "like" name! msg-box .child+ ;
 wmsg-class :method msg:vote { xc -- }
     msg:end msg-start-par
     {{
@@ -1158,14 +1194,12 @@ wmsg-class :method msg:vote { xc -- }
 	text-color!
 	xc [: ." vote: " xemit ;] $tmp }}text 25%b
     }}z box[]
-    "vote" name! msg-box .child+
-;
+    "vote" name! msg-box .child+ ;
 wmsg-class :method msg:action dup 0= IF  2drop EXIT  THEN { d: string -- o }
     \italic last-otr? IF light-blue ELSE dark-blue THEN
     string ['] utf8-sanitize $tmp }}text 25%bv \regular
     text-color!
-    "action" name! msg-box .child+
-;
+    "action" name! msg-box .child+ ;
 wmsg-class :method msg:url dup 0= IF  2drop EXIT  THEN { d: string -- o }
     last-otr? IF light-blue ELSE dark-blue THEN
     string ['] utf8-sanitize $tmp }}text _underline_ 25%bv
@@ -1173,8 +1207,7 @@ wmsg-class :method msg:url dup 0= IF  2drop EXIT  THEN { d: string -- o }
     [: data >o text$ encode-% o> open-url ;]
     over click[]
     click( ." url: " dup ..parents cr )
-    "url" name! msg-box .child+
-;
+    "url" name! msg-box .child+ ;
 wmsg-class :method msg:lock dup 0= IF  2drop EXIT  THEN ( d: string -- )
     0 .v-dec$ dup IF
 	msg-key!  msg-group-o .msg:+lock
@@ -1197,8 +1230,7 @@ wmsg-class :method msg:coord dup 0= IF  2drop EXIT  THEN { d: string -- o }
     {{
 	glue*l gps-color# slide-frame dup .button1
 	blackish string [: ."  GPS: " .coords ;] $tmp }}text 25%b
-    }}z "gps" name! msg-box .child+
-;
+    }}z "gps" name! msg-box .child+ ;
 wmsg-class :method msg:perms { 64^ perm d: pk -- }
     perm [ 1 64s ]L pk msg-group-o .msg:perms# #!
     {{
@@ -1207,15 +1239,13 @@ wmsg-class :method msg:perms { 64^ perm d: pk -- }
 	    pk [: '@' emit .key-id ;] $tmp ['] utf8-sanitize $tmp }}text 25%b
 	    perm 64@ 64>n ['] .perms $tmp }}text 25%b
 	}}h
-    }}z msg-box .child+
-;
+    }}z msg-box .child+ ;
 wmsg-class :method msg:chain dup 0= IF  2drop EXIT  THEN { d: string -- o }
     {{
 	glue*l chain-color# slide-frame dup .button1
 	string sighash? IF  re-green  ELSE  obj-red  THEN
 	log:date log:perm or +log#-date-token
-    }}z "chain" name! msg-box .child+
-;
+    }}z "chain" name! msg-box .child+ ;
 wmsg-class :method msg:signal { d: pk -- o }
     {{
 	x-color { f: xc }
@@ -1227,15 +1257,13 @@ wmsg-class :method msg:signal { d: pk -- o }
 	black# to x-color
 	[: '@' emit .key-id ;] $tmp ['] utf8-sanitize $tmp }}text 25%b r> swap
 	xc to x-color
-    }}z msg-box .child+
-;
+    }}z msg-box .child+ ;
 wmsg-class :method msg:re ( addr u -- )
     re-green [: ." [" 85type ." ]→" ;] $tmp }}text msg-box .child+
     text-color! ;
 wmsg-class :method msg:id ( addr u -- )
     obj-red [: ." [" 85type ." ]:" ;] $tmp }}text msg-box .child+
-    text-color!
-;
+    text-color! ;
 : +otr-box ( addr u -- )
      light-blue \italic }}text 25%bv \regular blackish
      "otrify" name! msg-box .child+ ;
@@ -1524,8 +1552,7 @@ wmsg-class :method msg:object ( addr u type -- )
 	nip nip [: ." ???(" h. ." )" ;] $tmp }}text 0
     endcase
     msg-box .child+
-    text-color!
-;
+    text-color! ;
 
 in net2o : new-wmsg ( o:connection -- o )
     o wmsg-class new >o  parent!  msg-table @ token-table ! o o> ;
@@ -1785,8 +1812,13 @@ wmsg-o >o msg-table @ token-table ! o>
 		"" }}text 40%b dup to group-name
 		{{
 		}}h box[] dup to group-members
+		{{
+		    "" }}text 40%b dup to deselect-all-button [: deselect-all +sync ;] 0 click[]
+		    "↔️" }}text 40%b dup to select-range-button [: select-range +sync ;] 0 click[]
+		    "" }}text 40%b dup to clipboard-button [: ['] .$selected $tmp clipboard! ;] 0 click[]
+		}}h box[] "log:select" name! /flip
 		glue*l }}glue
-	    }}h box[]
+	    }}h box[] dup to msgs-title-box
 	}}z box[]
 	{{
 	    {{

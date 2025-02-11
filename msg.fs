@@ -1503,6 +1503,10 @@ Variable $lastline
 
 : !date ( addr u -- addr u )
     2dup + sigsize# - le-64@ line-date 64! ;
+: >tib ( addr u maxlen addr -- ) { maxlen addr }
+    dup maxlen u> IF  dup >r maxlen 0 addr over r> grow-tib
+	2drop to addr drop to maxlen  THEN
+    tuck addr maxlen smove ;
 : find-prev-chatline { maxlen addr -- max span addr span }
     msg-group$ $@ >group
     msg-group-o .msg:log[] $[]# 0= IF  maxlen 0 addr over  EXIT  THEN
@@ -1510,11 +1514,7 @@ Variable $lastline
     BEGIN  1- dup 0>= WHILE  dup msg-log-dec@
 	dup sigpksize# - /string key| 0 .pk@ key| str=  UNTIL  THEN
     msg-log-dec@ dup 0= IF  nip
-    ELSE  !date ['] msg:display textmsg-o .$tmp
-	dup maxlen u> IF  dup >r maxlen 0 addr over r> grow-tib
-	    2drop to addr drop to maxlen  THEN
-	tuck addr maxlen smove
-    THEN
+    ELSE  !date ['] msg:display textmsg-o .$tmp maxlen addr >tib  THEN
     maxlen swap addr over ;
 : find-next-chatline { maxlen addr -- max span addr span }
     msg-group$ $@ >group
@@ -1525,10 +1525,7 @@ Variable $lastline
     dup  msg-group-o .msg:log[] $[]# u>=
     IF    drop $lastline $@  64#-1 line-date 64!
     ELSE  msg-log-dec@ !date ['] msg:display textmsg-o .$tmp  THEN
-    dup maxlen u> IF  dup >r maxlen 0 addr over r> grow-tib
-	2drop to addr drop to maxlen  THEN
-    tuck addr maxlen smove
-    maxlen swap addr over ;
+    maxlen addr >tib  maxlen swap addr over ;
 
 : chat-prev-line  ( max span addr pos1 -- max span addr pos2 false )
     line-date 64@ 64#-1 64= IF
