@@ -693,6 +693,7 @@ $F503 Constant 'user-minus'
 '' Constant 'user-times'
 
 0 Value online-flag
+0 Value select-mode-button
 0 Value select-range-button
 0 Value deselect-all-button
 0 Value clipboard-button
@@ -1087,7 +1088,8 @@ Variable re-indent#
     gui( re-indent# @ spaces name$ type cr )
     logmask# @ >r
     name$ "log:" string-prefix? IF
-	name$ 4 /string ['] log >wordlist find-name-in
+	name$ 4 /string over c@ '~' = IF  1 /string r> invert >r  THEN
+	['] log >wordlist find-name-in
 	?dup-IF  name>interpret execute r> and ?flip  EXIT  THEN  THEN
     rdrop
     o cell- @ boxes?  IF
@@ -1813,7 +1815,10 @@ wmsg-o >o msg-table @ token-table ! o>
 		{{
 		}}h box[] dup to group-members
 		{{
-		    "" }}text 40%b dup to deselect-all-button [: deselect-all +sync ;] 0 click[]
+		    "✅️" }}text 40%b dup to select-mode-button [: logstyles:+select +sync +resize ;] 0 click[]
+		}}h box[] "log:~select" name!
+		{{
+		    "" }}text 40%b dup to deselect-all-button [: deselect-all logstyles:-select +sync +resize ;] 0 click[]
 		    "↔️" }}text 40%b dup to select-range-button [: select-range +sync ;] 0 click[]
 		    "" }}text 40%b dup to clipboard-button [: ['] .$selected $tmp clipboard! ;] 0 click[]
 		}}h box[] "log:select" name! /flip
