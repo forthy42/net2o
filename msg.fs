@@ -516,19 +516,19 @@ Defer update-log
 : .group ( addr u -- )
     2dup printable? IF  forth:type  ELSE  ." @" .key-id  THEN ;
 
+: +style: ( n -- )
+    Create , DOES> @ logmask# or! update-log ;
+: -style: ( n -- )
+    Create , DOES> @ invert logmask# and! update-log ;
+: create-styles ( -- )
+    [:  { nt }
+	nt name>interpret execute dup
+	nt name>string [: '+' emit type ;] $tmp nextname +style:
+	nt name>string [: '-' emit type ;] $tmp nextname -style:
+	true ;] ['] log >wordlist traverse-wordlist ;
+
 scope: logstyles
-: +num  log:num  logmask# or! update-log ;
-: -num  log:num  invert logmask# and! update-log ;
-: +date log:date logmask# or! update-log ;
-: -date log:date invert logmask# and! update-log ;
-: +end  log:end  logmask# or! update-log ;
-: -end  log:end  invert logmask# and! update-log ;
-: +len  log:len  logmask# or! update-log ;
-: -len  log:len  invert logmask# and! update-log ;
-: +perm log:perm logmask# or! update-log ;
-: -perm log:perm invert logmask# and! update-log ;
-: +select log:select logmask# or! update-log ;
-: -select log:select invert logmask# and! update-log ;
+create-styles
 }scope
 
 msg-notify-class :method msg:start ( addr u -- )
