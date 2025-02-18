@@ -2184,17 +2184,16 @@ s" minos2/unicode/brackets.db" open-fpath-file
 	punctation$ x-skip$
 	brackets$   x-skip$
     dup r> = UNTIL ;
+: -split| ( addr u -- addr u' )
+    2dup '|' -scan dup IF  2nip  ELSE  2drop  THEN ;
 
 : text-rec ( addr u -- )
     2drop ['] noop ;
 : tag-rec ( addr u -- )
     over c@ '#' = IF
-	-skip-punctation
-	over ?flush-text 2dup + to last->in
-	[: 1 /string
-	    \ ." tag: '" forth:type ''' forth:emit forth:cr
-	    $, msg-tag
-	;]
+	-skip-punctation -split|
+	over ?flush-text 2dup + dup c@ '|' = - to last->in
+	[: 1 /string $, msg-tag ;]
     ELSE  2drop 0  THEN ;
 : vote-rec ( addr u -- )
     2dup "vote:" string-prefix? IF

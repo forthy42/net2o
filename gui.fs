@@ -1815,12 +1815,16 @@ wmsg-o >o msg-table @ token-table ! o>
 		{{
 		}}h box[] dup to group-members
 		{{
-		    "✅️" }}text 40%b dup to select-mode-button [: logstyles:+select +sync +resize ;] 0 click[]
+		    "✅️" }}text 40%b dup to select-mode-button
+		    [: logstyles:+select +sync +resize ;] 0 click[]
 		}}h box[] "log:~select" name!
 		{{
-		    "" }}text 40%b dup to deselect-all-button [: deselect-all logstyles:-select +sync +resize ;] 0 click[]
-		    "↔️" }}text 40%b dup to select-range-button [: select-range +sync ;] 0 click[]
-		    "" }}text 40%b dup to clipboard-button [: ['] .$selected $tmp clipboard! ;] 0 click[]
+		    "" }}text 40%b dup to deselect-all-button
+		    [: deselect-all logstyles:-select +sync +resize ;] 0 click[]
+		    "↔️" }}text 40%b dup to select-range-button
+		    [: select-range +sync ;] 0 click[]
+		    "" }}text 40%b dup to clipboard-button
+		    [: ['] .$selected $tmp clipboard! ;] 0 click[]
 		}}h box[] "log:select" name! /flip
 		glue*l }}glue
 	    }}h box[] dup to msgs-title-box
