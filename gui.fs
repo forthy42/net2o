@@ -1824,7 +1824,9 @@ wmsg-o >o msg-table @ token-table ! o>
 		    "↔️" }}text 40%b dup to select-range-button
 		    [: select-range +sync ;] 0 click[]
 		    "" }}text 40%b dup to clipboard-button
+		    [IFDEF] android also jni [THEN]
 		    [: ['] .$selected $tmp clipboard! ;] 0 click[]
+		    [IFDEF] android previous [THEN]
 		}}h box[] "log:select" name! /flip
 		glue*l }}glue
 	    }}h box[] dup to msgs-title-box
