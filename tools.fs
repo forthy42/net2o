@@ -165,8 +165,8 @@ Variable net2o-debug$
 ?: cand! ( x c-addr -- )  dup >r c@ and r> c! ;
 ?: cor!  ( x c-addr -- )  dup >r c@ or  r> c! ;
 
-: max!@ ( n addr -- )    dup >r @ max  r> !@ ;
-: umax!@ ( n addr -- )   dup >r @ umax r> !@ ;
+: max!@ ( n addr -- n' )    dup >r @ max  r> !@ ;
+: umax!@ ( n addr -- n' )   dup >r @ umax r> !@ ;
 
 \ user stack, automatic init+dispose
 

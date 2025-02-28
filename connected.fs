@@ -46,7 +46,7 @@ connect-table $@ inherit-table context-table
 
 +net2o: set-top ( utop flag -- ) \g set top, flag is true when all data is sent
     >r 64>n r> data-rmap with mapc
-	over dest-top <> and false dest-end ?!@ drop \ atomic, replaces or!
+	over dest-top <> and false dest-end atomic?!@ drop \ atomic, replaces or!
 	dest-top!
     endwith ;
 +net2o: slurp ( -- ) \g slurp in tracked files

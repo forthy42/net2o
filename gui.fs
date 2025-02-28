@@ -2097,7 +2097,7 @@ Variable invitation-stack
 	    engage-delay# 0 [: fdrop drop k-enter id-toggler .act .ekeyed ;] >animate
 	THEN
     THEN
-    1config  !widgets  !init-animation
+    1config  !widgets
     get-order n>r ['] /chat >wordlist 1 set-order
     ['] widgets-loop catch  leave-chats
     text-chat-cmd-o to chat-cmd-o
