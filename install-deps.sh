@@ -12,7 +12,7 @@ EOF
 }
 
 install_debian() {
-    sudo apt-get -y install wget
+    sudo apt-get -y install wget git
     setup_debian
     sudo apt-get -y update
     sudo apt-get -y install gforth gforth-minos2
