@@ -17,4 +17,13 @@ install_debian() {
     sudo apt-get -y install gforth gforth-minos2
 }
 
+case `uname` in
+    Linux)
+	OS=`. /etc/os-release; echo ${ID%-*}`
+	;;
+    Darwin)
+	OS=osx
+	;;
+esac
+
 install_${TRAVIS_OS_NAME:-$OS}
