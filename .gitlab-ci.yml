@@ -12,10 +12,13 @@ build-amd64:
     - ./install-deps.sh unstable
     - ./autogen.sh
     - ./configure --host=x86_64-pc-linux-gnu --build=x86_64-pc-linux-gnu
+    - make -j`nprocs` libs
+    - make install-libs
     - make distclean
-    - dpkg-buildpackage -uc -us -d -b -j1
+    - for i in bdelta keccak-low threefish ed25519-donna; do (cd $i; dpkg-buildpackage -uc -us -d -b)
+    - dpkg-buildpackage -uc -us -d -b
     - rm -f debian/*.deb
-    - mv ../*.deb debian
+    - mv ../*.deb *.deb debian
   
   # The files which are to be made available in GitLab
   artifacts:
@@ -29,8 +32,11 @@ build-i386:
     - ./install-deps.sh unstable
     - ./autogen.sh
     - ./configure --host=i686-pc-linux-gnu --build=i686-pc-linux-gnu
+    - make -j`nprocs` libs
+    - make install-libs
     - make distclean
-    - dpkg-buildpackage -uc -us -d -b -ai386 -j1
+    - for i in bdelta keccak-low threefish ed25519-donna; do (cd $i; dpkg-buildpackage -uc -us -d -b)
+    - dpkg-buildpackage -uc -us -d -b -ai386
     - mv ../*i386*.deb debian
   
   # The files which are to be made available in GitLab
