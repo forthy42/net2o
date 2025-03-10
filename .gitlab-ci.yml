@@ -9,10 +9,10 @@ before_script:
     - case $ARCH in
       i386)
         export BARCH=i686
-	;;
+        ;;
       amd64)
         export BARCH=x86_64
-	;;
+        ;;
       esac
     - ./configure --host=$BARCH-pc-linux-gnu --build=$BARCH-pc-linux-gnu
     - make -j`nprocs` libs
