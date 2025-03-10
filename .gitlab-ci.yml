@@ -56,13 +56,14 @@ build-amd64-stable:
     - make distclean
     - for i in bdelta keccak-low threefish ed25519-donna; do (cd $i; dpkg-buildpackage -uc -us -d -b); done
     - dpkg-buildpackage -uc -us -d -b
-    - rm -f debian/*.deb
-    - mv ../*.deb *.deb debian
+    - mkdir -p debian/stable
+    - rm -f debian/stable/*.deb
+    - mv ../*.deb *.deb debian/stable
   
   # The files which are to be made available in GitLab
   artifacts:
     paths:
-      - debian/*.deb
+      - debian/stable/*.deb
 
 build-i386-stable:
   stage: build-i386
@@ -76,12 +77,12 @@ build-i386-stable:
     - make distclean
     - for i in bdelta keccak-low threefish ed25519-donna; do (cd $i; dpkg-buildpackage -uc -us -d -b -ai386); done
     - dpkg-buildpackage -uc -us -d -b -ai386
-    - mv ../*i386*.deb *.deb debian
+    - mv ../*i386*.deb *.deb debian/stable
   
   # The files which are to be made available in GitLab
   artifacts:
     paths:
-      - debian/*.deb
+      - debian/stable/*.deb
 
 build-amd64-oldstable:
   stage: build-amd64
@@ -95,13 +96,14 @@ build-amd64-oldstable:
     - make distclean
     - for i in bdelta keccak-low threefish ed25519-donna; do (cd $i; dpkg-buildpackage -uc -us -d -b); done
     - dpkg-buildpackage -uc -us -d -b
-    - rm -f debian/*.deb
-    - mv ../*.deb *.deb debian
+    - mkdir -p debian/oldstable
+    - rm -f debian/oldstable/*.deb
+    - mv ../*.deb *.deb debian/oldstable
   
   # The files which are to be made available in GitLab
   artifacts:
     paths:
-      - debian/*.deb
+      - debian/oldstable/*.deb
 
 build-i386-oldstable:
   stage: build-i386
@@ -115,10 +117,10 @@ build-i386-oldstable:
     - make distclean
     - for i in bdelta keccak-low threefish ed25519-donna; do (cd $i; dpkg-buildpackage -uc -us -d -b -ai386); done
     - dpkg-buildpackage -uc -us -d -b -ai386
-    - mv ../*i386*.deb *.deb debian
+    - mv ../*i386*.deb *.deb debian/oldstable
   
   # The files which are to be made available in GitLab
   artifacts:
     paths:
-      - debian/*.deb
+      - debian/oldstable/*.deb
 
