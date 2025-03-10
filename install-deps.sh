@@ -2,6 +2,7 @@
 which sudo || alias sudo=eval
 
 version=$1
+arch=$2
 
 setup_debian() {
 wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp.asc | \
