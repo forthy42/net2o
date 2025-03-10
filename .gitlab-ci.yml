@@ -37,7 +37,85 @@ build-i386:
     - make distclean
     - for i in bdelta keccak-low threefish ed25519-donna; do (cd $i; dpkg-buildpackage -uc -us -d -b -ai386); done
     - dpkg-buildpackage -uc -us -d -b -ai386
-    - mv ../*i386*.deb debian
+    - mv ../*i386*.deb *.deb debian
+  
+  # The files which are to be made available in GitLab
+  artifacts:
+    paths:
+      - debian/*.deb
+
+build-amd64-stable:
+  stage: build-amd64
+  image: forthy42/gforth-builder-linux-amd64:stable
+  script:
+    - ./install-deps.sh stable
+    - ./autogen.sh
+    - ./configure --host=x86_64-pc-linux-gnu --build=x86_64-pc-linux-gnu
+    - make -j`nprocs` libs
+    - make install-libs
+    - make distclean
+    - for i in bdelta keccak-low threefish ed25519-donna; do (cd $i; dpkg-buildpackage -uc -us -d -b); done
+    - dpkg-buildpackage -uc -us -d -b
+    - rm -f debian/*.deb
+    - mv ../*.deb *.deb debian
+  
+  # The files which are to be made available in GitLab
+  artifacts:
+    paths:
+      - debian/*.deb
+
+build-i386-stable:
+  stage: build-i386
+  image: forthy42/gforth-builder-linux-i386:stable
+  script:
+    - ./install-deps.sh stable
+    - ./autogen.sh
+    - ./configure --host=i686-pc-linux-gnu --build=i686-pc-linux-gnu
+    - make -j`nprocs` libs
+    - make install-libs
+    - make distclean
+    - for i in bdelta keccak-low threefish ed25519-donna; do (cd $i; dpkg-buildpackage -uc -us -d -b -ai386); done
+    - dpkg-buildpackage -uc -us -d -b -ai386
+    - mv ../*i386*.deb *.deb debian
+  
+  # The files which are to be made available in GitLab
+  artifacts:
+    paths:
+      - debian/*.deb
+
+build-amd64-oldstable:
+  stage: build-amd64
+  image: forthy42/gforth-builder-linux-amd64:oldstable
+  script:
+    - ./install-deps.sh oldstable
+    - ./autogen.sh
+    - ./configure --host=x86_64-pc-linux-gnu --build=x86_64-pc-linux-gnu
+    - make -j`nprocs` libs
+    - make install-libs
+    - make distclean
+    - for i in bdelta keccak-low threefish ed25519-donna; do (cd $i; dpkg-buildpackage -uc -us -d -b); done
+    - dpkg-buildpackage -uc -us -d -b
+    - rm -f debian/*.deb
+    - mv ../*.deb *.deb debian
+  
+  # The files which are to be made available in GitLab
+  artifacts:
+    paths:
+      - debian/*.deb
+
+build-i386-oldstable:
+  stage: build-i386
+  image: forthy42/gforth-builder-linux-i386:oldstable
+  script:
+    - ./install-deps.sh oldstable
+    - ./autogen.sh
+    - ./configure --host=i686-pc-linux-gnu --build=i686-pc-linux-gnu
+    - make -j`nprocs` libs
+    - make install-libs
+    - make distclean
+    - for i in bdelta keccak-low threefish ed25519-donna; do (cd $i; dpkg-buildpackage -uc -us -d -b -ai386); done
+    - dpkg-buildpackage -uc -us -d -b -ai386
+    - mv ../*i386*.deb *.deb debian
   
   # The files which are to be made available in GitLab
   artifacts:
