@@ -35,7 +35,7 @@ build-i386:
     - make -j`nprocs` libs
     - make install-libs
     - make distclean
-    - for i in bdelta keccak-low threefish ed25519-donna; do (cd $i; dpkg-buildpackage -uc -us -d -b); done
+    - for i in bdelta keccak-low threefish ed25519-donna; do (cd $i; dpkg-buildpackage -uc -us -d -b -ai386); done
     - dpkg-buildpackage -uc -us -d -b -ai386
     - mv ../*i386*.deb debian
   
