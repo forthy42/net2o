@@ -15,7 +15,7 @@ before_script:
         ;;
       esac
     - ./configure --host=$BARCH-pc-linux-gnu --build=$BARCH-pc-linux-gnu
-    - make -j`nprocs` libs
+    - make -j`nproc` libs
     - make install-libs
     - make distclean
     - for i in bdelta keccak-low threefish ed25519-donna; do (cd $i; dpkg-buildpackage -uc -us -d -b -a$ARCH); done
