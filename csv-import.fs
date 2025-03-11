@@ -26,4 +26,6 @@ $[]Variable msg-fields[]
     ELSE  msg-fields[] $[]@ 2dup msg-group$ $! >group chat-line  THEN ;
 
 : csv-importer ( addr u -- )
-    ['] import-messages read-csv ;
+    ['] import-messages read-csv
+    msg-fields[] [: 2dup msg-group$ $! >group msg-group-o .msg:-silent ;]
+    $[]map ;

@@ -66,10 +66,15 @@ hash-size# buffer: hash-out-buf
 
 \ commands for the command line user interface
 
+10 stack: forth-order
+
 : set-net2o-cmds ( -- )
+    get-order forth-order set-stack
+    ['] n2o >wordlist 1 set-order
     ['] .base ['] .stacks 2 status-xts set-stack
     ['] n2o >wordlist is forth-recognize ;
 : set-forth-cmds ( -- )
+    forth-order get-stack set-order
     ['] .base ['] .stacks ['] .order 3 status-xts set-stack
     [ action-of forth-recognize ]L is forth-recognize ;
 
