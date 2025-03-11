@@ -74,7 +74,7 @@ hash-size# buffer: hash-out-buf
     ['] .base ['] .stacks 2 status-xts set-stack
     ['] n2o >wordlist is forth-recognize ;
 : set-forth-cmds ( -- )
-    forth-order get-stack set-order
+    forth-order get-stack ?dup-IF  set-order  THEN
     ['] .base ['] .stacks ['] .order 3 status-xts set-stack
     [ action-of forth-recognize ]L is forth-recognize ;
 
