@@ -150,8 +150,11 @@ Forward net2o-gui
 Forward run-scan-qr
 
 scope: importer
-: g+ [ "json/parser.fs" ]path required
+: g+ ( ["dir"] -- )
+    [ "json/parser.fs" ]path required
     ?nextarg 0= IF  "."  THEN  "g+-import" evaluate ;
+: csv ( "file" -- )
+    ?nextarg IF  csv-importer  THEN ;
 }scope
 
 scope{ n2o
@@ -521,7 +524,7 @@ warnings !
     BEGIN  ?nextarg  WHILE  ." ====== Chat log for " 2dup type
 	    over c@ '@' = IF  1 /string nick>pk key| ."  key: " 2dup 85type  THEN
 	    ."  ======" cr msg-group$ $!
-	    msg-group$ $@ [ -1 1 rshift cell/ ]l load-msgn REPEAT ;
+	    msg-group$ $@ load-msg [ -1 1 rshift cell/ ]l display-lastn  REPEAT ;
 
 : chatgroup ( -- )
     \U chatgroup name [id] @user1 .. @usern [admin <sk>] [+perm]
@@ -787,7 +790,9 @@ synonym #! \ ( -- )
     check-old$ $@ ['] .rngstat stderr outfile-execute  check-old$ $free ;
 
 : import ( -- )
-    \U import g+|... [directory]
+    \U import g+ [directory]
+    \U import cvs file
+    \G importer for various external formats
     ?nextarg IF
 	['] importer >wordlist find-name-in ?dup-IF
 	    name>interpret execute  EXIT  THEN  THEN

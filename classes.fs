@@ -150,7 +150,7 @@ cmd-class class{ msg
     field: mode
     value: silent?
     \ mode bits:
-    1 3 bits: otr# lock# visible#
+    1 4 bits: otr# lock# visible# silent#
     : bit-ops: ( bit -- )
         parse-name [{: d: name :}l name rot [: emit type ;] $tmp nextname ;]
 	{: xt: gen-name :}
@@ -160,6 +160,7 @@ cmd-class class{ msg
     otr#     bit-ops: otr
     lock#    bit-ops: lock
     visible# bit-ops: visible
+    silent#  bit-ops: silent
 
     1 4 bits: role-admin# key-admin# moderator# troll#
     \ key admins can set keys, role-admins can set roles

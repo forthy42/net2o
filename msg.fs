@@ -187,7 +187,7 @@ msg-notify-class ' new static-a with-allocater Constant msg-notify-o
     msg-notify-o .msg:display ;
 
 : display-lastn ( n -- )
-    msg-group-o .msg:redisplay ;
+    ?dup-IF   msg-group-o .msg:redisplay  THEN ;
 : display-sync-done ( -- )
     rows  msg-group-o .msg:redisplay ;
 
@@ -1630,6 +1630,7 @@ previous
 : send-avalanche ( xt -- )
     msg-group-o .msg:?otr IF  now>otr  ELSE  now>never  THEN
     (send-avalanche)
+    msg-group-o .msg:?silent IF  drop 2drop EXIT  THEN
     >r .chat r> 0= IF  msg-group-o .msg:.nobody  THEN ;
 
 : send-otr-avalanche ( args xt group -- )
@@ -2383,9 +2384,6 @@ Defer msg-recognize
 
 previous
 
-: load-msgn ( addr u n -- )
-    >r load-msg r> display-lastn ;
-
 : +group ( -- ) msg-group$ $@ >group +unique-con ;
 
 : msg-timeout ( -- )
@@ -2462,12 +2460,12 @@ $B $E 2Value chat-bufs#
     @/ 2swap tuck msg-group$ $!  0=
     IF  2dup key| msg-group$ $!  THEN ; \ 1:1 chat-group=key
 
-: ?load-msgn ( -- )
+: ?load-msgn { n -- }
     msg-group$ $@ >group msg-group-o .msg:log[] $@len 0= IF
-	msg-group$ $@ rows load-msgn  THEN ;
+	msg-group$ $@ load-msg n display-lastn  THEN ;
 
 : chat-connects ( -- )
-    chat-keys [: key>group ?load-msgn
+    chat-keys [: key>group rows ?load-msgn
       dup 0= IF  2drop msg-group$ $@ >group  EXIT  THEN
       2dup search-connect ?dup-IF  >o +group greet o> 2drop EXIT  THEN
       2dup pk-peek?  IF  chat-connect  ELSE  2drop  THEN ;] $[]map ;
@@ -2565,6 +2563,9 @@ scope{ /chat
 
 \ chat toplevel
 
+: chat-line ( addr u -- )
+    do-chat-cmd? 0= IF  avalanche-text  THEN ;
+
 : do-chat ( -- )
     status-xts get-stack n>r  get-order n>r
     chat-history  edit-curpos-off
@@ -2577,7 +2578,7 @@ scope{ /chat
     ['] .order 4 status-xts set-stack
     BEGIN  .status get-input-line .unstatus default-color
 	2dup "/bye" str= >r 2dup "\\bye" str= r> or 0= WHILE
-	    do-chat-cmd? 0= IF  avalanche-text  THEN
+	    chat-line
     REPEAT  2drop leave-chats  xchar-history
     nr> set-order nr> status-xts set-stack ;
 

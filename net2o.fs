@@ -1992,6 +1992,7 @@ require addr.fs
 require dht.fs
 require vault.fs
 require msg.fs
+require csv-import.fs \ message importer
 require helper.fs
 require qr.fs
 \ require term.fs
