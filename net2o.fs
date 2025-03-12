@@ -1213,7 +1213,7 @@ Create chunk-adder chunks-struct allot
 
 : .0depth ( -- ) <warn> "Stack should always be empty!" type cr <default> ;
 : !!0depth!! ( -- ) ]] depth IF  .0depth ~~bt clearstack  THEN [[ ; immediate
-: event-loop' ( -- )  BEGIN  stop  !!0depth!!  AGAIN ;
+: event-loop' ( -- )  BEGIN  stop  !!0depth!!  terminating? UNTIL ;
 : create-query-task ( -- )
     ['] event-loop' 1 net2o-task to query-task ;
 : ?query-task ( -- task )
@@ -1876,7 +1876,7 @@ Forward next-saved-msg
 	d#cleanups?     !!0depth!!
 	request-timeout !!0depth!!
 	last-packet-tos !!0depth!!
-    AGAIN ;
+    terminating? UNTIL ;
 
 : create-timeout-task ( -- )  timeout-task ?EXIT
     ['] timeout-loop 1 net2o-task to timeout-task ;
@@ -1884,7 +1884,7 @@ Forward next-saved-msg
 \ packet reciver task
 
 : packet-loop ( -- ) \ 1 stick-to-core
-    BEGIN  packet-event  !!0depth!!  AGAIN ;
+    BEGIN  packet-event  !!0depth!!  terminating? UNTIL ;
 
 in net2o : request-done ( n -- )
     o [{: n xo :}h1 n xo .request ;] up@ send-event ;
@@ -1909,7 +1909,7 @@ in net2o : request-done ( n -- )
     event-loop-task requests->0 o> ;
 
 : server-loop ( -- )
-    0 >o rdrop  BEGIN  client-loop  AGAIN ;
+    0 >o rdrop  BEGIN  client-loop  terminating? UNTIL ;
 
 : server-loop-catch ( -- )
     ['] server-loop catch

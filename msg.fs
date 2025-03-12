@@ -150,15 +150,15 @@ Variable saved-msg$
 : save-msgs& ( -- )
     syncfile( msg-group-o saved-msg$ +unique$ )else(
     msg-group-o [{: group-o :}h1 group-o saved-msg$ +unique$ ;]
-      ?file-task send-event ) ;
+    ?file-task send-event ) ;
 
 0 Value log#
-2Variable last-msg
-
+0 Value log$
+  
 : +msg-log ( addr u -- addr' u' / 0 0 )
     [: msg-group-o .msg:log[] $ins[]date  dup  dup 0< xor to log#
-	log# msg-group-o .msg:log[] $[]@ last-msg 2!
-	0< IF  #0.  ELSE  last-msg 2@  THEN
+	log# msg-group-o .msg:log[] $[] to log$
+	0< IF  #0.  ELSE  log$ $@  THEN
     ;] msglog-sema c-section ;
 : ?save-msg ( -- )
     msg( ." saving messages in group " msg-group-o dup h. .msg:name$ type cr )
@@ -415,6 +415,9 @@ previous
     IF  2drop  ELSE  \ ." msg-key+ " 2dup 85type forth:cr
 	$make msg-group-o .msg:keys[] >back  THEN ;
 
+: .like ( xc -- )
+    dup xemit '0' '9' 1+ within IF  $FE0F xemit $20E3 xemit  THEN ;
+
 \ message commands
 
 scope{ net2o-base
@@ -564,7 +567,7 @@ msg-notify-class :method msg:object case
     endcase ;
 msg-notify-class :method msg:end ( -- )
     msg-notify ;
-msg-notify-class :method msg:like ( xchar -- ) ['] xemit $tmp notify+ ;
+msg-notify-class :method msg:like ( xchar -- ) ['] .like $tmp notify+ ;
 msg-notify-class :method msg:vote ( xchar -- ) [: cr ." vote: " xemit ;] $tmp notify+ ;
 
 \ msg scan for hashes class
@@ -631,7 +634,7 @@ msg:class :method msg:signal ( addr u -- ) last# >r
     r> to last# ;
 msg:class :method msg:chain ( addr u -- )
     2dup sighash? IF  <info>  ELSE  <err>  THEN
-    ."  <" over le-64@ .ticks
+    ." <" over le-64@ .ticks space
     verbose( dup keysize - /string ." ," 85type )else( 2drop ) <default>
 ;
 msg:class :method msg:re ( addr u -- )
@@ -651,7 +654,7 @@ msg:class :method msg:text+format ( addr u format -- )
 msg:class :method msg:url ( addr u -- ) $utf8>
     <warn> encode-% forth:type <default> ;
 msg:class :method msg:like ( xchar -- )
-    <info> utf8emit <default> ;
+    <info> .like <default> ;
 msg:class :method msg:vote ( xchar -- )
     <info> cr ." vote: " utf8emit <default> ;
 msg:class :method msg:lock ( addr u -- )
@@ -1653,6 +1656,8 @@ also net2o-base
 	key [: $, msg-signal " left" $, msg-action ;] group send-otr-avalanche
 	o> ;]
     wait-task-event ;
+: send-like ( xc msg-addr u -- )
+    [: chain, ulit, msg-like ;] send-avalanche ;
 previous
 
 \ chat helper words
@@ -2033,13 +2038,14 @@ scope{ /chat
 	2drop drop "logstyle" /help
     THEN ;
 
+e? xchar-maxmem 1 = [IF] '+' [ELSE] '👍' [THEN] Constant default-like
+
 :is /like ( addr u -- )
     bl $split 2swap s>unumber? 0= abort" Line number needed!" drop >r
-    IF  xc@  ELSE  drop   [ e? xchar-maxmem 1 = ] [IF] '+' [ELSE] '👍' [THEN]  THEN  r>
+    IF  xc@  ELSE  drop default-like  THEN  r>
     msg-group-o .msg:log[] $[]# >r
-    dup 0< IF   r@ +  THEN  r> dup 0<> - umin
-    [: msg-group-o .msg:log[] $[]@ chain,
-	ulit, msg-like ;] (send-avalanche) drop .chat save-msgs& ;
+    dup 0< IF   r@ +  THEN  r> dup 0<> - umin msg-group-o .msg:log[] $[]@
+    send-like .chat save-msgs& ;
 
 :is /otrify ( addr u -- )
     [: BEGIN  bl $split 2>r dup  WHILE  s>number? WHILE

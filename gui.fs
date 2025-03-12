@@ -1187,14 +1187,15 @@ wmsg-class :method msg:text+format over 0= IF  drop 2drop EXIT  THEN { d: string
     \regular \normal \sans ;
 wmsg-class :method msg:like { xc -- }
     text-color!
-    xc ['] xemit $tmp }}text 25%bv
+    xc ['] .like $tmp }}text 25%bv
     "like" name! msg-box .child+ ;
 wmsg-class :method msg:vote { xc -- }
     msg:end msg-start-par
     {{
 	glue*l send-color x-color font-size# 40% f* }}frame dup .button2
 	text-color!
-	xc [: ." vote: " xemit ;] $tmp }}text 25%b
+	xc [: ." vote: " .like ;] $tmp }}text 25%b
+	xc [{: xc :}h xc data $@ send-like ;] log$ click[]
     }}z box[]
     "vote" name! msg-box .child+ ;
 wmsg-class :method msg:action dup 0= IF  2drop EXIT  THEN { d: string -- o }
@@ -1633,7 +1634,8 @@ wmsg-o >o msg-table @ token-table ! o>
 : msg-tdisplay-loop ( addr u uskip log -- )
     { log }
     safe/string bounds U+DO
-	I log - cell/ to log#
+	I log - cell/ to log# \ index
+	I @ to log$           \ actual message address
 	I $@ { d: msgt }
 	msgt ['] msg-tdisplay wmsg-o .catch nothrow  IF
 	    <err> ." invalid entry" cr <default> 2drop
@@ -1783,7 +1785,7 @@ wmsg-o >o msg-table @ token-table ! o>
     chat-edit >o font@ to text-font x-color to text-color  o> ;
 
 : chat-edit-enter ( o:edit-w -- )
-    text$ dup IF  do-chat-cmd? 0= IF  avalanche-text
+    text$ dup ```-state or IF  do-chat-cmd? 0= IF  avalanche-text
 	ELSE  ?chat-otr-status ?chat-```-status  THEN
     ELSE  2drop  THEN
     64#-1 line-date 64!  $lastline $free ;
