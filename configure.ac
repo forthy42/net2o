@@ -15,7 +15,7 @@ dnl Process this file with autoconf to produce a configure script.
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([net2o], [0.9.9-20250312], [bernd@net2o.de], [net2o], [https://fossil.net2o.de/net2o/reportlist])
+AC_INIT([net2o], [0.9.9-20250319], [bernd@net2o.de], [net2o], [https://fossil.net2o.de/net2o/reportlist])
 AC_PREREQ([2.59])
 AC_CONFIG_MACRO_DIR([m4])
 AC_USE_SYSTEM_EXTENSIONS
@@ -125,8 +125,15 @@ AC_SUBST(GFDEBVER)
 AC_SUBST(GFARCH)
 AC_SUBST(GNU_LIBTOOL)
 
-ED25519_DONNA=
-test -d ed25519-donna && ED25519_DONNA=ed25519-donna
+if test -d ed25519-donna
+then
+    ED25519_DONNA=ed25519-donna
+else
+    ED25519_DONNA=
+    echo "*** Configure failed ***"
+    echo "Please do a git clone https://git.net2o.de/bernd/ed25519-donna.git"
+    exit 1
+fi
 AC_SUBST(ED25519_DONNA)
 
 test "x$prefix" = xNONE && prefix=$ac_default_prefix

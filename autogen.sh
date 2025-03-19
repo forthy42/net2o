@@ -15,7 +15,7 @@ function git-get {
     fi
 }
 
-if [ ! -f /app/include/ed25519-prims.h ]
+if [ ! -f $srcdir/ed25519-donna/ed25519-prims.h ]
 then
     (cd $srcdir; git-get https://git.net2o.de/bernd ed25519-donna)
 fi
