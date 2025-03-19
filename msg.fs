@@ -1626,7 +1626,7 @@ also net2o-base
     max#have +LOOP  ihave$ $free ;
 
 : (send-avalanche) ( xt -- addr u flag )
-    [:  msg:?silent [: <msg IF msg-silent-start ELSE msg-start THEN
+    [:  msg-group-o .msg:?silent [: <msg IF msg-silent-start ELSE msg-start THEN
 	    execute msg> ;] 0 .gen-cmd$
 	+last-signed msg-log, ;] [group] ihave>push ;
 previous
