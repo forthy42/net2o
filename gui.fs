@@ -1062,10 +1062,13 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 : deselect-all ( -- )
     $selected $free  re-run-selection ;
 
+: <log#>! ( o addr u -- o )
+     log# 0 <# #s 2swap holds #> name! ;
+
 : +log#-date-token ( log-mask -- o ) >r
     {{
 	\sans
-	{{ "🔲" }}text dup { textwidget } log# 0 <# #s "num:" holds #> name!
+	{{ "🔲" }}text dup { textwidget } "num:" <log#>!
 	}}v 25%bv "log:select" name! r@ log:select and 0= IF  /flip  THEN
 	\script
 	{{
@@ -1083,8 +1086,28 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 
 : ?flip ( flag -- ) IF  o /flop  ELSE  o /flip  THEN  drop ;
 Variable re-indent#
+0 Value chain-par
+0 Value vote-box
+UValue search-result
 
-: re-box-run ( -- ) recursive
+: (search-log#) ( string-post string-pre -- string-pre string-post )
+    name$ 2over string-prefix? IF
+	2over 2over nip name$ rot /string str= IF  o to search-result  THEN
+	EXIT \ don't recurse if the prefix matches
+    THEN
+    o cell- @ boxes?  IF  ['] recurse do-childs  THEN ;
+: search-par# ( n -- )
+    0 to search-result
+    s>d tuck <# #s rot sign #> "par:"
+    ['] (search-log#) msgs-box .do-childs 2drop 2drop
+    search-result to chain-par ;
+: search-vote# ( xc -- )
+    0 to search-result
+    <# xhold #0. #> "vote:"
+    ['] (search-log#) chain-par .do-childs 2drop 2drop
+    search-result to vote-box ;
+
+: re-box-run ( -- )
     gui( re-indent# @ spaces name$ type cr )
     logmask# @ >r
     name$ "log:" string-prefix? IF
@@ -1093,7 +1116,7 @@ Variable re-indent#
 	?dup-IF  name>interpret execute r> and ?flip  EXIT  THEN  THEN
     rdrop
     o cell- @ boxes?  IF
-	1 re-indent# +! ['] re-box-run do-childs
+	1 re-indent# +! ['] recurse do-childs
 	-1 re-indent# +!
     THEN ;
 : re-log#-token ( -- )
@@ -1103,7 +1126,7 @@ Variable re-indent#
 ' re-log#-token is update-log
 
 : msg-start-par ( -- )
-    {{ }}p "msg-par" name!
+    {{ }}p  "par:" <log#>!
     dup .subbox box[] drop box[] cbl >bl
     dup .subbox "msg-box" name!
     to msg-box to msg-par ;
@@ -1185,19 +1208,34 @@ wmsg-class :method msg:text+format over 0= IF  drop 2drop EXIT  THEN { d: string
     format msg:#strikethrough and IF  -strikethrough-  THEN
     "text" name! msg-box .child+
     \regular \normal \sans ;
+: vote { xc -- }
+    chain-par IF  xc search-vote#
+	vote-box ?dup-IF >o
+	    text$ s>unumber? IF
+		#1. d+ <# #s #> to text$
+	    ELSE  2drop  THEN
+	    o> THEN
+    THEN ;
+
 wmsg-class :method msg:like { xc -- }
-    text-color!
-    xc ['] .like $tmp }}text 25%bv
-    "like" name! msg-box .child+ ;
+    msg:silent? IF
+	." got a silent like " xc xemit cr
+	xc vote
+    ELSE
+	text-color!
+	xc ['] .like $tmp }}text 25%bv
+	"like" name! msg-box .child+
+    THEN ;
 wmsg-class :method msg:vote { xc -- }
     msg:end msg-start-par
     {{
 	glue*l send-color x-color font-size# 40% f* }}frame dup .button2
 	text-color!
-	xc [: ." vote: " .like ;] $tmp }}text 25%b
-	xc [{: xc :}h xc data $@ send-like ;] log$ click[]
-    }}z box[]
-    "vote" name! msg-box .child+ ;
+	{{ xc [: ." vote: " .like ;] $tmp }}text 25%b
+	    "0" }}text 25%b xc [: "vote:" type xemit ;] $tmp name! 
+	}}h
+    }}z xc [{: xc :}h xc addr data $@ send-silent-like ;] log$ click[]
+    msg-box .child+ ;
 wmsg-class :method msg:action dup 0= IF  2drop EXIT  THEN { d: string -- o }
     \italic last-otr? IF light-blue ELSE dark-blue THEN
     string ['] utf8-sanitize $tmp }}text 25%bv \regular
@@ -1243,12 +1281,16 @@ wmsg-class :method msg:perms { 64^ perm d: pk -- }
 	    perm 64@ 64>n ['] .perms $tmp }}text 25%b
 	}}h
     }}z msg-box .child+ ;
-wmsg-class :method msg:chain dup 0= IF  2drop EXIT  THEN { d: string -- o }
-    {{
-	glue*l chain-color# slide-frame dup .button1
-	string sighash? IF  re-green  ELSE  obj-red  THEN
-	log:date log:perm or +log#-date-token
-    }}z "chain" name! msg-box .child+ ;
+wmsg-class :method msg:chain ( addr u -- )
+    dup 0= IF  2drop EXIT  THEN  sighash? { flag -- }
+    flag IF  log# dup search-par#  ELSE  -1  THEN  to chain-log#
+    msg:silent? 0= IF
+	{{
+	    glue*l chain-color# slide-frame dup .button1
+	    flag IF  re-green  ELSE  obj-red  THEN
+	    log:date log:perm or +log#-date-token
+	}}z "chain" name! msg-box .child+
+    THEN ;
 wmsg-class :method msg:signal { d: pk -- o }
     {{
 	x-color { f: xc }

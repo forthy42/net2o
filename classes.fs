@@ -194,6 +194,8 @@ cmd-class class{ msg
     method hashs
     method hash-id
     method updates
+    method chain2
+    method like2
     
     method display   \ display one message
     method redisplay \ display full set

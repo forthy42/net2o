@@ -1,6 +1,6 @@
 # Commands #
 
-Version 0.9.9-20250319.
+Version 0.9.9-20250326.
 
 net2o separates data and commands.  Data is passed through to higher
 layers, commands are interpreted when they arrive.  For connection
@@ -417,6 +417,10 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   Each additional context is hashed to a 64 byte hash, and all the hashs
   are hashed together sequentially in the same order as the fileinfo
   describes.
+* $65 msg-chain2 ( $:dates,sighash -- )
+  chained to message[s]
+* $66 msg-like2 ( xchar -- )
+  add a like
 
 ### group description commands ###
 
