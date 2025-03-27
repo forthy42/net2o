@@ -983,9 +983,10 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 wmsg-class :method msg:end ( -- )
     msg:silent? IF  false to msg:silent?  EXIT  THEN
     glue*ll }}glue msg-box .child+
+    msg-par .subbox .name$ { d: subbox-name }
     dpy-w @ 80% fm* msg-par .par-split
     {{ msg-par unbox }} cbl
-    dup >r 0 ?DO  I pick box[] >bl "unboxed" name! drop  LOOP  r>
+    dup >r 0 ?DO  I pick box[] >bl subbox-name name! drop  LOOP  r>
     msg-vbox .+childs  enqueue ;
 0 Value edit-infobar-text \ nobody is online warning
 l" Deactivate Verbatim"
@@ -1023,8 +1024,8 @@ wmsg-class :method msg:.nobody ( -- )
 	['] .$selected $tmp primary!
     ;] swap click[] ;
 
-Create boxes? parbox , hbox , vbox , zbox ,
-DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
+Create boxes? hbox , vbox , zbox , here >r
+DOES>  [ r> ]L swap U+DO  dup I @ = IF  drop true unloop  EXIT  THEN
   cell +LOOP  drop false ;
 
 : re-run-selection ( -- )
@@ -1063,7 +1064,7 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
     $selected $free  re-run-selection ;
 
 : <log#>! ( o addr u -- o )
-     log# 0 <# #s 2swap holds #> name! ;
+    log# 0 <# #s 2swap holds #> name! ;
 
 : +log#-date-token ( log-mask -- o ) >r
     {{
@@ -1086,26 +1087,28 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 
 : ?flip ( flag -- ) IF  o /flop  ELSE  o /flip  THEN  drop ;
 Variable re-indent#
-0 Value chain-par
+User search-results
+Variable chain-pars
 0 Value vote-box
 UValue search-result
 
 : (search-log#) ( string-post string-pre -- string-pre string-post )
     name$ 2over string-prefix? IF
-	2over 2over nip name$ rot /string str= IF  o to search-result  THEN
+	2over 2over nip name$ rot /string str= IF  o search-results >stack  THEN
 	EXIT \ don't recurse if the prefix matches
     THEN
-    o cell- @ boxes?  IF  ['] recurse do-childs  THEN ;
+    o cell- @ boxes?  IF  ['] recurse do-childs  THEN
+\    o cell- @ parbox =  IF  ['] recurse subbox .do-childs  THEN
+;
 : search-par# ( n -- )
-    0 to search-result
     s>d tuck <# #s rot sign #> "par:"
     ['] (search-log#) msgs-box .do-childs 2drop 2drop
-    search-result to chain-par ;
+    0 search-results !@ chain-pars !@ sp@ $free drop ;
 : search-vote# ( xc -- )
-    0 to search-result
+    search-results $free
     <# xhold #0. #> "vote:"
-    ['] (search-log#) chain-par .do-childs 2drop 2drop
-    search-result to vote-box ;
+    chain-pars $@ bounds U+DO  I @ .(search-log#)  cell +LOOP  2drop 2drop
+    search-results get-stack 0 ?DO  to vote-box  LOOP ;
 
 : re-box-run ( -- )
     gui( re-indent# @ spaces name$ type cr )
@@ -1126,10 +1129,9 @@ UValue search-result
 ' re-log#-token is update-log
 
 : msg-start-par ( -- )
-    {{ }}p  "par:" <log#>!
-    dup .subbox box[] drop box[] cbl >bl
-    dup .subbox "msg-box" name!
-    to msg-box to msg-par ;
+    {{ }}p
+    dup .subbox box[] "par:" <log#>! to msg-box
+    box[] cbl >bl to msg-par ;
 : new-msg-par ( -- )
     msg-start-par
     cbl re-green logmask# @ +log#-date-token msg-box .child+
@@ -1209,19 +1211,22 @@ wmsg-class :method msg:text+format over 0= IF  drop 2drop EXIT  THEN { d: string
     "text" name! msg-box .child+
     \regular \normal \sans ;
 : vote { xc -- }
-    chain-par IF  xc search-vote#
+    chain-pars stack# IF  xc search-vote#
 	vote-box ?dup-IF >o
 	    text$ s>unumber? IF
 		#1. d+ <# #s #> to text$
 	    ELSE  2drop  THEN
-	    o> THEN
+	    o>
+	ELSE
+	    ." Didn't find vote box " xc xemit cr
+	THEN
+    ELSE
+	." Didn't find vote chain " xc xemit cr
     THEN ;
 
 wmsg-class :method msg:like { xc -- }
-    msg:silent? IF
-	." got a silent like " xc xemit cr
-	xc vote
-    ELSE
+    xc vote
+    msg:silent? 0= IF
 	text-color!
 	xc ['] .like $tmp }}text 25%bv
 	"like" name! msg-box .child+

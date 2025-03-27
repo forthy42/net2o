@@ -436,7 +436,7 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
 +net2o: msg-id ( $:id -- ) \g a hash id
     2 !!>=order? $> msg:id ;
 +net2o: msg-chain ( $:dates,sighash -- ) \g chained to message[s]
-    2 !!>=order? $> msg:chain ;
+    $41 2 msg:silent? select !!>=order? $> msg:chain ;
 +net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     2 !!>=order? $> msg:signal ;
 +net2o: msg-re ( $:hash ) \g relate to some object
@@ -482,10 +482,6 @@ $60 net2o: msg-silent-start ( $:pksig -- ) \g silent message tag
     \g are hashed together sequentially in the same order as the fileinfo
     \g describes.
     $40 !!order?  $> $> msg:updates ;
-+net2o: msg-chain2 ( $:dates,sighash -- ) \g chained to message[s]
-    $41 !!>=order? $> msg:chain2 ;
-+net2o: msg-like2 ( xchar -- ) \g add a like
-    64>n msg:like2 ;
 }scope
 
 msg-table $save
@@ -554,7 +550,6 @@ msg-notify-class :method msg:text+format ( addr u format -- ) drop $utf8> notify
 msg-notify-class :method msg:url ( addr u -- ) $utf8> notify+ ;
 msg-notify-class :method msg:action ( addr u -- ) $utf8> notify+ ;
 ' 2drop msg-notify-class is msg:chain
-' 2drop msg-notify-class is msg:chain2
 ' 2drop msg-notify-class is msg:re
 ' 2drop  msg-notify-class is msg:lock
 ' noop  msg-notify-class is msg:unlock
@@ -574,7 +569,6 @@ msg-notify-class :method msg:object case
 msg-notify-class :method msg:end ( -- )
     msg-notify ;
 msg-notify-class :method msg:like ( xchar -- ) ['] .like $tmp notify+ ;
-' drop msg-notify-class is msg:like2 ( xchar -- )
 msg-notify-class :method msg:vote ( xchar -- ) [: cr ." vote: " xemit ;] $tmp notify+ ;
 
 \ msg scan for hashes class
@@ -588,14 +582,12 @@ end-class msg-?hash-class
 ' 2drop msg-?hash-class is msg:tag
 ' 2drop msg-?hash-class is msg:signal
 ' 2drop msg-?hash-class is msg:chain
-' 2drop msg-?hash-class is msg:chain2
 ' 2drop msg-?hash-class is msg:id
 ' 2drop msg-?hash-class is msg:re
 ' 2drop msg-?hash-class is msg:text
 msg-?hash-class :method msg:text+format 2drop drop ;
 ' 2drop msg-?hash-class is msg:url
 ' drop  msg-?hash-class is msg:like
-' drop  msg-?hash-class is msg:like2
 ' drop  msg-?hash-class is msg:vote
 msg-?hash-class :method msg:lock ( addr u -- )
     0 .v-dec$ dup IF
@@ -646,7 +638,6 @@ msg:class :method msg:chain ( addr u -- )
     ." <" over le-64@ .ticks space
     verbose( dup keysize - /string ." ," 85type )else( 2drop ) <default>
 ;
-' 2drop msg:class is msg:chain2
 msg:class :method msg:re ( addr u -- )
     space <warn> ." [" 85type ." ]->" <default> ;
 msg:class :method msg:id ( addr u -- )
@@ -665,7 +656,6 @@ msg:class :method msg:url ( addr u -- ) $utf8>
     <warn> encode-% forth:type <default> ;
 msg:class :method msg:like ( xchar -- )
     <info> .like <default> ;
-' drop msg:class is msg:like2 ( xchar -- )
 msg:class :method msg:vote ( xchar -- )
     <info> cr ." vote: " utf8emit <default> ;
 msg:class :method msg:lock ( addr u -- )
@@ -1489,7 +1479,6 @@ textmsg-class :method msg:tag '#' emit type ;
 textmsg-class :method msg:signal '@' emit .simple-id ;
 ' 2drop textmsg-class is msg:re
 ' 2drop textmsg-class is msg:chain
-' 2drop textmsg-class is msg:chain2
 ' 2drop textmsg-class is msg:id
 ' 2drop textmsg-class is msg:lock
 ' noop textmsg-class is msg:unlock
@@ -1503,7 +1492,6 @@ textmsg-class :method msg:action ." /me " type ;
 textmsg-class :method msg:coord ." /here " 2drop ;
 textmsg-class :method msg:vote ." vote:" utf8emit ;
 textmsg-class :method msg:like ." /like " utf8emit ;
-' drop textmsg-class is msg:like2
 ' noop textmsg-class is msg:end
 textmsg-class :method msg:otrify 2drop 2drop ;
 ' 2drop textmsg-class is msg:payment
@@ -1675,8 +1663,7 @@ also net2o-base
 : execute-silent ( ... xt -- )
     msg-group-o .msg:mode dup @ msg:silent# or swap rot !wrapper ;
 : send-silent-like ( xc msg-addr u -- )
-    [: chain$, msg-chain2 ulit, msg-like2 ;]
-    ['] send-avalanche execute-silent ;
+    ['] send-like execute-silent ;
 previous
 
 \ chat helper words
