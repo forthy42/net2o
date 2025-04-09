@@ -403,6 +403,7 @@ Commands are context-sensitive in an OOP method hierarchy sense.
 * $31 msg-vote ( xchar -- )
   add a vote tag; votes are set by likes
 * $32 msg-text+format ( $text format -- )
+* $33 msg-vote-style ( style -- )
 * $60 msg-silent-start ( $:pksig -- )
   silent message tag
 * $61 msg-hashs ( $:hashs -- )
@@ -417,10 +418,6 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   Each additional context is hashed to a 64 byte hash, and all the hashs
   are hashed together sequentially in the same order as the fileinfo
   describes.
-* $65 msg-chain2 ( $:dates,sighash -- )
-  chained to message[s]
-* $66 msg-like2 ( xchar -- )
-  add a like
 
 ### group description commands ###
 

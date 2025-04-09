@@ -1,6 +1,6 @@
-\ messages                                           06aug2014py
+\ messages                                                           06aug2014py
 
-\ Copyright © 2014-2023   Bernd Paysan
+\ Copyright © 2014-2025   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -467,6 +467,8 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
     64>n msg:vote ;
 +net2o: msg-text+format ( $text format -- )
     64>n >r $> r> msg:text+format ;
++net2o: msg-vote-style ( style -- )
+    64>n msg:vote-style ;
 
 $60 net2o: msg-silent-start ( $:pksig -- ) \g silent message tag
     1 !!>order? $40 c-state !  $> msg:silent-start ;
@@ -535,6 +537,18 @@ scope: logstyles
 create-styles
 }scope
 
+: vote-singe ( xc -- ) drop ;
+: vote-multiple ( xc -- ) drop ;
+: vote-counting ( xc -- ) drop ;
+: vote-startstop ( xc -- ) drop ;
+
+Create vote-evals
+' vote-singe ,
+' vote-multiple ,
+' vote-counting ,
+' vote-startstop ,
+DOES> swap msg:?startstop umin cells + @ ;
+
 msg-notify-class :method msg:start ( addr u -- )
     2dup key| 0 .pk@ key| str= IF  2drop un-cmd  EXIT  THEN
     last# >r  2dup key| to msg:id$
@@ -560,16 +574,18 @@ msg-notify-class :method msg:otrify 2drop 2drop ." otrify " ;
 ' 2drop msg-notify-class is msg:hashs
 ' 2drop msg-notify-class is msg:hash-id
 msg-notify-class :method msg:object case
-	msg:image# of 2drop "img[] " notify+ endof
-	msg:thumbnail# of 2drop "thumb[] " notify+ endof
-	msg:audio# of 2drop "audio[] " notify+ endof
-	msg:video# of 2drop "video[] " notify+ endof
+	msg:image# of 2drop "img[] " ( " ) notify+ endof
+	msg:thumbnail# of 2drop "thumb[] " ( " ) notify+ endof
+	msg:audio# of 2drop "audio[] " ( " ) notify+ endof
+	msg:video# of 2drop "video[] " ( " ) notify+ endof
 	2drop
     endcase ;
 msg-notify-class :method msg:end ( -- )
     msg-notify ;
 msg-notify-class :method msg:like ( xchar -- ) ['] .like $tmp notify+ ;
 msg-notify-class :method msg:vote ( xchar -- ) [: cr ." vote: " xemit ;] $tmp notify+ ;
+msg-notify-class :method msg:vote-style ( n -- )
+    vote-evals is msg:vote-eval ;
 
 \ msg scan for hashes class
 

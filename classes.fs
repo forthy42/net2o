@@ -1,6 +1,6 @@
 \ net2o classes
 
-\ Copyright © 2015   Bernd Paysan
+\ Copyright © 2015-2025   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -148,6 +148,8 @@ cmd-class class{ msg
     field: pks#
     field: perms# \ pk -> permission map
     field: mode
+    defer: vote-eval
+    field: vote-info
     value: silent?
     \ mode bits:
     1 4 bits: otr# lock# visible# silent#
@@ -185,6 +187,8 @@ cmd-class class{ msg
     method away
     method perms
     method vote
+    method vote-style
+    0 4 enums ?single ?multiple ?counting ?startstop
     method text+format
     0 8 enums *normal *micro *tiny *script *footnote *small *large *huge
     $8 5 bits: #bold #italic #underline #strikethrough #mono
