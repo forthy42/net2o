@@ -9,17 +9,15 @@ Die Domains [net2o.de](https://net2o.de), [net2o.com](https://net2o.com) und
 
 Bernd Paysan<br/>
 net2o secure communication<br/>
-Wilbrechtstr. 85<br/>
-81477 München
+Bergstr. 16<br/>
+72393 Burladingen–Starzeln
 
 Kontakt:
 --------
 
 <table><tr>
 <th>Telefon:</th>
-<td>+𝟦𝟫‧𝟪𝟫‧𝟦𝟣 𝟣𝟧 𝟦𝟨 𝟧𝟧</td></tr>
-<tr><th>Telefax:</th>
-<td>+𝟦𝟫‧𝟪𝟫‧𝟦𝟣 𝟣𝟧 𝟦𝟨 𝟧𝟨</td></tr>
+<td>+𝟦𝟫‧𝟣𝟩𝟥‧𝟪𝟤 𝟢𝟨 𝟪𝟩𝟦</td></tr>
 <tr><th>E-Mail:</th>
 <td>bernd (at) net2o (dot) de</td>
 <tr><th>PGP keys:</th>
