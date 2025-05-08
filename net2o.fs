@@ -1373,7 +1373,7 @@ in net2o : save&done ( -- )
 object class
 64field: queue-timestamp
 field: queue-job
-defer: queue-xt
+addressable: defer: queue-xt
 end-class queue-class
 queue-class >osize @ Constant queue-struct
 
@@ -1556,7 +1556,7 @@ Variable timeout-tasks
 begin-structure last-packet
     64value: lp-addr
     64value: lp-time
-    $value: lp$
+    addressable: $value: lp$
 end-structure
 
 last-packet buffer: last-packet-desc

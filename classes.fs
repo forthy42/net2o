@@ -17,6 +17,10 @@
 
 \ job context structure and subclasses
 
+[IFUNDEF] addressable:
+    : addressable: ;
+[THEN]
+
 current-o
 
 Variable contexts \G contains all command objects
@@ -61,18 +65,18 @@ also mapc definitions
 cmd-class class
     64value: dest-vaddr
     value: dest-size
-    value: dest-raddr
-    $value: dest-ivs$
-    value: dest-ivsgen
-    scvalue: dest-ivslastgen
+    addressable: value: dest-raddr
+    addressable: $value: dest-ivs$
+    addressable: value: dest-ivsgen
+    addressable: scvalue: dest-ivslastgen
     \                   sender:                receiver:
     scvalue: dest-req   \ n/a                    true if ongoing request
-    $value: dest-ivsrest$
-    value: dest-timestamps
-    value: dest-replies
+    addressable: $value: dest-ivsrest$
+    addressable: value: dest-timestamps
+    addressable: value: dest-replies
     value: dest-top     \ n/a                    sender read up to here
-    value: dest-head    \ read up to here        received some
-    value: dest-tail    \ send from here         received all
+    addressable: value: dest-head    \ read up to here        received some
+    addressable: value: dest-tail    \ send from here         received all
     value: dest-back    \ flushed on destination flushed
     field: dest-end     \ n/a                    true if last chunk
     field: do-slurp
@@ -264,7 +268,7 @@ drop
 cmd-class class
     \ callbacks
     defer: send0-xt      \ send out a stateless packet
-    defer: timeout-xt    \ callback for timeout
+    addressable: defer: timeout-xt    \ callback for timeout
     defer: setip-xt      \ callback for set-ip
     defer: ack-xt        \ callback for acknowledge
     defer: punch-done-xt \ callback for NAT traversal ok
@@ -272,10 +276,10 @@ cmd-class class
     defer: sync-none-xt  \ callback for sync not needed
     \ maps for data and code transfer
     0 +field start-maps
-    value: code-map
-    value: code-rmap
-    value: data-map
-    value: data-rmap
+    addressable: value: code-map
+    addressable: value: code-rmap
+    addressable: value: data-map
+    addressable: value: data-rmap
     0 +field end-maps
     \ strings
     0 +field start-strings
@@ -593,7 +597,7 @@ KEYBYTES 2* Constant keysize2 \ pubkey+revkey=64 bytes
 \ group description
 
 cmd-class class{ groups
-    $value: id$ \ is the pubkey
+    addressable: $value: id$ \ is the pubkey
     field: member[]
     field: admin     \ secret key, only known to the admins
     64value: perms#
