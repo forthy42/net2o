@@ -43,6 +43,7 @@ machine "amd64" str= [IF]
 [THEN]
 "mode" replaces
 "c-library keccak_%mode% \"keccak_%mode%\" add-lib" $substitute 0 min throw evaluate
+\c #include <stdint.h>
 \c #include <KeccakP-1600-SnP.h>
 
 \ ----===< int constants >===-----
