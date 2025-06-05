@@ -1526,9 +1526,11 @@ hash: imgs# \ hash of images
 Variable current-play$
 Variable current-player
 
+[IFDEF] opensles also opensles [THEN]
+
 : >msg-audio-player ( addr u -- )
     2dup current-play$ $@ str= IF
-	[IFDEF] android opensles:resume-play [ELSE] resume-play [THEN]
+	resume-play
     ELSE
 	2dup current-play$ $!  caller-w current-player !
 	2dup key| ?read-enc-hashed idx-block $!
@@ -1536,23 +1538,29 @@ Variable current-player
 	start-play
     THEN ;
 
-: audio-play[] ( addr u o -- o )
-    [:  current-player @ ?dup-IF
-	    caller-w <> IF
-		play$ $@ current-player @ >o to text$ o> +sync
-	    THEN
+: make-current-player ( -- )
+    current-player @ ?dup-IF
+	caller-w <> IF
+	    play$ $@ current-player @ >o to text$ o> +sync
 	THEN
+    THEN ;
+
+: audio-play[] ( addr u o -- o )
+    dup cell- @ boxes? IF  .childs[] $@ drop @  THEN
+    [:  make-current-player
 	caller-w .text$ play$ $@ str=
 	dup to audio-playing
 	IF
 	    addr data $@ ['] >msg-audio-player catch 0= IF
-		pause$ $@ caller-w >o to text$ o> +sync
-	    ELSE  2drop  THEN
+		pause$ $@
+	    ELSE  2drop EXIT  THEN
 	ELSE
-	    [IFDEF] android opensles:pause-play [ELSE] pause-play [THEN]
-	    play$ $@ caller-w >o to text$ o> +sync
-	THEN  ;]
+	    pause-play play$ $@
+	THEN
+	caller-w >o to text$ o> +sync ;]
     2swap $make 64#1 +to msg:timestamp click[] ;
+
+[IFDEF] opensles previous [THEN]
 
 : msg-stack= ( addr u -- o true | false )
     2>r msg-box .childs[] $[]# dup IF
@@ -1922,8 +1930,8 @@ wmsg-o >o msg-table @ token-table ! o>
 		[ELSE]
 		    close-rec-stereo
 		[THEN]
-		"recording" .net2o-cache/
-		[: ." file://" type ." .aidx" ;] $tmp avalanche-text
+		"recording.aidx" .net2o-cache/
+		[: ." file://" type ;] $tmp avalanche-text
 	    ;] 0 click[]
 	    {{ glue*lll edit-bg x-color font-size# 40% f* }}frame dup .button3
 		dup to chat-edit-bg
