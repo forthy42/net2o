@@ -1930,8 +1930,7 @@ wmsg-o >o msg-table @ token-table ! o>
 		[ELSE]
 		    close-rec-stereo
 		[THEN]
-		"recording.aidx" .net2o-cache/
-		[: ." file://" type ;] $tmp avalanche-text
+		"recording.aidx" file://.net2o-cache/ avalanche-text
 	    ;] 0 click[]
 	    {{ glue*lll edit-bg x-color font-size# 40% f* }}frame dup .button3
 		dup to chat-edit-bg

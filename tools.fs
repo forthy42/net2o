@@ -526,6 +526,8 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
 
 : .net2o-config/ ( addr u -- addr' u' ) [: .net2o-config$ $. '/' emit type ;] $tmp ;
 : .net2o-cache/ ( addr u -- addr' u' ) [: .net2o-cache$ $. '/' emit type ;] $tmp ;
+: file://.net2o-cache/ ( addr u -- addr' u' )
+    [: ." file://" .net2o-cache$ $. '/' emit type ;] $tmp ;
 : ~net2o-cache/ ( addr u -- )
     .net2o-cache/ 2dup $1FF init-dir drop set-dir throw ;
 : ~net2o-cache/.. ( addr u -- )
@@ -1155,7 +1157,7 @@ edit-terminal edit-out !
 
 : catch-loop { xt -- flag }
     BEGIN   xt catch dup -1 = ?EXIT
-	?int dup  WHILE  xt .loop-err  REPEAT
+	?int dup  WHILE  xt .loop-err  terminating? UNTIL  THEN
     drop false ;
 
 [IFDEF] EAGAIN

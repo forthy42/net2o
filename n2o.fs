@@ -834,7 +834,7 @@ n2o-history
     ELSE
 	[ action-of DoError ]L is DoError
     THEN ;
-?set-debug
+warnings @ 0= [IF] ?set-debug [THEN]
 
 :is 'cold  defers 'cold ?set-debug n2o-history ;
 [IFDEF] 'debug-cold
