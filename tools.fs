@@ -1156,8 +1156,8 @@ edit-terminal edit-out !
     [: ." Task: " id. dup . cr DoError cr ;] do-debug ;
 
 : catch-loop { xt -- flag }
-    BEGIN   xt catch dup -1 = ?EXIT
-	?int dup  WHILE  xt .loop-err  terminating? UNTIL  THEN
+    BEGIN   terminating? 0= WHILE  xt catch dup -1 = ?EXIT
+	?int dup  WHILE  xt .loop-err  REPEAT  THEN
     drop false ;
 
 [IFDEF] EAGAIN
