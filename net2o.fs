@@ -2009,7 +2009,7 @@ context-table   $save
 
 \ modify bye
 
-' bye defered? [IF]
+' bye deferred? [IF]
     : net2o-bye  1 die-on-signal !
 	!save-all-msgs subme dht-disconnect
 	query-task IF  net2o-kills  THEN
