@@ -2186,6 +2186,11 @@ $Variable punctation$
 s" minos2/unicode/punctation.db" open-fpath-file
 0= [IF] 2drop dup punctation$ $slurp forth:close-file throw
 [ELSE] s" .,:;!" punctation$ $! [THEN]
+$Variable punctation^/$
+punctation$ $@ punctation^/$ $!
+punctation^/$ $@ "/" search [IF]
+    drop punctation^/$ $@ drop - 1 punctation^/$ -rot $del
+[ELSE] 2drop [THEN]
 $Variable brackets$
 s" minos2/unicode/brackets.db" open-fpath-file
 0= [IF] 2drop dup brackets$ $slurp forth:close-file throw
@@ -2212,6 +2217,11 @@ s" minos2/unicode/brackets.db" open-fpath-file
     BEGIN  dup >r
 	punctation$ x-skip$
 	brackets$   x-skip$
+    dup r> = UNTIL ;
+: -skip-punctation^/ ( addr u -- addr u' )
+    BEGIN  dup >r
+	punctation^/$ x-skip$
+	brackets$     x-skip$
     dup r> = UNTIL ;
 : -split| ( addr u -- addr u' )
     2dup '|' -scan dup IF  2nip  ELSE  2drop  THEN ;
@@ -2265,7 +2275,7 @@ s" minos2/unicode/brackets.db" open-fpath-file
     2dup "https://" string-prefix? >r
     2dup "http://" string-prefix? r> or IF
 	over ?flush-text
-	-skip-punctation 2dup + to last->in
+	-skip-punctation^/ 2dup + to last->in
 	[: rework-% $, msg-url ;]
     ELSE  2drop 0  THEN ;
 
