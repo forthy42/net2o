@@ -2225,13 +2225,19 @@ s" minos2/unicode/brackets.db" open-fpath-file
     dup r> = UNTIL ;
 : -split| ( addr u -- addr u' )
     2dup '|' -scan dup IF  2nip  ELSE  2drop  THEN ;
+: -split|? ( addr u -- addr u' flag )
+    2dup '|' -scan dup IF  2nip true  ELSE  2drop false  THEN ;
+: -skip-punctation| ( addr u -- addr u' )
+    -split|? 0= IF  -skip-punctation  THEN ;
+: set-last->in| ( addr u -- addr u )
+    2dup + dup c@ '|' = - to last->in ;
 
 : text-rec ( addr u -- )
     2drop ['] noop ;
 : tag-rec ( addr u -- )
     over c@ '#' = IF
-	-skip-punctation -split|
-	over ?flush-text 2dup + dup c@ '|' = - to last->in
+	-skip-punctation|
+	over ?flush-text set-last->in|
 	[: 1 /string $, msg-tag ;]
     ELSE  2drop 0  THEN ;
 : vote-rec ( addr u -- )
@@ -2243,10 +2249,10 @@ s" minos2/unicode/brackets.db" open-fpath-file
 : pk-rec ( addr u -- rectype )
     over c@ '@' <> over 3 < or IF
 	2drop 0  EXIT  THEN \ minimum nick: 2 characters
-    -skip-punctation  2dup 1 /string  nick>pk
+    -skip-punctation|  2dup 1 /string  nick>pk
     2dup d0= IF  2drop 2drop 0
     ELSE
-	2>r over ?flush-text + to last->in
+	2>r over ?flush-text set-last->in| 2drop
 	last->in source drop - >in !  2r>
 	[:
 	    \ ." signal: '" 85type ''' forth:emit forth:cr
@@ -2255,7 +2261,7 @@ s" minos2/unicode/brackets.db" open-fpath-file
     THEN ;
 : chain-rec ( addr u -- )
     over c@ '!' = IF
-	-skip-punctation  2dup 1 /string
+	-skip-punctation|  2dup 1 /string
 	dup 0= IF  2drop 2drop 0  EXIT  THEN
 	snumber?
 	case
@@ -2263,7 +2269,7 @@ s" minos2/unicode/brackets.db" open-fpath-file
 	    -1 of
 		msg-group-o .msg:log[] $[]#
 		over abs over u< IF  over 0< IF  +  ELSE  drop  THEN
-		    >r over ?flush-text + to last->in  r>
+		    >r over ?flush-text set-last->in| 2drop  r>
 		    [: msg-group-o .msg:log[] $[]@ chain$, msg-chain ;]
 		    EXIT  THEN
 	    endof
@@ -2275,7 +2281,7 @@ s" minos2/unicode/brackets.db" open-fpath-file
     2dup "https://" string-prefix? >r
     2dup "http://" string-prefix? r> or IF
 	over ?flush-text
-	-skip-punctation^/ 2dup + to last->in
+	-split|? 0= IF  -skip-punctation^/  THEN  set-last->in|
 	[: rework-% $, msg-url ;]
     ELSE  2drop 0  THEN ;
 
