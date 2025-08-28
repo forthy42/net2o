@@ -1491,8 +1491,8 @@ end-class textmsg-class
 ' 2drop textmsg-class is msg:hashs
 ' 2drop textmsg-class is msg:hash-id
 ' 2drop textmsg-class is msg:updates
-textmsg-class :method msg:tag '#' emit type ;
-textmsg-class :method msg:signal '@' emit .simple-id ;
+textmsg-class :method msg:tag '#' emit type '|' emit ;
+textmsg-class :method msg:signal '@' emit .simple-id '|' emit ;
 ' 2drop textmsg-class is msg:re
 ' 2drop textmsg-class is msg:chain
 ' 2drop textmsg-class is msg:id
@@ -1500,7 +1500,7 @@ textmsg-class :method msg:signal '@' emit .simple-id ;
 ' noop textmsg-class is msg:unlock
 ' drop textmsg-class is msg:away
 ' type textmsg-class is msg:text
-' type textmsg-class is msg:url
+textmsg-class :method msg:url type '|' emit ;
 textmsg-class :method msg:object drop 2drop ;
 textmsg-class :method msg:text+format
     dup >r .formatter type r> .formatter ;
