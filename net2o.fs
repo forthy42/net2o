@@ -1884,7 +1884,7 @@ Forward next-saved-msg
 \ packet reciver task
 
 : packet-loop ( -- ) \ 1 stick-to-core
-    BEGIN  packet-event  !!0depth!!  terminating? UNTIL ;
+    BEGIN  terminating? 0=  WHILE  packet-event  !!0depth!!  REPEAT ;
 
 in net2o : request-done ( n -- )
     o [{: n xo :}h1 n xo .request ;] up@ send-event ;
