@@ -1147,17 +1147,19 @@ edit-terminal edit-out !
 
 \ catch loop
 
-0 Value terminating?
+$BEEF Value terminating?
 
-: ?int ( throw-code -- throw-code )  dup -28 = terminating? or
+: ?int ( throw-code -- throw-code )  dup -28 = terminating? $BEEF <> or
     IF  kill-task  THEN ;
 
 : .loop-err ( throw xt -- )
     [: ." Task: " id. dup . cr DoError cr ;] do-debug ;
 
 : catch-loop { xt -- flag }
-    BEGIN   terminating? 0= WHILE  xt catch dup -1 = ?EXIT
-	?int dup  WHILE  xt .loop-err  REPEAT  THEN
+    BEGIN   terminating? $BEEF = WHILE  xt catch dup -1 = ?EXIT
+	    ?int dup  WHILE  xt .loop-err
+		terminating? $BEEF = IF  [: ." not terminating" cr ;] do-debug  THEN
+	REPEAT  THEN
     drop false ;
 
 [IFDEF] EAGAIN
@@ -1171,4 +1173,4 @@ edit-terminal edit-out !
 \ evaluate in
 
 : evaluate-in ( addr u voc-addr -- )
-    >wordlist ['] forth-recognize ['] evaluate wrap-xt ;
+    >wordlist ['] rec-forth ['] evaluate wrap-xt ;

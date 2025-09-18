@@ -2396,7 +2396,7 @@ $100 buffer: format-chars
 depth >r
 ' text-rec  ' format-text-rec  ' vote-rec  ' file-rec
 ' http-rec  ' chain-rec ' tag-rec   ' pk-rec
-depth r> - recognizer-sequence: msg-smart-text
+depth r> - rec-sequence: msg-smart-text
 
 Defer msg-recognize
 ' msg-smart-text is msg-recognize
@@ -2412,15 +2412,15 @@ Defer msg-recognize
     THEN
     ```-state 0= dup to ```-state ./mono-info ;
 
-: parse-text ( addr u -- ) last# >r  action-of forth-recognize >r
+: parse-text ( addr u -- ) last# >r  action-of rec-forth >r
     0 to last->in  !format-chars
-    ['] msg-recognize is forth-recognize 2dup evaluate
+    ['] msg-recognize is rec-forth 2dup evaluate
     last->in IF  + last->in tuck -  THEN  dup IF
 	\ ." text: '" forth:type ''' forth:emit forth:cr
 	current-format ?dup-IF  ulit, $, msg-text+format
 	ELSE  $, msg-text  THEN
     ELSE  2drop  THEN
-    r> is forth-recognize  r> to last#
+    r> is rec-forth  r> to last#
     msg:#mono ```-state and to current-format ;
 
 : avalanche-text ( addr u -- )

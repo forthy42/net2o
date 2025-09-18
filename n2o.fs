@@ -72,11 +72,11 @@ hash-size# buffer: hash-out-buf
     get-order forth-order set-stack
     ['] n2o >wordlist 1 set-order
     ['] .base ['] .stacks 2 status-xts set-stack
-    ['] n2o >wordlist is forth-recognize ;
+    ['] n2o >wordlist is rec-forth ;
 : set-forth-cmds ( -- )
     forth-order get-stack ?dup-IF  set-order  THEN
     ['] .base ['] .stacks ['] .order 3 status-xts set-stack
-    [ action-of forth-recognize ]L is forth-recognize ;
+    [ action-of rec-forth ]L is rec-forth ;
 
 : do-net2o-cmds ( xt -- )
     rp0 @ >r  rp@ 3 cells + rp0 !
@@ -861,7 +861,7 @@ scope{ /chat
 
 "n2o command not found" exception Constant !!no-net2o-cmd!!
 
-: debug-recognizer ( addr u -- debug translator | false )
+: rec-debug ( addr u -- debug translator | false )
     dup 0= IF  2drop false  EXIT  THEN
     over c@ >r 1 /string
     r@ '+' = IF  find-debug ?dup-IF  ['] on   THEN  rdrop EXIT  THEN
@@ -873,7 +873,7 @@ scope{ /chat
     4 to precision s>f 42949672.96e f/ f. '%' forth:emit
     r> to precision ;
 
-: %droprate-recognizer ( addr u -- float translator | 0 )
+: rec-%droprate ( addr u -- float translator | 0 )
     2dup + 1- c@ '%' <> IF  2drop 0 EXIT  THEN
     prefix-number IF
 	1e fmin -1e fmax $FFFFFFFF fm* f>d
@@ -891,8 +891,8 @@ scope{ /chat
 :noname ( -- ) \ if unknown, just process help
     [: !!no-net2o-cmd!! DoError cr ;] do-debug
     ?nextarg IF  2drop  THEN  n2o:help n2o:bye ;
-' %droprate-recognizer ' debug-recognizer ' n2o >wordlist
-4 recognizer-sequence: n2o-option
+' rec-%droprate ' rec-debug ' n2o >wordlist
+4 rec-sequence: n2o-option
 
 \\\
 Local Variables:

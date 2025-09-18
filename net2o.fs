@@ -184,7 +184,7 @@ kill-seconds# 1+ #1000000000 um* 2constant kill-timeout# \ 3s
 0 Value query-task    \ for background queries initiated in other tasks
 
 : net2o-kills ( -- )
-    true to terminating?
+    $DEADBEEF to terminating? [: ." terminating" cr ;] do-debug
     0 to sender-task
     0 to receiver-task
     0 to timeout-task
@@ -309,7 +309,7 @@ $Variable dest-map s" " dest-map $!
 
 :is 'image defers 'image
     0 to inbuf 0 to outbuf 0 to tmpbuf  io-mem off ;
-:is 'cold defers 'cold false to terminating? keccak-o crypto-o !
+:is 'cold defers 'cold $BEEF to terminating? keccak-o crypto-o !
     hash-init-rng alloc-io ;
 
 $100 Value dests#
@@ -1213,7 +1213,7 @@ Create chunk-adder chunks-struct allot
 
 : .0depth ( -- ) <warn> "Stack should always be empty!" type cr <default> ;
 : !!0depth!! ( -- ) ]] depth IF  .0depth ~~bt clearstack  THEN [[ ; immediate
-: event-loop' ( -- )  BEGIN  stop  !!0depth!!  terminating? UNTIL ;
+: event-loop' ( -- )  BEGIN  stop  !!0depth!!  terminating? $BEEF <> UNTIL ;
 : create-query-task ( -- )
     ['] event-loop' 1 net2o-task to query-task ;
 : ?query-task ( -- task )
@@ -1869,14 +1869,15 @@ Forward next-saved-msg
 
 : timeout-loop ( -- ) [IFDEF] android jni:attach [THEN]
     !ticks  BEGIN
-	>next-ticks     !!0depth!!
-	beacon?         !!0depth!!
-	save-msgs?      !!0depth!!
-	announce?       !!0depth!!
-	d#cleanups?     !!0depth!!
-	request-timeout !!0depth!!
-	last-packet-tos !!0depth!!
-    terminating? UNTIL ;
+	terminating? $BEEF = WHILE
+	    >next-ticks     !!0depth!!
+	    beacon?         !!0depth!!
+	    save-msgs?      !!0depth!!
+	    announce?       !!0depth!!
+	    d#cleanups?     !!0depth!!
+	    request-timeout !!0depth!!
+	    last-packet-tos !!0depth!!
+    REPEAT ;
 
 : create-timeout-task ( -- )  timeout-task ?EXIT
     ['] timeout-loop 1 net2o-task to timeout-task ;
@@ -1884,7 +1885,7 @@ Forward next-saved-msg
 \ packet reciver task
 
 : packet-loop ( -- ) \ 1 stick-to-core
-    BEGIN  terminating? 0=  WHILE  packet-event  !!0depth!!  REPEAT ;
+    BEGIN  terminating? $BEEF =  WHILE  packet-event  !!0depth!!  REPEAT ;
 
 in net2o : request-done ( n -- )
     o [{: n xo :}h1 n xo .request ;] up@ send-event ;
@@ -1909,7 +1910,7 @@ in net2o : request-done ( n -- )
     event-loop-task requests->0 o> ;
 
 : server-loop ( -- )
-    0 >o rdrop  BEGIN  client-loop  terminating? UNTIL ;
+    0 >o rdrop  BEGIN  terminating? $BEEF =  WHILE  client-loop  REPEAT ;
 
 : server-loop-catch ( -- )
     ['] server-loop catch
@@ -2009,21 +2010,11 @@ context-table   $save
 
 \ modify bye
 
-' bye deferred? [IF]
-    : net2o-bye  1 die-on-signal !
-	!save-all-msgs subme dht-disconnect
-	query-task IF  net2o-kills  THEN
-	1 ms defers bye ;
-    ' net2o-bye is bye
-[ELSE]
-    0 warnings !@
-    : bye  !save-all-msgs subme dht-disconnect
-	query-task IF  net2o-kills  THEN
-	[IFDEF] cilk-bye cilk-bye [THEN]
-	[IFDEF] delete-whereg delete-whereg [THEN]
-	.unstatus 0 (bye) ;
-    warnings !
-[THEN]
+: net2o-bye  1 die-on-signal !
+    !save-all-msgs subme dht-disconnect
+    query-task IF  net2o-kills  ELSE  $DEADBEEF to terminating?  THEN
+    1 ms defers bye ;
+' net2o-bye is bye
 
 \ show problems
 
