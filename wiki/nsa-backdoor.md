@@ -65,7 +65,7 @@ Therefore, here is the official statement about NSA-demanded backdoors: -
     images.  By sending not only indices it is interested in, but also others,
     tracing a client by index is not very likely a success, either.
 
-4. For convenience, I added a search by telephone or e-mail function.  That way, you
+  4. For convenience, I added a search by telephone or e-mail function.  That way, you
     can search all your known contacts for a net2o key, and communicate with them
     without actually asking them. This has two benefits, the NSA told me:
 
