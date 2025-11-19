@@ -30,40 +30,61 @@ Therefore, here is the official statement about NSA-demanded backdoors: -
     blocked+reported if detected as evil.  [EFF on client–side
     scanning](https://www.eff.org/deeplinks/2019/11/why-adding-client-side-scanning-breaks-end-end-encryption)
 
-There are (at least) two problems with client–side scanning, as the EFF
-already noticed.  First, the client gets the algorithm to do the hashing of
-the image.  This is not a normal hash, this is usually a fingerprint of the
-image, so that trivial image editing doesn't make it a different picture.  If
-you have that algorithm on the client side, you can try several tweaks on the
-image until it doesn't create the same fingerprint anymore.  So people who
-know that they are doing evil things will evade detection anyhow.
+    There are (at least) two problems with client–side scanning, as the EFF
+    already noticed.  First, the client gets the algorithm to do the hashing of
+    the image.  This is not a normal hash, this is usually a fingerprint of the
+    image, so that trivial image editing doesn't make it a different picture.  If
+    you have that algorithm on the client side, you can try several tweaks on the
+    image until it doesn't create the same fingerprint anymore.  So people who
+    know that they are doing evil things will evade detection anyhow.
 
-The other issue is that you don't want the client to have the list of
-“forbidden fingerprints”.  They can use it as search entry for sharing exactly
-those forbidden things.  So you need a server with the hashs, and a
-client–side query of this server to check the image.  This is not
-privacy–preserving, as all fingerprints go to that server, so you can map
-published images to queries.
+    The other issue is that you don't want the client to have the list of
+    “forbidden fingerprints”.  They can use it as search entry for sharing exactly
+    those forbidden things.  So you need a server with the hashs, and a
+    client–side query of this server to check the image.  This is not
+    privacy–preserving, as all fingerprints go to that server, so you can map
+    published images to queries.
 
-However, I invented a way to avoid that: Index the forbidden fingerprints, in
-a way that a reasonable small amount of fingerprints are in one index bucket.
-There are orders of magnitude more legal images with the same index.  For
-checking a fingerprint, you send {index, salt, hash(fingerprint, salt)} to the
-server.  The server hashes all the fingerprints with the same index with that
-salt, and compare to your hash(fingerprint, salt) value.  This preserves your
-privacy, unless it's a match.  Reverting that hash(fingerprint, salt) is
-expensive, even if you have access to the image fingerprints and the backlog
-of the query, because now you have to do orders of magnitude more hashes.
+    However, I invented a way to avoid that: Index the forbidden fingerprints, in
+    a way that a reasonable small amount of fingerprints are in one index bucket.
+    There are orders of magnitude more legal images with the same index.  For
+    checking a fingerprint, you send {index, salt, hash(fingerprint, salt)} to the
+    server.  The server hashes all the fingerprints with the same index with that
+    salt, and compare to your hash(fingerprint, salt) value.  This preserves your
+    privacy, unless it's a match.  Reverting that hash(fingerprint, salt) is
+    expensive, even if you have access to the image fingerprints and the backlog
+    of the query, because now you have to do orders of magnitude more hashes.
 
-The last problem is that client–side scanning requires cooperation from the
-clients — if they just disable their code, it's ineffective.  Since people
-unlikely want to be exposed for fetching forbidden images, but often want to
-not view those, it is probably better to send {\[index\]\*, salt1} to the
-server, and get { salt2, \[hash(fingerprint, salt1, salt2)\]\*} back, i.e. all
-hashes for the given index.  The client can cache these hashes, without being
-able to use them for a search, and avoid downloading or showing the forbidden
-images.  By sending not only indices it is interested in, but also others,
-tracing a client by index is not very likely a success, either.
+    The last problem is that client–side scanning requires cooperation from the
+    clients — if they just disable their code, it's ineffective.  Since people
+    unlikely want to be exposed for fetching forbidden images, but often want to
+    not view those, it is probably better to send {\[index\]\*, salt1} to the
+    server, and get { salt2, \[hash(fingerprint, salt1, salt2)\]\*} back, i.e. all
+    hashes for the given index.  The client can cache these hashes, without being
+    able to use them for a search, and avoid downloading or showing the forbidden
+    images.  By sending not only indices it is interested in, but also others,
+    tracing a client by index is not very likely a success, either.
+
+4. For convenience, I added a search by telephone or e-mail function.  That way, you
+    can search all your known contacts for a net2o key, and communicate with them
+    without actually asking them. This has two benefits, the NSA told me:
+
+    1. The phone number is tied to a verified identity, which means the NSA
+        can kill based on metadata — even if they don't know the identity,
+	they at least know the cellphone's position, which is good enough.
+
+    2. The phone number space is small enough to [scrape](https://github.com/sbaresearch/whatsapp-census/blob/main/Hey_there_You_are_using_WhatsApp.pdf) all possible numbers.
+
+    Fortunately, I've found a way around this: Instead of sending your
+    telephone numbers in plain text or just hashed once (which doesn't help
+    the least to prevent scraping), you hash the tuple <my phone number>,<my
+    contact's phone number> with an at least 384 bit hash.  You send 128 bits
+    of that hash to the server as index, and use the further 256 bits to xor
+    it with your pubkey.  To retrieve the pubkey, you actually need both phone
+    numbers (or both e-mails if you do this for e-mails).
+
+    The server now needs to store more data, maybe by a factor 100, when an address
+    book contains on average 100 contacts.  That's doable.
 
 As net2o is open source, you can (in theory) verify statements about actual
 backdoors.  And keep an eye on this page, I intent to publish fnords about

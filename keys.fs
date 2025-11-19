@@ -144,7 +144,7 @@ Create >im-color ( xt n -- )
 ' <invited> ,
 ' <provisional> ,
 ' <untrusted> ,
-DOES> swap >im-color# 7 umin cells + [: perform execute ;] execute-theme-color ;
+DOES> swap >im-color# 7 umin th [: perform execute ;] execute-theme-color ;
 
 : .imports ( mask -- )
     imports$ import#new bounds DO
@@ -1432,7 +1432,7 @@ forward >qr-key
 \ the idea of scan an own key is to send a invitation,
 \ and receive a signature that proofs the scanned device
 \ has access to the secret key
-' scanned-ownkey scanned-x qr:ownkey# cells + !
+' scanned-ownkey scanned-x qr:ownkey# th!
 
 \ key api helpers
 

@@ -79,7 +79,7 @@ hash-size# buffer: hash-out-buf
     [ action-of rec-forth ]L is rec-forth ;
 
 : do-net2o-cmds ( xt -- )
-    rp0 @ >r  rp@ 3 cells + rp0 !
+    rp0 @ >r  rp@ 3 th rp0 !
     set-net2o-cmds
     catch set-forth-cmds
     r> rp0 !  throw ;

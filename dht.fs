@@ -288,7 +288,7 @@ end-class dht-file-class
 : d#values, ( addr u mask -- addr' u' ) { mask }
     k#size cell/ 1 DO
 	mask 1 and IF
-	    dht-hash I cells + I
+	    dht-hash I th I
 	    dht( ." access dht: " over h. dup . forth:cr )
 	    [{: k# :}l check-exact-date
 		0= IF  k# d#c, d#$,  ELSE  2drop  THEN ;] $[]map

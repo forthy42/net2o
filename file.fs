@@ -97,7 +97,7 @@ cell 8 = [IF]
     [IFDEF] android  rdrop 64drop
     [ELSE]  \ ." Set time: " r@ . 64dup 64>d d. cr
 	64>d 2dup statbuf ntime!
-	statbuf 2 cells + ntime!
+	statbuf 2 th ntime!
 	r> statbuf futimens ?ior [THEN] ;
 : fs-size! ( 64size -- )
     64dup to fs-size to fs-limit
@@ -316,7 +316,7 @@ Value file-classes#
     cells file-classes + @ o cell- ! ;
 
 : +file-classes ( addr -- )
-    file-classes file-classes# dup 1+ to file-classes# cells + ! ;
+    file-classes file-classes# dup 1+ to file-classes# th! ;
 
 \ state handling
 

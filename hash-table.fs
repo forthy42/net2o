@@ -92,8 +92,8 @@ warnings !
     LOOP  2drop ;
 
 : #frees ( hash -- ) dup @ 0= IF  drop  EXIT  THEN  dup
-    >r @             $100 cells bounds DO  I $free    cell +LOOP
-    r@ @ $100 cells + $80 cells bounds DO  I recurse  cell +LOOP
+    >r @        $100 cells bounds DO  I $free    cell +LOOP
+    r@ @ $100 th $80 cells bounds DO  I recurse  cell +LOOP
     r@ @ free throw  r> off ;
 
 -1 8 rshift invert Constant msbyte#
@@ -122,7 +122,7 @@ warnings !
     hash @ $100 cells bounds DO
 	I @ IF  I xt execute  THEN
     2 cells +LOOP
-    hash @ $100 cells + $80 cells bounds DO
+    hash @ $100 th $80 cells bounds DO
 	I @ IF  I xt recurse  THEN
     cell +LOOP ;
 

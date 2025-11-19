@@ -122,7 +122,7 @@ $10 cells buffer: rngstat-buf
 	1 I c@ 4 rshift cells rngstat-buf + +!
 	1 I c@ $F and   cells rngstat-buf + +!
     LOOP
-    0 $10 0 DO  rngstat-buf I cells + @ e - dup * +  LOOP
+    0 $10 0 DO  rngstat-buf I th@ e - dup * +  LOOP
     s>f e fm/ 0.0625e f* -1e fexp f**
     [ 16e 1e fexp f- 16e f/ -1e fexp f** ] FLiteral f- ;
 
@@ -158,7 +158,7 @@ $10 cells buffer: rngstat-buf
     ." health - χ² normalized (|x|<0.9): "
     fdup fabs .9e f<= IF  <info>  ELSE  <err>  THEN
     6 4 1 f.rdp <default> cr ;
-\    $10 0 DO  rngstat I cells + ?  LOOP cr
+\    $10 0 DO  rngstat I th ?  LOOP cr
 
 \ init salt
 

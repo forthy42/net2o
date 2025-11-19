@@ -291,10 +291,10 @@ $8000 Constant init-xy
     4 +LOOP minr maxr ming maxg minb maxb ;
 
 #10 Cells buffer: p0
-p0 2 cells + Constant p1
-p1 2 cells + Constant p2
-p2 2 cells + Constant p3
-p3 2 cells + Constant px
+p0 2 th Constant p1
+p1 2 th Constant p2
+p2 2 th Constant p3
+p3 2 th Constant px
 
 : min²! ( x y addr -- ) >r
     over dup * over dup * +

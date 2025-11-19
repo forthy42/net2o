@@ -8,7 +8,7 @@
 25 cells constant kkey#
 
 : carray  Create  DOES> + c@ ;
-: array   Create  DOES> swap cells + @ ;
+: array   Create  DOES> swap th @ ;
 
 array keccakf-rndc
 $0000000000000001 , $0000000000008082 ,
@@ -54,16 +54,16 @@ kkey# buffer: st
 
 : theta1 ( -- )
     5 0 DO
-	0 st i cells + kkey# bounds DO
+	0 st i th kkey# bounds DO
 	I @ xor  kcol# +LOOP
-	bc i cells + !
+	bc i th !
     LOOP ;
 
 : theta2 ( -- )
     5 0 DO
 	bc I 4 + mod5 + @
 	bc I 1 + mod5 + @ lrot1 xor
-	st i cells + kkey# bounds DO
+	st i th kkey# bounds DO
 	dup I xor!  kcol# +LOOP
 	drop
     LOOP ;
@@ -82,7 +82,7 @@ kkey# buffer: st
 	5 0 DO
 	    bc I 1+ mod5 + @ invert
 	    bc I 2 + mod5 + @ and
-	    J I cells + xor!
+	    J I th xor!
 	LOOP
     kcol# +LOOP ;
 

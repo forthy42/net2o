@@ -182,12 +182,12 @@ cell 8 = [IF]
 	dup
 	>r @
 	r@ cell+ @
-	r@ 2 cells + @
-	r> 3 cells + @ ;
+	r@ 2 th@
+	r> 3 th@ ;
     : 128! ( x1..x4 addr -- )
 	dup
-	>r 3 cells + !
-	r@ 2 cells + !
+	>r 3 th!
+	r@ 2 th!
 	r@ cell+ !
 	r> ! ;
     synonym stop-64ns stop-dns

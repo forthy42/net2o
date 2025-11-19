@@ -547,7 +547,7 @@ Create vote-evals
 ' vote-multiple ,
 ' vote-counting ,
 ' vote-startstop ,
-DOES> swap msg:?startstop umin cells + @ ;
+DOES> swap msg:?startstop umin th@ ;
 
 msg-notify-class :method msg:start ( addr u -- )
     2dup key| 0 .pk@ key| str= IF  2drop un-cmd  EXIT  THEN

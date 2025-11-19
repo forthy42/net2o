@@ -193,7 +193,7 @@ drop
 : >net2o-name ( addr -- addr' u )
     net2o.name body> name>string ;
 : >net2o-sig ( addr -- addr' u )
-    net2o.name 3 cells + $@ ;
+    net2o.name 3 th $@ ;
 : .net2o-num ( off -- )  cell/ '<' emit 0 .r '>' emit space ;
 
 User see:table \ current token table for see only
@@ -201,7 +201,7 @@ User see:table \ current token table for see only
 : (net2o-see) ( addr index -- )  dup >r + @
     dup 0<> IF
 	net2o.name
-	dup 2 cells + @ ?dup-IF  @ see:table @ t-push see:table !  THEN
+	dup 2 th@ ?dup-IF  @ see:table @ t-push see:table !  THEN
 	body> id.
     ELSE  drop r@ .net2o-num  THEN  rdrop ;
 
@@ -395,8 +395,8 @@ Defer .n-name  ' noop is .n-name
     dup >r , here >r 0 , 0 , here $saved 0 , ['] net2o, set-does> noname :
     latestxt dup r> ! r> >cmd ;
 : +net2o: ( "name" -- ) gen-table $[]# net2o: ;
-: >table ( table -- )  last-2o 2 cells + ! ;
-: cmdsig ( -- addr )  last-2o 3 cells + ;
+: >table ( table -- )  last-2o 2 th! ;
+: cmdsig ( -- addr )  last-2o 3 th ;
 : net2o' ( "name" -- ) ' >body @ ;
 
 Forward net2o:words
