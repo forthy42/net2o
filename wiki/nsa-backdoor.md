@@ -77,8 +77,8 @@ Therefore, here is the official statement about NSA-demanded backdoors: -
 
     Fortunately, I've found a way around this: Instead of sending your
     telephone numbers in plain text or just hashed once (which doesn't help
-    the least to prevent scraping), you hash the tuple <my phone number>,<my
-    contact's phone number> with an at least 384 bit hash.  You send 128 bits
+    the least to prevent scraping), you hash the tuple \<my phone number\>,\<my
+    contact's phone number\> with an at least 384 bit hash.  You send 128 bits
     of that hash to the server as index, and use the further 256 bits to xor
     it with your pubkey.  To retrieve the pubkey, you actually need both phone
     numbers (or both e-mails if you do this for e-mails).
