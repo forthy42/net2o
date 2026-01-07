@@ -2012,7 +2012,7 @@ context-table   $save
 
 : net2o-bye  1 die-on-signal !
     !save-all-msgs subme dht-disconnect
-    query-task IF  net2o-kills  ELSE  $DEADBEEF to terminating?  THEN
+    query-task IF  net2o-kills  ELSE  $DEADBEEF addr terminating? !@ drop  THEN
     1 ms defers bye ;
 ' net2o-bye is bye
 

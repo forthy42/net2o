@@ -2167,11 +2167,7 @@ previous
 
 locale-csv net2o-lang.csv
 
-: ??lang ( addr u -- )
-    ['] lang >wordlist find-name-in ?dup-IF  execute  THEN ;
-
-s" LANG" getenv '.' $split 2drop '_' $split 2drop ??lang
-s" LANG" getenv '.' $split 2drop ??lang
+${LANG} '.' $split 2drop set-locale
 
 \ lsids .lsids
 
