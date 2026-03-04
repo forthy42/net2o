@@ -2319,11 +2319,11 @@ synonym jpeg jpg
 synonym webp jpg
 synonym gif png
 
-: opus ( addr u -- )
-    2dup 2>r 2dup
-    [: 5 - forth:type ." .aidx" ;] $tmp file-in save-mem 2>r
-    [: 5 - forth:type ." .opus" ;] $tmp file-in save-mem 2r> 2r>
-    [:  filename,
+: opus { addr u -- }
+    addr u [: 5 - forth:type ." .aidx" ;] $tmp file-in save-mem 2>r
+    addr u [: 5 - forth:type ." .opus" ;] $tmp file-in save-mem 2r>
+    addr u save-mem
+    [:  over >r filename, r> free throw
 	over >r $, msg:audio-idx# ulit, msg-object r> free throw
 	over >r $, msg:audio# ulit, msg-object r> free throw ;] ;
 synonym aidx opus
@@ -2345,11 +2345,11 @@ synonym aidx opus
 	msgparse( [: forth:cr ." file recognized: '" 2dup forth:type ." '" ;] do-debug )
 	expand-to-file IF
 	    over ?flush-text 7 /string
-	    2dup + >r  rework-% save-mem over >r
+	    2dup + >r save-mem over >r rework-% save-mem over >r
 	    2dup suffix ['] file-suffixes >wordlist find-name-in
 	    dup 0= IF  drop ['] genfile-file  THEN
 	    catch
-	    r> free throw  r> to last->in
+	    r> free throw  r> free throw  r> to last->in
 	    0= IF  EXIT  THEN
 	THEN
     THEN
