@@ -92,12 +92,12 @@ forward msg-add-hashs
 	cell +LOOP  ;] gen-cmd ;
 
 : scan-log-hashs ( -- )
-    msg-log@ over >r
-    [: bounds ?DO
-	    I $@ msg:display
-	cell +LOOP
-	msg-add-hashs
-    ;] msg-scan-hash r> free throw ;
+    msg-log@ [:
+	[: bounds ?DO
+		I $@ msg:display
+	    cell +LOOP
+	    msg-add-hashs
+	;] msg-scan-hash ;] string-consumer ;
 
 Variable saved-msg$
 64Variable saved-msg-ticks
@@ -105,8 +105,8 @@ Variable saved-msg$
 : save-msgs ( group-o -- ) to msg-group-o
     msg( ." Save messages in group " msg-group-o dup h. .msg:name$ type cr )
     ?.net2o/chats  net2o:new-msging >o
-    msg-log@ over >r  serialize-log enc-file $!buf
-    r> free throw  dispose o>
+    msg-log@ [:  serialize-log enc-file $!buf
+    ;] string-consumer  dispose o>
     msg-group-o .msg:name$ >chatid .chats/ enc-filename $!
     pk-off  key-list encfile-rest ;
 
@@ -2165,8 +2165,8 @@ Forward ```
     2dup "```" str= IF  2drop ``` true  EXIT  THEN
     ?slash dup 0= ?EXIT  drop
     bl $split 2swap
-    2dup save-mem over >r '/' r@ c!
-    ['] /chat >wordlist find-name-in r> free throw
+    2dup save-mem [: '/' r@ c!
+    ['] /chat >wordlist find-name-in ;] string-consumer
     ?dup-IF  nip nip name>interpret chat-cmd-file-execute true
     ELSE  drop -rot + over - false
     THEN ;
@@ -2291,7 +2291,7 @@ forward hash-in
     2dup key|  2dup >have-group  2dup >ihave  ihave$ $+! ;
 
 : file-in ( addr u -- hash u )
-    slurp-file over >r hash-in r> free throw >have+group ;
+    slurp-file [: hash-in ;] string-consumer >have+group ;
 
 ?: suffix ( addr u -- addr' u' )
     2dup '.' scan-back nip /string ;
@@ -2300,20 +2300,23 @@ forward hash-in
     basename $, msg:filename# ulit, msg-object ;
 
 : image+thumbnail ( addr-image u-image addr-thumbnail u-thumbnail -- )
-    2swap 2dup 2>r file-in
-    2swap >have+group 2r>
-    [:  filename,
-	$, msg:thumbnail# ulit, msg-object
-	$, msg:image# ulit, msg-object ;] ;
+    2swap save-mem 2dup 2>r
+    file-in save-mem
+    2swap >have+group save-mem 2r>
+    [:  ['] filename, string-consumer
+	[: $, msg:thumbnail# ulit, msg-object ;] string-consumer
+	[: $, msg:image# ulit, msg-object ;] string-consumer ;] ;
 
 scope: file-suffixes
 : png ( addr-image u-image -- xt )
-    2dup 2>r file-in 2r> [: filename, $, msg:image# ulit, msg-object ;] ;
+    2dup save-mem 2>r file-in save-mem 2r>
+    [:  ['] filename, string-consumer
+	[: $, msg:image# ulit, msg-object ;] string-consumer ;] ;
 : jpg ( addr u -- xt )
     2dup >thumbnail
-    dup IF  over >r hash-in
-	[: forth:type img-orient @ 1- 0 max forth:emit ;] $tmp
-	r> free throw image+thumbnail
+    dup IF
+	[: hash-in [: forth:type img-orient @ 1- 0 max forth:emit ;] $tmp
+	;] string-consumer  image+thumbnail
     ELSE  2drop png  THEN ;
 synonym jpeg jpg
 synonym webp jpg
@@ -2323,15 +2326,15 @@ synonym gif png
     addr u [: 5 - forth:type ." .aidx" ;] $tmp file-in save-mem 2>r
     addr u [: 5 - forth:type ." .opus" ;] $tmp file-in save-mem 2r>
     addr u save-mem
-    [:  over >r filename, r> free throw
-	over >r $, msg:audio-idx# ulit, msg-object r> free throw
-	over >r $, msg:audio# ulit, msg-object r> free throw ;] ;
+    [:  [: filename, ;] string-consumer
+	[: $, msg:audio-idx# ulit, msg-object ;] string-consumer
+	[: $, msg:audio# ulit, msg-object ;] string-consumer ;] ;
 synonym aidx opus
 }scope
 
 : genfile-file ( addr u -- )
     file-in save-mem
-    [:  over >r $, msg:files# ulit, msg-object r> free throw ;] ;
+    [:  [: $, msg:files# ulit, msg-object ;] string-consumer ;] ;
 
 : expand-to-file ( addr u -- addr u' flag )
     2dup 7 /string rework-%
@@ -2345,11 +2348,14 @@ synonym aidx opus
 	msgparse( [: forth:cr ." file recognized: '" 2dup forth:type ." '" ;] do-debug )
 	expand-to-file IF
 	    over ?flush-text 7 /string
-	    2dup + >r save-mem over >r rework-% save-mem over >r
-	    2dup suffix ['] file-suffixes >wordlist find-name-in
-	    dup 0= IF  drop ['] genfile-file  THEN
-	    catch
-	    r> free throw  r> free throw  r> to last->in
+	    2dup + >r save-mem
+	    [: rework-% save-mem
+		[: 2dup suffix ['] file-suffixes >wordlist find-name-in
+		    dup 0= IF  drop ['] genfile-file  THEN
+		    catch
+		;] string-consumer
+	    ;] string-consumer
+	    r> to last->in
 	    0= IF  EXIT  THEN
 	THEN
     THEN

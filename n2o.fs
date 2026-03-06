@@ -456,7 +456,12 @@ warnings !
     ?get-me
     root-genkeys init-server addme-owndht
     0 my-addr$ $[]@ 2dup sigsize# - .addr$ .sigdates forth:cr
-    0 my-addr$ $[]@ 85type forth:cr server-loop-catch ;
+    ." ===== cut&paste this into dhtroot.fs =====" forth:cr
+    .\" 85\" " pk@ key| key# #@ 0= !!unknown-key!! cell+ .85key
+     .\" \" dhtroot.n2o $!" forth:cr forth:cr
+    .\" 85\" " 0 my-addr$ $[]@ 85type .\" \" dhtroot-addr$ $!" forth:cr
+    ." ===== end cut&paste =====" forth:cr
+    server-loop-catch ;
 
 \ dht commands
 

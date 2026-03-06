@@ -1240,6 +1240,8 @@ Forward !my-addr$
     >o pack-outkey ['] .nick-base $tmp fn-sanitize o>
     [: ." ~/" type ." .n2o" ;] $tmp w/o create-file throw
     >r cmdbuf$ r@ write-file throw r> close-file throw ;
+: .85key ( o -- )
+    >o pack-outkey o> cmdbuf$ 85type ;
 : out-me ( -- )
     pk@ key| key# #@ 0= !!unknown-key!! \ well, you should know yourself
     cell+ out-key ;

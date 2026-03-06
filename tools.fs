@@ -908,6 +908,8 @@ to current-theme
 : freez ( addr size -- ) \ net2o
     \G erase and then free - for secret stuff
     over swap erase free throw ;
+: string-consumer ( addr u xt -- )
+    third >r catch r> free throw throw ;
 : ?free ( addr size -- ) >r
     dup @ IF  dup @ r@ freez off  ELSE  drop  THEN  rdrop ;
 
@@ -1147,6 +1149,8 @@ edit-terminal edit-out !
 
 \ catch loop
 
+Variable terminate#
+$10 Constant terminate#-threshold
 $BEEF Value terminating?
 
 : ?int ( throw-code -- throw-code )  dup -28 = terminating? $BEEF <> or
@@ -1158,7 +1162,11 @@ $BEEF Value terminating?
 : catch-loop { xt -- flag }
     BEGIN   terminating? $BEEF = WHILE  xt catch dup -1 = ?EXIT
 	    ?int dup  WHILE  xt .loop-err
-		terminating? $BEEF = IF  [: ." not terminating" cr ;] do-debug  THEN
+		terminating? $BEEF = IF  [: ." not terminating" cr ;] do-debug
+		    1 terminate# +!@ terminate#-threshold = IF
+			$DEADBEEF to terminating?
+		    THEN
+		THEN
 	REPEAT  THEN
     drop false ;
 
