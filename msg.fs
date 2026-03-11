@@ -2105,7 +2105,7 @@ e? xchar-maxmem 1 = [IF] '+' [ELSE] '👍' [THEN] Constant default-like
 ;
 :is /unlock ( addr u -- )
     2drop msg-group-o .msg:-lock
-    [: net2o-base:msg-unlock ;] send-avalanche
+    ['] net2o-base:msg-unlock send-avalanche
 ;
 :is /lock? ( addr u -- )
     2drop msg-group-o .msg:?lock 0= IF  ." un"  THEN  ." locked" forth:cr
@@ -2165,8 +2165,7 @@ Forward ```
     2dup "```" str= IF  2drop ``` true  EXIT  THEN
     ?slash dup 0= ?EXIT  drop
     bl $split 2swap
-    2dup save-mem [: '/' r@ c!
-    ['] /chat >wordlist find-name-in ;] string-consumer
+    2dup save-mem [: '/' third c! ['] /chat >wordlist find-name-in ;] string-consumer
     ?dup-IF  nip nip name>interpret chat-cmd-file-execute true
     ELSE  drop -rot + over - false
     THEN ;
@@ -2291,7 +2290,7 @@ forward hash-in
     2dup key|  2dup >have-group  2dup >ihave  ihave$ $+! ;
 
 : file-in ( addr u -- hash u )
-    slurp-file [: hash-in ;] string-consumer >have+group ;
+    slurp-file ['] hash-in string-consumer >have+group ;
 
 ?: suffix ( addr u -- addr' u' )
     2dup '.' scan-back nip /string ;
@@ -2326,7 +2325,7 @@ synonym gif png
     addr u [: 5 - forth:type ." .aidx" ;] $tmp file-in save-mem 2>r
     addr u [: 5 - forth:type ." .opus" ;] $tmp file-in save-mem 2r>
     addr u save-mem
-    [:  [: filename, ;] string-consumer
+    [:  ['] filename, string-consumer
 	[: $, msg:audio-idx# ulit, msg-object ;] string-consumer
 	[: $, msg:audio# ulit, msg-object ;] string-consumer ;] ;
 synonym aidx opus
