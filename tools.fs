@@ -952,7 +952,7 @@ Variable tmp-file$
     tmp-file$ $@ ;
 
 : >backup ( addr u -- )
-    2dup 2dup [: type '~' emit ;] $tmp link
+    2dup 2dup [: type '~' emit ;] $tmp 2dup delete-file drop link
     IF  -512 errno -  ELSE 0  THEN >r
     tmp-file$ $@ 2swap rename-file
     r> throw?exists throw ;
