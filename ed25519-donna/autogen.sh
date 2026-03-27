@@ -1,12 +1,10 @@
-#!/bin/bash -e
+#!/bin/sh -e
 test -n "$srcdir" || srcdir=`dirname "$0"`
 test -n "$srcdir" || srcdir=.
 
+mkdir -p m4
 libtoolize --force --copy --install || glibtoolize --force --copy --install
 autoreconf --force --install --verbose "$srcdir"
-for i in ./*/autogen.sh
-do
-    echo "autogen.sh in ${i%autogen.sh}"
-    (cd ${i%autogen.sh}; ./autogen.sh)
-done
+aclocal --install -I m4
+automake --add-missing
 test -n "$NOCONFIGURE" || "$srcdir/configure" "$@"

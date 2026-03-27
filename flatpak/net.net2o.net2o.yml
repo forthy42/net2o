@@ -9,12 +9,6 @@ sdk: org.freedesktop.Sdk
 command: n2o
 
 modules:
-  - name: ed25519-donna
-    buildsystem: autotools
-    config-opts:
-    sources:
-      - type: git
-        url: https://git.net2o.de/bernd/ed25519-donna
   - name: net2o
     buildsystem: autotools
     config-opts:

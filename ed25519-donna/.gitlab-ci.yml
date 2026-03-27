@@ -1,0 +1,23 @@
+image: debian:unstable
+ 
+before_script:
+  - apt update -qq
+  - apt-get -y install gcc automake libtool make dpkg-dev debhelper
+ 
+stages:
+  - build
+ 
+build-distcheck:
+  stage: build
+  script:
+    - ./autogen.sh
+    - ./configure
+    - make
+    - make check-TESTS
+    - dpkg-buildpackage -uc -us -d -b
+    - mv ../*.deb debian
+ 
+  # The files which are to be made available in GitLab
+  artifacts:
+    paths:
+      - debian/*.deb
