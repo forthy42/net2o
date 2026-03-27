@@ -15,10 +15,10 @@ function git-get {
     fi
 }
 
-if [ ! -f $srcdir/ed25519-donna/ed25519-prims.h ]
-then
-    (cd $srcdir; git-get https://git.net2o.de/bernd ed25519-donna)
-fi
+#if [ ! -f $srcdir/ed25519-donna/ed25519-prims.h ]
+#then
+#    (cd $srcdir; git-get https://git.net2o.de/bernd ed25519-donna)
+#fi
 
 libtoolize --force --copy --install || glibtoolize --force --copy --install
 autoreconf --force --install --verbose "$srcdir"
