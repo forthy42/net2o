@@ -1951,6 +1951,12 @@ chat-cmds ' new static-a with-allocater Constant text-chat-cmd-o
 
 text-chat-cmd-o to chat-cmd-o
 
+: green-input ( -- ) \ gforth
+    \G Future use of @word{input-color} will result in further output
+    \G in magenta, which may be easier to recognize in presentations
+    \G than just bold.
+    [ <a green >fg defaultcolor >bg bold a> ]L white? + to input-color ;
+
 scope{ /chat
 ' 2drop is /imgs \ stub
 
@@ -1973,7 +1979,7 @@ scope{ /chat
 :is /otr ( addr u -- )
     2dup -trailing s" on" str= >r
     2dup -trailing s" off" str= r@ or IF   2drop
-	msg-group-o r@ IF  .msg:+otr  ELSE  .msg:-otr  THEN
+	msg-group-o r@ IF  .msg:+otr green-input  ELSE  .msg:-otr default-input  THEN
 	r> ./otr-info
     ELSE  rdrop
 	msg-group-o .msg:mode @ >r

@@ -20,7 +20,6 @@ RUN apk add --no-cache --virtual .build-deps build-base \
     && env \
     && git clone --branch "@VERSION@" https://github.com/forthy42/net2o.git \
     && cd net2o \
-    && git clone https://github.com/forthy42/ed25519-donna.git \
     && ./autogen.sh --prefix=/usr \
     && make no-config && make install-libs \
     && make libcc \
