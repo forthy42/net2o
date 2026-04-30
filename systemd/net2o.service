@@ -1,0 +1,15 @@
+[Unit]
+Description=net2o DHT service
+After=network.target
+
+[Service]
+Type=forking
+User=net2o
+Group=net2o
+ExecStart=/usr/bin/screen -dmS net2o /home/net2o/bin/n2o-dht
+ExecStop=/usr/bin/screen -S net2o -X quit
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

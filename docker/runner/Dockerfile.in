@@ -18,7 +18,7 @@ RUN apk add --no-cache --virtual .build-deps build-base \
       autoconf automake boost zlib-dev coreutils mesa-gles bash \
     && cd /tmp \
     && env \
-    && git clone --branch "@VERSION@" https://github.com/forthy42/net2o.git \
+    && git clone --branch "@VERSION@" https://git.net2o.de/bernd/net2o \
     && cd net2o \
     && ./autogen.sh --prefix=/usr \
     && make no-config && make install-libs \

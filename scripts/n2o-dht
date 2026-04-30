@@ -1,0 +1,7 @@
+#!/bin/bash
+export PASSPHRASE=<insert passphrase here>
+while [ .T. ]
+do
+    sleep 1
+    n2o +beacon +dht -conf date=12 rootserver
+done
