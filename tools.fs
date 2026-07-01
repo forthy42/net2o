@@ -1165,6 +1165,7 @@ $BEEF Value terminating?
 		terminating? $BEEF = IF  [: ." not terminating" cr ;] do-debug
 		    1 terminate# +!@ terminate#-threshold = IF
 			$DEADBEEF to terminating?
+			[: ." terminating" cr ;] do-debug
 		    THEN
 		THEN
 	REPEAT  THEN
