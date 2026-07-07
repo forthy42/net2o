@@ -101,7 +101,7 @@ PRECLANG=${PRECC%clang*}
 dnl MacOS X has a libtool that does something else
 AC_CHECK_PROGS(GNU_LIBTOOL,glibtool libtool)
 
-GNU_LIBTOOL=${PRECLANG}${GNU_LIBTOOL}
+#GNU_LIBTOOL=${PRECLANG}${GNU_LIBTOOL}
 echo "Libtool: $PRECC, $PRECLANG, $GNU_LIBTOOL"
 
 AC_ARG_ENABLE(gps,
