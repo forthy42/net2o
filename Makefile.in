@@ -41,6 +41,8 @@ FORTHLIB = ed25519-donna.fs keccak.fs threefish.fs bdelta.fs
 COMPRESS=xz -9
 COMPEXT=.xz
 
+DHTBINARIES = dhtroot.n2o dhtroot.addr
+
 SOURCES = 64bit.fs base64.fs base85.fs crypto-api.fs debugging.fs	      \
 	  hash-table.fs keccak-small.fs kregion.fs n2o.fs addr.fs classes.fs  \
 	  cmd.fs connected.fs connect.fs crypt.fs csv-import.fs dht.fs err.fs \
@@ -160,7 +162,7 @@ install:	libcc-install
 		$(MKDIR) -p $(datadir)/$$i; \
 	done
 	-@VERDIR@rm $(datadir)/net2o
-	for i in $(SOURCES) $(LANGS); do \
+	for i in $(SOURCES) $(LANGS) $(DHTBINARIES); do \
 		$(INSTALL_DATA) $(srcdir)/$$i $(datadir)/$(SRCPATH)/$$i; \
 	done
 	for i in $(GEN); do \

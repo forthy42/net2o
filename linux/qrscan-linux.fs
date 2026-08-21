@@ -1,6 +1,6 @@
-\ scan color QR codes on Android
+\ scan color QR codes on Linux
 
-\ Copyright © 2018   Bernd Paysan
+\ Copyright © 2026   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -16,6 +16,7 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require minos2/soil-texture.fs
+require minos2/v4l2.fs
 
 : draw-cam ( -- )
     scan-tex-raw next-arg qr( ." image: " 2dup type cr )
