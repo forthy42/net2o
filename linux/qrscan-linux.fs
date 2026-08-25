@@ -18,16 +18,45 @@
 require minos2/soil-texture.fs
 require minos2/v4l2.fs
 
+also v4l2
+
+MJPG Value video-format
+0 0 2Value video-wh
+Variable scans
+
+: redisplay-image ( addr u index -- ) >r
+    scan-tex-raw
+    case  video-format
+	MJPG of  img>mem  endof
+	YUYV of  video-wh yuyv>mem  endof
+	abort" Unhandled format"
+    endcase
+    2dup to cam-h to cam-w >texture
+    [: 1 scans +! ;] [ up@ ]L send-event
+    r> bg-queue ;
+
 : draw-cam ( -- )
-    scan-tex-raw next-arg qr( ." image: " 2dup type cr )
-    load-texture to cam-h to cam-w
-    argc @ 1 <= IF
-	level# off
-    THEN ;
+    0>framebuffer
+    1 1e 1e draw-scan sync
+    scans @ BEGIN  stop dup scans @ u<  UNTIL  drop
+    cam-w cam-h scan-fb-raw >framebuffer
+    1 1e 1e draw-scan
+    scan-tex-raw linear-mipmap mipmap ;
 : cam-end ( -- ) ;
 : scan-start ( -- )
     dpy 0= IF window-init THEN
-    new-scantexes ;
+    new-scantexes
+    0 open-video .fmts
+    [IFDEF] use-yuyv
+	#800 #600 2dup to video-wh YUYV
+    [ELSE]
+	#1920 #1080 2dup to video-wh MJPG
+    [THEN]
+    dup to video-format set-format
+    start-capture start-streaming
+    ['] redisplay-image bg-capture ;
+
+previous
 
 \\\
 Local Variables:

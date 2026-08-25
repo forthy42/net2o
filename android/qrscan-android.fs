@@ -19,8 +19,8 @@ also opengl also android also jni
 
 : draw-cam ( -- )
     0>framebuffer
-    camera-init screen-orientation 1e 1e draw-scan sync
-    cam-w cam-h scan-fb-raw >framebuffer
+    camera-init screen-orientation 1 1e 1e draw-scan sync
+    cam-w cam-h scan-fb-raw >framebufferb
     1 1e 1e draw-scan
     scan-tex-raw linear-mipmap mipmap ;
 
