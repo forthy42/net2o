@@ -202,10 +202,10 @@ scope{ net2o-base
 \ error ID handling
 
 Variable id#
-Sema id-sema
+Mutex id-mtx
 
 : new-error-id ( -- addr u )
-    [: o { w^ idcon } $10 rng$ idcon cell 2over id# #! ;] id-sema c-section
+    [: o { w^ idcon } $10 rng$ idcon cell 2over id# #! ;] id-mtx c-section
     2dup my-error-id $! ;
 : error-id>o ( addr u -- o/0 )
     $error-id $@ ?dup-IF
@@ -214,7 +214,7 @@ Sema id-sema
     drop 0 ;
 : error-id$free ( -- )
     [: my-error-id $@ ?dup-IF  id# #free  ELSE  drop  THEN
-      my-error-id $free ;] id-sema c-section ;
+      my-error-id $free ;] id-mtx c-section ;
 
 :is extra-dispose  error-id$free defers extra-dispose ;
 

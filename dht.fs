@@ -22,7 +22,7 @@
 
 $200 cells Constant dht-size# \ $100 entries + $100 chains
 
-Sema dht-sema
+Mutex dht-mtx
 
 Variable d#public \ root of public dht
 
@@ -156,7 +156,7 @@ dht-class ' new static-a with-allocater constant dummy-dht
 	  over $40 = IF  dht-table dht-class new-tok >o
 	      o swap !  dht-hash $!  o o>
 	  ELSE  2drop drop dummy-dht dup .dht-off  THEN
-      ELSE  @ nip nip  THEN ;] dht-sema c-section ;
+      ELSE  @ nip nip  THEN ;] dht-mtx c-section ;
 : .tag ( addr u -- ) 2dup 2>r 
     >tag verify-tag >r sigpksize# - type r> 2r> space .sigdates .check ;
 : .host ( addr u -- ) over c@ '!' = IF  .revoke  EXIT  THEN
@@ -182,25 +182,25 @@ dht-class ' new static-a with-allocater constant dummy-dht
     d#public ['] d#. dht-map ;
 
 : d#owner+ ( addr u -- ) \ with sanity checks
-    [: check-owner dht-owner $rep[]sig dht( d#. ) ;] dht-sema c-section ;
+    [: check-owner dht-owner $rep[]sig dht( d#. ) ;] dht-mtx c-section ;
 : d#host+ ( addr u -- ) \ with sanity checks
-    [: check-host dht-host $ins[]sig drop dht( d#. ) ;] dht-sema c-section ;
+    [: check-host dht-host $ins[]sig drop dht( d#. ) ;] dht-mtx c-section ;
 : d#tags+ ( addr u -- ) \ with sanity checks
-    [: check-tag dht-tags $ins[]sig drop dht( d#. ) ;] dht-sema c-section ;
+    [: check-tag dht-tags $ins[]sig drop dht( d#. ) ;] dht-mtx c-section ;
 : d#have+ ( addr u -- ) \ with sanity checks
-    [: check-have dht-have $ins[]sig drop dht( d#. ) ;] dht-sema c-section ;
+    [: check-have dht-have $ins[]sig drop dht( d#. ) ;] dht-mtx c-section ;
 : d#owner- ( addr u -- ) \ with sanity checks
     [: delete-owner? 0= IF  dht-owner $del[]sig dht( d#. )
-      ELSE  2drop  THEN ;] dht-sema c-section ;
+      ELSE  2drop  THEN ;] dht-mtx c-section ;
 : d#host- ( addr u -- ) \ with sanity checks
     [: delete-host? 0= IF  dht-host $del[]sig dht( d#. )
-      ELSE  2drop  THEN ;] dht-sema c-section ;
+      ELSE  2drop  THEN ;] dht-mtx c-section ;
 : d#tags- ( addr u -- ) \ with sanity checks
     [: delete-tag? 0= IF  dht-tags $del[]sig dht( d#. )
-      ELSE  2drop  THEN ;] dht-sema c-section ;
+      ELSE  2drop  THEN ;] dht-mtx c-section ;
 : d#have- ( addr u -- ) \ with sanity checks
     [: delete-have? 0= IF  dht-have $del[]sig dht( d#. )
-      ELSE  2drop  THEN ;] dht-sema c-section ;
+      ELSE  2drop  THEN ;] dht-mtx c-section ;
 
 : d#cleanup ( o:dht -- )
     dht-hash k#size + dht-hash cell+ U+DO
@@ -209,7 +209,7 @@ dht-class ' new static-a with-allocater constant dummy-dht
 	cell +LOOP  0 I del$cell
     cell +LOOP ;
 : d#cleanups ( -- )
-    d#public [: ['] d#cleanup dht-sema c-section ;] dht-map ;
+    d#public [: ['] d#cleanup dht-mtx c-section ;] dht-map ;
 
 64Variable last-d#cleanup
 
@@ -305,7 +305,7 @@ dht-file-class :method fs-read ( addr u -- n )  dup >r
 
 : new>dht ( -- )
     [: dht-file-class new { w^ fs-ins } fs-ins cell file-state $+! drop ;]
-    filestate-sema c-section ;
+    filestate-mtx c-section ;
 
 : d#open ( fid -- )  new>dht lastfile@ .fs-open ;
 : d#query ( addr u mask fid -- )  state-addr >o
@@ -408,11 +408,11 @@ previous
 
 : addme-owndht ( -- )
     pk@ >d#id [: >o dht-host $[]free
-      my-addr$ [: dht-host $+[]! ;] $[]map o> ;] dht-sema c-section ;
+      my-addr$ [: dht-host $+[]! ;] $[]map o> ;] dht-mtx c-section ;
 : addnick-owndht ( addr u -- )
     2dup sigpk2size# - + keysize2 >d#id
     [: >o [: 2dup sigpk2size# - type + sigsize# - sigsize# type ;] $tmp
-      dht-owner o> $rep[]sig ;] dht-sema c-section ;
+      dht-owner o> $rep[]sig ;] dht-mtx c-section ;
 
 \ replace me stuff
 
@@ -432,7 +432,7 @@ also net2o-base
 		2dup + sigdate datesize# move
 		gen-host-del $, dht-host-
 		false  ELSE  2drop true  THEN ;] $[]filter
-    ;] dht-sema c-section
+    ;] dht-mtx c-section
     ( host $free ) ;
 
 : fetch-id, ( id-addr u -- )

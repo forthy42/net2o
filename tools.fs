@@ -1021,7 +1021,7 @@ compsem: sourcefilename postpone sliteral ['] search-help compile, ;
 
 \ unique list of cells
 
-Sema resize-sema
+Mutex resize-mtx
 
 : unique$cell? ( x addr -- flag )
     $@ bounds ?DO  dup I @ = IF  drop false unloop  EXIT  THEN
@@ -1029,7 +1029,7 @@ Sema resize-sema
 
 : +unique$ ( x addr -- )
     [: 2dup unique$cell? IF  >stack  ELSE  2drop  THEN ;]
-    resize-sema c-section ;
+    resize-mtx c-section ;
 
 \ sorted list of cells, not efficient
 

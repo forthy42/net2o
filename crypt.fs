@@ -458,7 +458,7 @@ pw-diffuse-1
 
 \ IVS
 
-Sema regen-sema
+Mutex regen-mtx
 
 : keypad$ ( -- addr u )
     do-keypad sec@ dup 0= IF  2drop  crypto-key sec@  THEN ;
@@ -476,13 +476,13 @@ scope{ mapc
 	clear-replies
 	dest-ivs$ dest-a/b c:prng ivs( ." Regen A/B IVS" cr )
 	2 addr dest-ivslastgen cxor! r> c:key! ;]
-    regen-sema c-section  ;
+    regen-mtx c-section  ;
 
 : regen-ivs-all ( o:map -- ) [: c:key@ >r
       dest-ivsgen kalign key( ." regen-ivs " dup c:key# .nnb cr ) c:key!
       dest-ivs$ c:prng ivs( ." Regen all IVS" cr )
       r> c:key! ;]
-    regen-sema c-section ;
+    regen-mtx c-section ;
 
 : rest+ ( addr u -- addr u )
     addr dest-ivsrest$ $@len IF
@@ -511,7 +511,7 @@ scope{ mapc
 	  rest-prng
       len +LOOP
       regen( ." regen-ivs-part' " dest-ivsgen kalign c:key# .nnb cr )
-      r> c:key! ;] regen-sema c-section ;
+      r> c:key! ;] regen-mtx c-section ;
 
 : (regen-ivs) ( offset o:map -- )
     addr dest-ivs$ $@len 2/ 2/ / dest-ivslastgen =

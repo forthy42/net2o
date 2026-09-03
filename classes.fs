@@ -304,10 +304,10 @@ cmd-class class
     field: dest-0key     \ key for stateless connections
     0 +field end-secrets
     \ semaphores
-    0 +field start-semas
-    1 pthread-mutexes +field filestate-sema
-    1 pthread-mutexes +field code-sema
-    0 +field end-semas
+    0 +field start-mtxes
+    1 pthread-mutexes +field filestate-mtx
+    1 pthread-mutexes +field code-mtx
+    0 +field end-mtxes
     \ contexts for subclasses
     field: next-context  \ link field to connect all contexts
     field: log-context

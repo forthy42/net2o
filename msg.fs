@@ -54,7 +54,7 @@ Variable msg-group$
 User replay-mode
 User skip-sig?
 
-Sema msglog-sema
+Mutex msglog-mtx
 
 : ?msg-context ( -- o )
     msging-context @ dup 0= IF
@@ -65,9 +65,9 @@ Sema msglog-sema
 : >chatid ( group u -- id u )  defaultkey sec@ keyed-hash#128 ;
 
 : msg-log@ ( -- addr u )
-    [: msg-group-o .msg:log[] $@ save-mem ;] msglog-sema c-section ;
+    [: msg-group-o .msg:log[] $@ save-mem ;] msglog-mtx c-section ;
 : #msg-log@ ( i -- addr u )
-    [: msg-group-o .msg:log[] $[]@ ;] msglog-sema c-section ;
+    [: msg-group-o .msg:log[] $[]@ ;] msglog-mtx c-section ;
 
 : purge-log ( -- )
     [: msg-group-o .msg:log[] { a[] }
@@ -79,7 +79,7 @@ Sema msglog-sema
 		ELSE
 		    1+
 		THEN
-	REPEAT  drop ;] msglog-sema c-section ;
+	REPEAT  drop ;] msglog-mtx c-section ;
 
 forward msg-scan-hash
 forward msg-add-hashs
@@ -160,19 +160,19 @@ Variable saved-msg$
     [: msg-group-o .msg:log[] $ins[]date  dup  dup 0< xor to log#
 	log# msg-group-o .msg:log[] $[] to log$
 	0< IF  #0.  ELSE  log$ $@  THEN
-    ;] msglog-sema c-section ;
+    ;] msglog-mtx c-section ;
 : ?save-msg ( -- )
     msg( ." saving messages in group " msg-group-o dup h. .msg:name$ type cr )
     msg-group-o .msg:?otr replay-mode @ or 0= IF  save-msgs&  THEN ;
 
-Sema queue-sema
+Mutex queue-mtx
 
 \ peer queue, in msg context
 
 : peer> ( -- addr / 0 )
-    [: msg:peers[] back> ;] queue-sema c-section ;
+    [: msg:peers[] back> ;] queue-mtx c-section ;
 : >peer ( addr u -- )
-    [: msg:peers[] $+[]! ;] queue-sema c-section ;
+    [: msg:peers[] $+[]! ;] queue-mtx c-section ;
 
 \ events
 
@@ -782,7 +782,7 @@ fetcher:class ' new static-a with-allocater Constant fetcher-prototype
     [:  2dup fetch# #@ d0= IF
 	    fetcher-prototype cell- [ fetcher:class >osize @ cell+ ]L
 	    2over fetch# #!
-	THEN ;] resize-sema c-section  2drop ;
+	THEN ;] resize-mtx c-section  2drop ;
 
 : transmit-queue ( queue -- )
     up@ [{: w^ queue[] task :}h1
@@ -1277,7 +1277,7 @@ msgfs-class :method fs-open ( addr u mode -- )
 : msg-file-done ( -- )
     fs-path $@len IF
 	msg( ." msg file done: " fs-path $@ .chat-file forth:cr )
-	['] fs-flush file-sema c-section
+	['] fs-flush file-mtx c-section
     THEN ;
 msgfs-class :method fs-create ( addr u mode -- )
     fs-close drop fs-path $!
@@ -2099,7 +2099,7 @@ e? xchar-maxmem 1 = [IF] '+' [ELSE] '👍' [THEN] Constant default-like
 		bounds ?DO  I msg-group-o .msg:log[] $[] $free  LOOP
 		2r>  REPEAT  2drop 2r> 2drop
 	0 msg-group-o .msg:log[] del$cell
-    ;] msglog-sema c-section save-msgs&
+    ;] msglog-mtx c-section save-msgs&
 ;
 
 :is /lock ( addr u -- )

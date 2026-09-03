@@ -37,10 +37,11 @@ Variable scans
 
 : draw-cam ( -- )
     0>framebuffer
-    1 1e 1e draw-scan sync
-    scans @ BEGIN  stop dup scans @ u<  UNTIL  drop
+    unit-matrix MVPMatrix set-matrix
+    unit-matrix MVMatrix set-matrix
+    scan-tex-raw 1 1e 1e draw-scan sync
+    scans @ BEGIN  stop dup scans @ <>  UNTIL  drop
     cam-w cam-h scan-fb-raw >framebuffer
-    1 1e 1e draw-scan
     scan-tex-raw linear-mipmap mipmap ;
 : cam-end ( -- ) ;
 : scan-start ( -- )

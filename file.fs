@@ -15,7 +15,7 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Sema file-sema
+Mutex file-mtx
 
 cmd-class class
     64value: fs-size
@@ -67,14 +67,14 @@ Variable fs-table
 
 : id>addr ( id -- addr remainder )
     [: >r file-state $@ r> cells /string >r dup IF  @  THEN r> ;]
-    filestate-sema c-section ;
+    filestate-mtx c-section ;
 : id>addr? ( id -- addr )
     id>addr cell < !!fileid!! ;
 : new>file ( id -- )
     [: fs-table fs-class new-tok { w^ fsp } fsp cell file-state $+!
       o fsp @ >o parent! fs-id ! ['] file:done is file-xt
       64#-1 to fs-limit o> ;]
-    filestate-sema c-section ;
+    filestate-mtx c-section ;
 
 : lastfile@ ( -- fs-state ) file-state $@ + cell- @ ;
 : state-addr ( id -- addr )
@@ -267,7 +267,7 @@ is parse-name
 [IFDEF] notrace nr> set-recognizers [THEN]
 
 : >termserver-io ( -- )
-    [: up@ { w^ t } t cell termserver-tasks $+! ;] file-sema c-section ;
+    [: up@ { w^ t } t cell termserver-tasks $+! ;] file-mtx c-section ;
 
 : ev-termfile ( o -- ) dup termfile ! >o form term-w ! term-h ! o>
     termserver-in termserver-out ;
@@ -286,14 +286,14 @@ termserver-class :method fs-create ( addr u 64n -- )  64drop 2drop
     [: termserver-tasks $@ 0= !!no-termserver!!
 	@ termserver-tasks 0 cell $del dup fs-termtask !
 	o [{: xo :}h1 xo ev-termfile ;] swap send-event
-    ;] file-sema c-section
+    ;] file-mtx c-section
 ;
 latestxt termserver-class is fs-open
 termserver-class :method fs-close ( -- )
     [: fs-termtask @ ?dup-IF
 	    ['] ev-termclose swap send-event
 	    fs-termtask cell termserver-tasks $+! fs-termtask off
-	THEN ;] file-sema c-section
+	THEN ;] file-mtx c-section
 ;
 termserver-class :method fs-perm? ( perm -- )
     perm%termserver and 0= !!termserver-perm!!
@@ -394,7 +394,7 @@ in net2o : spit [: { back tail | spitbuf# -- newback } +calc slurp( .spit )
 	    back tail u>= ?LEAVE
 	+I +LOOP
 	spit#$ 0 spitbuf# $del
-	back ;] file-sema c-section +file ;
+	back ;] file-mtx c-section +file ;
 
 \ careful: must follow exactly the same logic as slurp (see below)
 
@@ -413,7 +413,7 @@ in net2o : spit [: { back tail | spitbuf# -- newback } +calc slurp( .spit )
 	    THEN
 	msg( ." Write end" cr ) +file
 	    back  fails states u>= IF  >maxalign  THEN  \ if all files are done, align
-	;] file-sema c-section
+	;] file-mtx c-section
 	slurp( .spit ) spit#$ $free
 	slurp( ."  left: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith h.
 	write-file# ? residualwrite @ h. forth:cr ) ;
@@ -427,7 +427,7 @@ in net2o : spit [: { back tail | spitbuf# -- newback } +calc slurp( .spit )
 : fstates-free ( -- )
      file-state $@ bounds ?DO  I @ .dispose  cell +LOOP ;
 : fstate-free ( -- )  file-state @ 0= ?EXIT
-    [: fstates-free file-state $free ;] file-sema c-section ;
+    [: fstates-free file-state $free ;] file-mtx c-section ;
 
 scope{ net2o
 
@@ -505,7 +505,7 @@ base !
 	fails states u>= dup IF  max/head@ >salign  THEN
 	head@ swap
 	msg( ." Read end: " over h. forth:cr ) ;]
-    file-sema c-section
+    file-mtx c-section
     slurp( ."  left: " data-head@ drop data-map with mapc dest-raddr - endwith h.
     read-file# ? residualread @ h. forth:cr )
 
@@ -518,14 +518,14 @@ base !
 		    fs-seekto 64dup to fs-seek o>
 		    xt execute  ELSE  drop o>  THEN
 	    THEN  2/
-	LOOP  drop ;] file-sema c-section ;
+	LOOP  drop ;] file-mtx c-section ;
 
 : track-all-seeks ( xt -- ) \ xt: ( i seeklen -- )
     [: { xt } fstates 0 ?DO
 	    I dup id>addr? >o fs-seek fs-seekto 64<> IF
 		fs-seekto 64dup to fs-seek o>
 		xt execute  ELSE  drop o>  THEN
-	LOOP ;] file-sema c-section ;
+	LOOP ;] file-mtx c-section ;
 
 }scope
 

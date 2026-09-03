@@ -162,7 +162,7 @@ $10 cells buffer: rngstat-buf
 
 \ init salt
 
-Sema rng-sema
+Mutex rng-mtx
 
 : salt-init ( -- )
     rng( [: cr ." init salt: " up@ h. (getpid) . ;] do-debug )
@@ -178,14 +178,14 @@ Sema rng-sema
 [IFDEF] child-fork
     :is child-fork defers child-fork
 	rng-o @ IF
-	    ['] salt-init rng-sema c-section
+	    ['] salt-init rng-mtx c-section
 	THEN ;
 [THEN]
 
 : rng-allot ( -- )
     rng-c >osize @ kalloc rng-o !
     rngbuf# rng-pos !
-    ['] salt-init rng-sema c-section
+    ['] salt-init rng-mtx c-section
 ;
 
 \ buffered random numbers to output 64 bit at a time
@@ -195,7 +195,7 @@ Sema rng-sema
     rng-o @ 0= IF  rng-allot  THEN
     [IFDEF] rng-pid
 	getpid rng-pid @ <>
-	IF  ['] salt-init rng-sema c-section  THEN
+	IF  ['] salt-init rng-mtx c-section  THEN
     [THEN] ;
 
 : rng-step? ( n -- ) \ net2o

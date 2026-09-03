@@ -42,8 +42,8 @@ Variable pending-notifications
     pending-notifications off
     latest-notify to last-notify ;
 
-Sema notify-sema
-: notify; nip (;]) ]] notify-sema c-section ; [[ ;
+Mutex notify-mtx
+: notify; nip (;]) ]] notify-mtx c-section ; [[ ;
 : notify> comp-[: ['] notify; colon-sys-xt-offset stick ; immediate
 : notify+ ( addr u -- )  notify> notify$ $+! ;
 : notify-nick+ ( addr u -- )  notify> s"  @" notify-nick$ $+! notify-nick$ $+! ;

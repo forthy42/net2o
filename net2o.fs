@@ -504,7 +504,7 @@ in net2o : new-context ( -- o )
     -1 blocksize !
     1 blockalign !
     config:timeouts# @ to max-timeouts
-    end-semas start-semas DO  I 0 pthread_mutex_init drop
+    end-mtxes start-mtxes DO  I 0 pthread_mutex_init drop
     1 pthread-mutexes +LOOP
     64#0 context-ticker 64!@ 64dup 64#0 64<> IF
 	ack@ >o ticker 64@ recv-tick 64! rtdelay! o>  ELSE  64drop  THEN
@@ -728,7 +728,7 @@ reply buffer: dummy-reply
     
 \ timing records
 
-Sema timing-sema
+Mutex timing-mtx
 
 in net2o : track-timing ( -- ) \ initialize timing records
     timing-stat $free ;
@@ -755,10 +755,10 @@ in net2o : /timing ( n -- )
 	  I timestats:grow 1u f* f.
 	  ." timing" cr
       timestats:sizeof +LOOP
-      track-timing $free o> ;] timing-sema c-section ;
+      track-timing $free o> ;] timing-mtx c-section ;
 
 in net2o : rec-timing ( addr u -- )
-    [: track-timing $+! ;] timing-sema c-section ;
+    [: track-timing $+! ;] timing-mtx c-section ;
 
 \ flow control
 
@@ -1228,7 +1228,7 @@ Create chunk-adder chunks-struct allot
       o chunk-adder chunk-context !
       0 chunk-adder chunk-count !
       chunk-adder chunks-struct chunks $+! ;]
-    resize-sema c-section
+    resize-mtx c-section
     ticker 64@ ack@ .ticks-init ;
 
 : o-chunks ( -- )
@@ -1237,7 +1237,7 @@ Create chunk-adder chunks-struct allot
 		chunks I chunks-struct del$one
 		chunks next$ replace-loop 0
 	    ELSE  chunks-struct  THEN  +LOOP ;]
-    resize-sema c-section ;
+    resize-mtx c-section ;
 
 in net2o : send-chunks  sender-task 0= IF  do-send-chunks  EXIT  THEN
     o [{: xo :}h1 xo .do-send-chunks ;] sender-task send-event ;
@@ -1290,7 +1290,7 @@ in net2o : send-chunks  sender-task 0= IF  do-send-chunks  EXIT  THEN
 	ELSE
 	    drop msg( .nosend )
 	    [: chunks chunks+ @ chunks-struct * chunks-struct $del ;]
-	    resize-sema c-section
+	    resize-mtx c-section
 	    false
 	THEN
     ELSE  drop chunks+ off false  THEN ;
@@ -1535,7 +1535,7 @@ Variable timeout-tasks
     timeout-task ?dup-IF  wake  THEN ;
 : o-timeout ( -- )
     0timeout  timeout( ." -timeout: " o h. ." task: " task# ? cr )
-    [: o timeout-tasks del$cell ;] resize-sema c-section ;
+    [: o timeout-tasks del$cell ;] resize-mtx c-section ;
 
 : >next-timeout ( -- )  ack@ .+timeouts next-timeout 64! ;
 : 64min? ( a b -- min flag )
@@ -1545,7 +1545,7 @@ Variable timeout-tasks
 	I @ .next-timeout 64@ 64min? IF  I @ to ctx  THEN
     cell +LOOP  ctx ;
 : next-timeout? ( -- time context )
-    ['] (next-timeout?) resize-sema c-section ;
+    ['] (next-timeout?) resize-mtx c-section ;
 : ?timeout ( -- context/0 )
     ticker 64@ next-timeout? >r 64- 64-0>= r> and ;
 
@@ -1563,7 +1563,7 @@ last-packet buffer: last-packet-desc
 
 Variable last-packets
 
-Sema lp-sema
+Mutex lp-mtx
 
 : last-packet! ( -- )
     unhandled( ." last packet @" dest-addr 64@ x64. cr )
@@ -1571,7 +1571,7 @@ Sema lp-sema
     dest-addr 64@ last-packet-desc to lp-addr
     ticks last-packet-desc to lp-time
     [: last-packet-desc last-packet last-packets $+! ;]
-    lp-sema c-section
+    lp-mtx c-section
     last-packet-desc addr lp$ off ;
 
 : last-packet? ( addr -- flag )
@@ -1581,7 +1581,7 @@ Sema lp-sema
 	      I lp$ over 0 swap packet-route drop send-a-packet ?msgsize
 	      64drop true unloop  EXIT
 	  THEN
-      last-packet +LOOP  64drop false ;] lp-sema c-section ;
+      last-packet +LOOP  64drop false ;] lp-mtx c-section ;
 
 : last-packet-tos ( -- )
     ticks connect-timeout# 64-
@@ -1593,7 +1593,7 @@ Sema lp-sema
 	      64drop unloop  EXIT
 	  THEN
       last-packet +LOOP  64drop  s" " last-packets $! ;]
-    lp-sema c-section ;
+    lp-mtx c-section ;
 
 \ handling packets
 
@@ -1708,10 +1708,10 @@ in net2o : dispose-context ( o:addr -- o:addr )
       THEN
       msging-context @ ?dup-IF  .dispose  THEN
       unlink-ctx  ungroup-ctx
-      end-semas start-semas DO  I pthread_mutex_destroy drop
+      end-mtxes start-mtxes DO  I pthread_mutex_destroy drop
       1 pthread-mutexes +LOOP
       dispose  0 to connection
-      cmd( ." disposed" cr ) ;] file-sema c-section ;
+      cmd( ." disposed" cr ) ;] file-mtx c-section ;
 
 \ loops for server and client
 
@@ -1943,7 +1943,7 @@ cookie-size# buffer: tmp-cookie
     [: ticks 64dup [ tmp-cookie .cc-timeout ]L 64!
 	o [ tmp-cookie .cc-context ]L !
 	tmp-cookie cookie-size#  cookies $+! ;]
-    resize-sema c-section ;
+    resize-mtx c-section ;
 
 : do-?cookie ( cookie -- context true / false )
     ticker 64@ connect-timeout# 64- { 64: timeout }
@@ -1965,7 +1965,7 @@ cookie-size# buffer: tmp-cookie
     +LOOP  64drop 0 ;
 
 : ?cookie ( cookie -- context true / false )
-    ['] do-?cookie resize-sema c-section ;
+    ['] do-?cookie resize-mtx c-section ;
 
 : cookie>context? ( cookie -- context true / false )
     ?cookie over 0= over and IF

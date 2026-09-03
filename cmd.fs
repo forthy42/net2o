@@ -226,7 +226,7 @@ User see:table \ current token table for see only
 	5 of  ." end-with " cr  t# IF  t-pop see:table !  THEN  endof
 	6 of  ." oswap " cr see:table @ t-pop see:table ! t-push  endof
 	11 of  string@noerr n2o.secstring  endof
-	13 of  '"' emit p@ 64>n xemit p@ 64>n xemit p@ 64>n xemit .\" \" 4cc, "
+	13 of  '"' emit p@ 64>n xemit p@ 64>n xemit p@ 64>n xemit "\" 4cc, " type
 	endof
 	14 of  string@noerr  2drop  endof
 	$10 of ." push' " p@ 64>n .net2o-name  endof
@@ -235,7 +235,7 @@ User see:table \ current token table for see only
 
 User show-offset  show-offset on
 
-Sema see-sema
+Mutex see-mtx
 
 : cmd-see ( addr u -- addr' u' )
     dup show-offset @ = IF  ." <<< "  THEN
@@ -246,7 +246,7 @@ in net2o : (see) ( addr u -- )
     [: ." net2o-code"  dest-flags 1+ c@ stateless# and IF  '0' emit  THEN
       dup h. t-stack $free
       [: BEGIN  cmd-see dup 0= UNTIL ;] catch
-      ."  end-code" cr throw  2drop ;] see-sema c-section
+      ."  end-code" cr throw  2drop ;] see-mtx c-section
     2r> buf-state 2! ;
 
 : >see-table ( -- )
@@ -301,7 +301,7 @@ code-buf
 
 :is cmdreset ( -- )  cmdbuf# off  connection >o
 	req? off  ['] send-cX code-reply is send-xt o> ;
-:is cmdlock ( -- addr )   connection .code-sema ;
+:is cmdlock ( -- addr )   connection .code-mtx ;
 :is cmdbuf$ ( -- addr u ) connection .code-dest cmdbuf# @ ;
 :is maxstring ( -- n )  maxdata cmdbuf# @ - ;
 :is +cmdbuf ( addr u -- ) dup maxstring u> IF
@@ -310,7 +310,7 @@ code-buf
 :is -cmdbuf ( n -- )  cmdbuf# +! ;
 :is cmddest ( -- 64dest ) code-vdest 64dup 64-0= !!no-dest!! ;
 
-Sema cmd0lock
+Mutex cmd0lock
 
 cmd-buf-c class
     maxdata uvar cmd0buf
@@ -321,7 +321,7 @@ cmd-buf0 ' new static-a with-allocater code0-buf^ !
 
 \ command buffer in a string
 
-Sema cmd$lock
+Mutex cmd$-mtx
 
 cmd-buf-c class
     cell uvar cmd$
@@ -332,7 +332,7 @@ cmd-buf$ ' new static-a with-allocater code-buf$^ !
 
 code-buf$
 
-' cmd$lock is cmdlock
+' cmd$-mtx is cmdlock
 :is cmdbuf$  cmd$ $@ ;
 :is cmdreset  cmd$ $free ;
 ' true is maxstring \ really maxuint = -1 = true
