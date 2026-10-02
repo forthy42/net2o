@@ -2014,6 +2014,7 @@ gui-chat-cmd-o to chat-cmd-o
 scope{ /chat
 :is ./otr-info ( flag -- ) 2 + change-edit-info ;
 :is ./mono-info ( flag -- ) 4 + change-edit-info ;
+:is /bye ( addr u -- ) 2drop prev-slide ;
 ' .imgs is /imgs
 }scope
 
@@ -2154,8 +2155,8 @@ Variable invitation-stack
 	THEN
     THEN
     1config  !widgets
-    get-order n>r ['] /chat >wordlist 1 set-order
     ['] widgets-loop catch  leave-chats
+    get-order n>r ['] /chat >wordlist 1 set-order
     text-chat-cmd-o to chat-cmd-o
     nr> set-order ?dup-IF  DoError  THEN ;
 

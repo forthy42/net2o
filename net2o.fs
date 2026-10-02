@@ -184,7 +184,7 @@ kill-seconds# 1+ #1000000000 um* 2constant kill-timeout# \ 3s
 0 Value query-task    \ for background queries initiated in other tasks
 
 : net2o-kills ( -- )
-    $DEADBEEF to terminating? [: ." terminating" cr ;] do-debug
+    $DEADBEEF to terminating? verbose( [: ." terminating" cr ;] do-debug )
     0 to sender-task
     0 to receiver-task
     0 to timeout-task

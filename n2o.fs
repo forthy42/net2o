@@ -815,7 +815,8 @@ synonym #! \ ( -- )
     set-forth-cmds
     [ "gui.fs" ]path required
     set-net2o-cmds
-    false to script? net2o-gui ;
+    false to script? \ script ends here
+    net2o-gui net2o-bye ;
 
 : ... ( -- )
     ... ;
