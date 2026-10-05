@@ -816,7 +816,7 @@ synonym #! \ ( -- )
     [ "gui.fs" ]path required
     ['] noop is bootmessage
     [:  set-net2o-cmds ['] net2o-bye is 'quit
-	net2o-gui net2o-bye ;] IS 'quit ;
+	net2o-gui true to script? net2o-bye ;] IS 'quit ;
 
 : ... ( -- )
     ... ;
